@@ -231,21 +231,39 @@ footer a:hover {
 #sugerenciasUbicacion .list-group-item:last-child {
     border-bottom: none;
 }
-
 /* Estilos para el carrusel */
 .carousel {
-    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    /* Eliminado el borde redondeado y la sombra */
+}
+
+.carousel-inner {
+    height: 100%; 
+}
+
+/* Eliminamos la clase 'rounded' para quitar el borde redondeado */
+.carousel-inner.rounded {
+    border-radius: 0 !important;
+}
+
+.carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 350px; /* Altura fija para todas las diapositivas */
 }
 
 .carousel-item img {
-    height: 350px;
-    object-fit: cover;
+    width: auto;
+    height: auto;
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; /* Muestra la imagen completa sin recortes */
+    margin: 0 auto; /* Centra la imagen horizontalmente */
 }
 
 .carousel-indicators {
-    bottom: 10px;
+    bottom: 0; /* Movemos los indicadores más abajo */
 }
 
 .carousel-control-prev, 

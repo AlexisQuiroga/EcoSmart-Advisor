@@ -17,23 +17,23 @@
         </div>
     </div>
     <div class="col-lg-6 mt-4 mt-lg-0">
-        <div class="card bg-dark text-white">
-            <div class="card-body p-4 text-center">
+        <div class="bg-dark text-white" style="border-radius: 0;">
+            <div class="p-4 text-center">
                 <div id="carouselEnergiasRenovables" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-indicators">
                         <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Energía Solar"></button>
                         <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1" aria-label="Energía Eólica"></button>
                         <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2" aria-label="Termotanque Solar"></button>
                     </div>
-                    <div class="carousel-inner rounded">
+                    <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <img src="{{ url_for('static', filename='images/paneles solares.png') }}" class="d-block w-100" alt="Energía Solar">
+                            <img src="{{ url_for('static', filename='images/paneles solares.png') }}" class="d-block" alt="Energía Solar">
                         </div>
                         <div class="carousel-item">
-                            <img src="{{ url_for('static', filename='images/generador eolico.png') }}" class="d-block w-100" alt="Energía Eólica">
+                            <img src="{{ url_for('static', filename='images/generador eolico.png') }}" class="d-block" alt="Energía Eólica">
                         </div>
                         <div class="carousel-item">
-                            <img src="{{ url_for('static', filename='images/termotanque solar.png') }}" class="d-block w-100" alt="Termotanque Solar">
+                            <img src="{{ url_for('static', filename='images/termotanque solar.png') }}" class="d-block" alt="Termotanque Solar">
                         </div>
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="prev">
