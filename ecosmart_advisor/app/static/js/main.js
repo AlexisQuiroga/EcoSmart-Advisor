@@ -42,19 +42,39 @@ document.addEventListener('DOMContentLoaded', function() {
             mapaModal.show();
             setTimeout(() => {
                 if (!map) {
-                    map = L.map('mapa').setView([-34.6037, -58.3816], 4);
+                    map = L.map('mapa', {
+                        minZoom: 2,
+                        maxZoom: 18,
+                        zoomControl: true,
+                        scrollWheelZoom: true
+                    }).setView([-34.6037, -58.3816], 4);
+                    
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
                         attribution: '© OpenStreetMap contributors'
                     }).addTo(map);
-                    marker = L.marker([-34.6037, -58.3816], {draggable: true}).addTo(map);
+                    
+                    marker = L.marker([-34.6037, -58.3816], {
+                        draggable: true,
+                        autoPan: true
+                    }).addTo(map);
                     
                     map.on('click', function(e) {
                         marker.setLatLng(e.latlng);
                     });
                 }
+                
+                // Forzar actualización del mapa después de que el modal esté completamente visible
+                setTimeout(() => {
+                    map.invalidateSize(true);
+                }, 300);
+            }, 100);
+        });
+
+        // Evento para cuando el modal se cierra
+        document.getElementById('mapaModal').addEventListener('hidden.bs.modal', function () {
+            if (map) {
                 map.invalidateSize();
-            }, 250);
+            }
         });
 
         // Confirmar ubicación seleccionada en el mapa

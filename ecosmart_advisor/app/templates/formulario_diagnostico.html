@@ -27,7 +27,7 @@
                                 </button>
                             </div>
                             <div id="sugerenciasUbicacion" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
-                            <div id="mapaModal" class="modal fade" tabindex="-1">
+                            <div id="mapaModal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -35,7 +35,12 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div id="mapa" style="height: 400px; width: 100%; z-index: 500;"></div>
+                                            <div id="mapa" style="height: 400px; width: 100%;"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="button" class="btn btn-primary" id="confirmarUbicacion">Confirmar ubicación</button>
+                                        </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
