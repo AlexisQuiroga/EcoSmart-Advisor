@@ -37,7 +37,14 @@
             <div class="carousel-inner">
                 <!-- Diapositiva 1: Generador Eólico sin overlay -->
                 <div class="carousel-item active">
-                    <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                    <div class="position-relative">
+                        <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                        <div class="position-absolute bottom-0 start-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Energía Eólica - El Futuro</h5>
+                            <p class="mb-0 small">La energía eólica es 100% renovable y no produce emisiones de gases de efecto invernadero.</p>
+                            <p class="mb-0 small mt-2">España está entre los 5 países con mayor potencia eólica instalada a nivel mundial.</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Diapositiva 2: Imagen de Generador Eólico con overlay para tapar marca de agua -->
@@ -52,12 +59,19 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 3: Video de Generador Eólico -->
+                <!-- Diapositiva 3: Video de Generador Eólico con overlay central -->
                 <div class="carousel-item">
-                    <video autoplay loop muted playsinline class="d-block w-100">
-                        <source src="{{ url_for('static', filename='images/carousel/video generador eolico.mp4') }}" type="video/mp4">
-                        Tu navegador no soporta videos HTML5.
-                    </video>
+                    <div class="position-relative">
+                        <video autoplay loop muted playsinline class="d-block w-100">
+                            <source src="{{ url_for('static', filename='images/carousel/video generador eolico.mp4') }}" type="video/mp4">
+                            Tu navegador no soporta videos HTML5.
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle bg-success bg-opacity-75 text-white p-3 rounded" style="max-width: 350px;">
+                            <h5 class="fs-6 fw-bold mb-1">Funcionamiento del Aerogenerador</h5>
+                            <p class="mb-0 small">Los aerogeneradores modernos generan electricidad cuando el viento mueve las palas a velocidades de 3-25 m/s.</p>
+                            <p class="mb-0 small mt-2">Una sola turbina puede reducir hasta 1.500 toneladas de CO2 al año.</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Diapositiva 4: Paneles Solares Vista Aérea -->
