@@ -1,0 +1,66 @@
+/* Estilos optimizados para el carrusel */
+.carousel {
+    overflow: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.carousel-inner {
+    overflow: hidden;
+}
+
+.carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px; /* Altura fija para todas las diapositivas */
+}
+
+.carousel-item img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; /* Muestra la imagen completa sin recortes */
+    margin: 0 auto;
+}
+
+.carousel-indicators {
+    bottom: 0;
+    margin-bottom: 0.5rem;
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    margin: 0 4px;
+}
+
+.carousel-indicators .active {
+    background-color: #fff;
+}
+
+.carousel-control-prev, 
+.carousel-control-next {
+    width: 8%;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.carousel-control-prev:hover, 
+.carousel-control-next:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .carousel-item {
+        height: 300px;
+    }
+}
+
+@media (max-width: 576px) {
+    .carousel-item {
+        height: 250px;
+    }
+}
