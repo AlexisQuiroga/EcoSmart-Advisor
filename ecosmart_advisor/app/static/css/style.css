@@ -197,86 +197,6 @@ footer a:hover {
     transform: scale(1.1);
 }
 
-/* Estilos para el autocompletado de ubicación */
-#sugerenciasUbicacion {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
-    border: 1px solid #dee2e6;
-    border-radius: 0 0 5px 5px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-#sugerenciasUbicacion .list-group-item {
-    cursor: pointer;
-    padding: 0.75rem 1rem;
-    border-left: none;
-    border-right: none;
-    transition: background-color 0.2s ease;
-}
-
-#sugerenciasUbicacion .list-group-item:hover,
-#sugerenciasUbicacion .list-group-item.active {
-    background-color: var(--light-green);
-    color: var(--primary-green);
-}
-
-#sugerenciasUbicacion .list-group-item:first-child {
-    border-top: none;
-}
-
-#sugerenciasUbicacion .list-group-item:last-child {
-    border-bottom: none;
-}
-/* Estilos para el carrusel */
-.carousel {
-    overflow: hidden;
-    /* Eliminado el borde redondeado y la sombra */
-}
-
-.carousel-inner {
-    height: 100%; 
-}
-
-/* Eliminamos la clase 'rounded' para quitar el borde redondeado */
-.carousel-inner.rounded {
-    border-radius: 0 !important;
-}
-
-.carousel-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 350px; /* Altura fija para todas las diapositivas */
-}
-
-.carousel-item img {
-    width: auto;
-    height: auto;
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain; /* Muestra la imagen completa sin recortes */
-    margin: 0 auto; /* Centra la imagen horizontalmente */
-}
-
-.carousel-indicators {
-    bottom: 0; /* Movemos los indicadores más abajo */
-}
-
-.carousel-control-prev, 
-.carousel-control-next {
-    width: 10%;
-    opacity: 0.7;
-}
-
-.carousel-control-prev:hover, 
-.carousel-control-next:hover {
-    opacity: 1;
-}
-
 /* Estilos responsivos */
 @media (max-width: 768px) {
     .display-4 {
@@ -289,10 +209,6 @@ footer a:hover {
     
     .metric-value {
         font-size: 1.5rem;
-    }
-    
-    .carousel-item img {
-        height: 250px;
     }
 }
 

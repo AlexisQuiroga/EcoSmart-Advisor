@@ -3,162 +3,38 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ubicacionInput = document.getElementById('ubicacion');
     const sugerenciasDiv = document.getElementById('sugerenciasUbicacion');
-    
-    // Variable para controlar el tiempo entre búsquedas (debounce)
-    let typingTimer;
-    const doneTypingInterval = 500; // Tiempo en ms
-    
-    // Variable para trackear la última consulta
-    let lastQuery = '';
-    
-    if (ubicacionInput && sugerenciasDiv) {
-        // Limpiar sugerencias al hacer clic fuera
-        document.addEventListener('click', function(e) {
-            if (e.target !== ubicacionInput && !sugerenciasDiv.contains(e.target)) {
-                sugerenciasDiv.style.display = 'none';
-            }
-        });
-        
-        // Manejar navegación por teclado en sugerencias
-        ubicacionInput.addEventListener('keydown', function(e) {
-            const sugerencias = sugerenciasDiv.querySelectorAll('.list-group-item');
-            const activeItem = sugerenciasDiv.querySelector('.active');
-            
-            if (sugerencias.length > 0 && sugerenciasDiv.style.display === 'block') {
-                // Flecha abajo
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (!activeItem) {
-                        sugerencias[0].classList.add('active');
-                    } else {
-                        const nextItem = activeItem.nextElementSibling;
-                        if (nextItem) {
-                            activeItem.classList.remove('active');
-                            nextItem.classList.add('active');
-                        }
-                    }
-                }
-                
-                // Flecha arriba
-                else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (activeItem) {
-                        const prevItem = activeItem.previousElementSibling;
-                        activeItem.classList.remove('active');
-                        if (prevItem) {
-                            prevItem.classList.add('active');
-                        }
-                    }
-                }
-                
-                // Enter para seleccionar
-                else if (e.key === 'Enter' && activeItem) {
-                    e.preventDefault();
-                    ubicacionInput.value = activeItem.textContent;
-                    sugerenciasDiv.style.display = 'none';
-                }
-                
-                // Escape para cerrar
-                else if (e.key === 'Escape') {
-                    sugerenciasDiv.style.display = 'none';
-                }
-            }
-        });
-        
-        // Autocompletado con debounce
-        ubicacionInput.addEventListener('input', function() {
-            clearTimeout(typingTimer);
-            
-            const texto = this.value.trim();
+
+    if (ubicacionInput) {
+        // Autocompletado
+        ubicacionInput.addEventListener('input', async function() {
+            const texto = this.value;
             if (texto.length < 3) {
                 sugerenciasDiv.style.display = 'none';
                 return;
             }
-            
-            // Si el texto no ha cambiado, no hacer nada
-            if (texto === lastQuery) return;
-            
-            // Esperar a que el usuario termine de escribir
-            typingTimer = setTimeout(async function() {
-                lastQuery = texto;
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${texto}`);
+                const data = await response.json();
                 
-                try {
-                    // Agregar parámetros para mejorar la búsqueda
-                    const params = new URLSearchParams({
-                        format: 'json',
-                        q: texto,
-                        limit: 5,
-                        addressdetails: 1,
-                        namedetails: 1
+                sugerenciasDiv.innerHTML = '';
+                data.slice(0, 5).forEach(lugar => {
+                    const div = document.createElement('div');
+                    div.className = 'list-group-item list-group-item-action';
+                    div.textContent = lugar.display_name;
+                    div.addEventListener('click', () => {
+                        ubicacionInput.value = lugar.display_name;
+                        sugerenciasDiv.style.display = 'none';
                     });
-                    
-                    sugerenciasDiv.innerHTML = '<div class="list-group-item text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Buscando...</div>';
-                    sugerenciasDiv.style.display = 'block';
-                    
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
-                    const data = await response.json();
-                    
-                    // Si no hay resultados
-                    if (data.length === 0) {
-                        sugerenciasDiv.innerHTML = '<div class="list-group-item text-center text-muted">No se encontraron resultados</div>';
-                        return;
-                    }
-                    
-                    // Mostrar resultados
-                    sugerenciasDiv.innerHTML = '';
-                    data.forEach(lugar => {
-                        // Formatear el nombre para que sea más legible y completo
-                        let nombreLugar = '';
-                        
-                        // Extraer el nombre de la ciudad/localidad, provincia/estado y país
-                        const partes = [];
-                        
-                        if (lugar.address) {
-                            // Localidad principal (ciudad, pueblo, villa, etc.)
-                            if (lugar.address.city) partes.push(lugar.address.city);
-                            else if (lugar.address.town) partes.push(lugar.address.town);
-                            else if (lugar.address.village) partes.push(lugar.address.village);
-                            else if (lugar.address.municipality) partes.push(lugar.address.municipality);
-                            else if (lugar.address.hamlet) partes.push(lugar.address.hamlet);
-                            else if (lugar.address.locality) partes.push(lugar.address.locality);
-                            
-                            // Siempre incluir provincia/estado si está disponible
-                            if (lugar.address.state) partes.push(lugar.address.state);
-                            else if (lugar.address.province) partes.push(lugar.address.province);
-                            else if (lugar.address.county) partes.push(lugar.address.county);
-                            else if (lugar.address.region) partes.push(lugar.address.region);
-                            
-                            // Siempre incluir país
-                            if (lugar.address.country) partes.push(lugar.address.country);
-                        }
-                        
-                        nombreLugar = partes.length > 0 ? partes.join(', ') : lugar.display_name;
-                        
-                        // Si no se pudo obtener un nombre legible, usar el nombre completo proporcionado por la API
-                        if (partes.length < 2) {
-                            nombreLugar = lugar.display_name;
-                        }
-                        
-                        const div = document.createElement('div');
-                        div.className = 'list-group-item list-group-item-action';
-                        div.textContent = nombreLugar;
-                        div.setAttribute('data-lat', lugar.lat);
-                        div.setAttribute('data-lon', lugar.lon);
-                        div.setAttribute('data-full', lugar.display_name);
-                        
-                        div.addEventListener('click', () => {
-                            ubicacionInput.value = nombreLugar;
-                            sugerenciasDiv.style.display = 'none';
-                        });
-                        
-                        sugerenciasDiv.appendChild(div);
-                    });
-                } catch (error) {
-                    console.error('Error en autocompletado:', error);
-                    sugerenciasDiv.innerHTML = '<div class="list-group-item text-center text-danger">Error al buscar ubicaciones</div>';
-                }
-            }, doneTypingInterval);
+                    sugerenciasDiv.appendChild(div);
+                });
+                sugerenciasDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error en autocompletado:', error);
+            }
         });
+
+        
     }
 });
 
