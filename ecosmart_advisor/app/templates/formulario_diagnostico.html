@@ -216,10 +216,43 @@
 <script>
     // Validaciones del formulario
     document.getElementById('diagnosticoForm').addEventListener('submit', function(event) {
+        // Asegurar que la ubicación completa se actualice antes de enviar
+        if (document.getElementById('provincia') && document.getElementById('ciudad')) {
+            const provincia = document.getElementById('provincia').value.trim();
+            const ciudad = document.getElementById('ciudad').value.trim();
+            const direccion = document.getElementById('direccion') ? document.getElementById('direccion').value.trim() : '';
+            
+            let ubicacionCompleta = '';
+            if (direccion) {
+                ubicacionCompleta += direccion + ', ';
+            }
+            if (ciudad) {
+                ubicacionCompleta += ciudad + ', ';
+            }
+            if (provincia) {
+                ubicacionCompleta += provincia;
+            }
+            
+            // Eliminar coma final si existe
+            ubicacionCompleta = ubicacionCompleta.replace(/,\s*$/, '');
+            
+            // Asignar al campo oculto
+            if (ubicacionCompleta) {
+                document.getElementById('ubicacion').value = ubicacionCompleta;
+            }
+        }
+        
         let ubicacion = document.getElementById('ubicacion').value;
         let tipoVivienda = document.getElementById('tipo_vivienda').value;
         let superficie = document.getElementById('superficie_disponible').value;
         let objetivo = document.getElementById('objetivo').value;
+        
+        // Verificar que tengamos al menos provincia y ciudad
+        if (!document.getElementById('provincia').value || !document.getElementById('ciudad').value) {
+            event.preventDefault();
+            alert('Por favor especifique al menos la Provincia/Estado y la Ciudad/Localidad');
+            return;
+        }
         
         if (!ubicacion || !tipoVivienda || !superficie || !objetivo) {
             event.preventDefault();

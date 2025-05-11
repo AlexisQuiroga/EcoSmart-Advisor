@@ -286,12 +286,47 @@
                 return preguntasSugeridas;
             }
             
-            // Función para seleccionar una pregunta sugerida
+            // Función para seleccionar una pregunta sugerida y enviarla automáticamente
             function seleccionarPreguntaSugerida(elemento) {
-                floatingChatInput.value = elemento.textContent;
-                floatingChatInput.focus();
-                // Opcionalmente, enviar automáticamente
-                // enviarPregunta();
+                // Obtener el texto de la pregunta
+                const pregunta = elemento.textContent;
+                
+                // Colocar la pregunta en el campo de entrada
+                floatingChatInput.value = pregunta;
+                
+                // Añadir la pregunta como mensaje del usuario
+                agregarMensajeUsuario(pregunta);
+                
+                // Limpiar el campo de entrada después de enviar
+                floatingChatInput.value = '';
+                
+                // Mostrar indicador de "escribiendo..."
+                mostrarEscribiendo();
+                
+                // Enviar la pregunta al servidor
+                fetch('/chatbot/consulta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pregunta: pregunta })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Eliminar el indicador de escritura
+                    document.getElementById('typing-message')?.remove();
+                    
+                    // Mostrar la respuesta
+                    agregarMensajeBot(data.respuesta);
+                })
+                .catch(error => {
+                    console.error('Error al consultar chatbot:', error);
+                    // Eliminar el indicador de escritura
+                    document.getElementById('typing-message')?.remove();
+                    
+                    // Mostrar mensaje de error
+                    agregarMensajeBot('Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, intenta de nuevo más tarde.');
+                });
             }
             
             // Función para mostrar indicador de escritura
