@@ -61,6 +61,8 @@ def obtener_datos_por_ciudad(ciudad):
                 'velocidad_viento': 3.5,  # m/s (valor medio global)
                 'temperatura_promedio': 15,  # °C (valor medio global)
                 'ubicacion': ciudad,
+                'latitud': None,
+                'longitud': None,
                 'fuente': 'datos_estimados'
             }
     except Exception as e:
@@ -126,6 +128,8 @@ def obtener_datos_por_coordenadas(lat, lon, nombre_lugar=None):
             'velocidad_viento': round(viento_promedio, 1),  # m/s
             'temperatura_promedio': round(temp_promedio, 1),  # °C
             'ubicacion': nombre_lugar or f"{lat}, {lon}",
+            'latitud': lat,
+            'longitud': lon,
             'fuente': 'open_meteo'
         }
         
@@ -137,5 +141,7 @@ def obtener_datos_por_coordenadas(lat, lon, nombre_lugar=None):
             'velocidad_viento': 3.5,
             'temperatura_promedio': 15,
             'ubicacion': nombre_lugar or f"{lat}, {lon}",
+            'latitud': lat,
+            'longitud': lon,
             'fuente': 'datos_estimados'
         }

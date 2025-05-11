@@ -215,44 +215,170 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <script>
+    // Variables globales para el mapa
+    let mapa;
+    let marcador;
+
+    // Función para inicializar el mapa
+    function inicializarMapa() {
+        // Si el mapa ya fue inicializado, retornar
+        if (mapa) return;
+        
+        // Crear el mapa centrado en Argentina por defecto
+        mapa = L.map('mapaUbicacion').setView([-34.6037, -58.3816], 5);
+        
+        // Añadir la capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapa);
+        
+        // Refrescar el mapa cuando se muestra (arregla problemas de renderizado)
+        setTimeout(() => {
+            mapa.invalidateSize();
+        }, 100);
+        
+        // Evento para seleccionar ubicación en el mapa
+        mapa.on('click', function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            
+            // Actualizar campos ocultos
+            document.getElementById('latitud').value = lat;
+            document.getElementById('longitud').value = lng;
+            
+            // Actualizar textos de coordenadas
+            document.getElementById('latitudDisplay').textContent = lat;
+            document.getElementById('longitudDisplay').textContent = lng;
+            
+            // Actualizar el campo de ubicación completa
+            actualizarUbicacionCompleta();
+            
+            // Añadir o mover el marcador
+            if (marcador) {
+                marcador.setLatLng(e.latlng);
+            } else {
+                marcador = L.marker(e.latlng).addTo(mapa);
+            }
+            
+            // Buscar información de la ubicación (geolocalización inversa)
+            buscarInformacionUbicacion(lat, lng);
+        });
+    }
+    
+    // Función para buscar información de ubicación por coordenadas
+    function buscarInformacionUbicacion(lat, lng) {
+        // Usar un servicio de geocodificación inversa
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.address) {
+                    // Extraer información de la dirección
+                    const direccion = data.address.road || data.address.pedestrian || '';
+                    const numero = data.address.house_number || '';
+                    const ciudad = data.address.city || data.address.town || data.address.village || '';
+                    const provincia = data.address.state || data.address.region || '';
+                    
+                    // Actualizar campos del formulario si están vacíos o si el usuario lo prefiere
+                    if (confirm('¿Desea actualizar los campos de ubicación con la información obtenida del mapa?')) {
+                        if (document.getElementById('direccion')) {
+                            document.getElementById('direccion').value = (direccion + ' ' + numero).trim();
+                        }
+                        if (document.getElementById('ciudad')) {
+                            document.getElementById('ciudad').value = ciudad;
+                        }
+                        if (document.getElementById('provincia')) {
+                            document.getElementById('provincia').value = provincia;
+                        }
+                        
+                        // Actualizar ubicación completa
+                        actualizarUbicacionCompleta();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener información de ubicación:', error);
+            });
+    }
+    
+    // Función para actualizar el campo oculto de ubicación completa
+    function actualizarUbicacionCompleta() {
+        const provincia = document.getElementById('provincia') ? document.getElementById('provincia').value.trim() : '';
+        const ciudad = document.getElementById('ciudad') ? document.getElementById('ciudad').value.trim() : '';
+        const direccion = document.getElementById('direccion') ? document.getElementById('direccion').value.trim() : '';
+        const latitud = document.getElementById('latitud') ? document.getElementById('latitud').value.trim() : '';
+        const longitud = document.getElementById('longitud') ? document.getElementById('longitud').value.trim() : '';
+        
+        let ubicacionCompleta = '';
+        
+        // Primero añadir dirección textual si existe
+        if (direccion) {
+            ubicacionCompleta += direccion;
+            if (ciudad || provincia) ubicacionCompleta += ', ';
+        }
+        
+        if (ciudad) {
+            ubicacionCompleta += ciudad;
+            if (provincia) ubicacionCompleta += ', ';
+        }
+        
+        if (provincia) {
+            ubicacionCompleta += provincia;
+        }
+        
+        // Si hay coordenadas y no hay texto, usar las coordenadas
+        if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitud && longitud) {
+            ubicacionCompleta = `${latitud}, ${longitud}`;
+        }
+        
+        // Asignar al campo oculto
+        if (ubicacionCompleta) {
+            document.getElementById('ubicacion').value = ubicacionCompleta;
+        }
+    }
+    
+    // Evento para mostrar/ocultar el mapa
+    document.getElementById('mostrarMapa').addEventListener('click', function() {
+        const mapaDiv = document.getElementById('mapaUbicacion');
+        if (mapaDiv.style.display === 'none') {
+            mapaDiv.style.display = 'block';
+            inicializarMapa();
+        } else {
+            mapaDiv.style.display = 'none';
+        }
+    });
+    
+    // Actualizar ubicación cuando cambian los campos individuales
+    ['provincia', 'ciudad', 'direccion'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', actualizarUbicacionCompleta);
+            element.addEventListener('input', actualizarUbicacionCompleta);
+        }
+    });
+    
     // Validaciones del formulario
     document.getElementById('diagnosticoForm').addEventListener('submit', function(event) {
         // Asegurar que la ubicación completa se actualice antes de enviar
-        if (document.getElementById('provincia') && document.getElementById('ciudad')) {
-            const provincia = document.getElementById('provincia').value.trim();
-            const ciudad = document.getElementById('ciudad').value.trim();
-            const direccion = document.getElementById('direccion') ? document.getElementById('direccion').value.trim() : '';
-            
-            let ubicacionCompleta = '';
-            if (direccion) {
-                ubicacionCompleta += direccion + ', ';
-            }
-            if (ciudad) {
-                ubicacionCompleta += ciudad + ', ';
-            }
-            if (provincia) {
-                ubicacionCompleta += provincia;
-            }
-            
-            // Eliminar coma final si existe
-            ubicacionCompleta = ubicacionCompleta.replace(/,\s*$/, '');
-            
-            // Asignar al campo oculto
-            if (ubicacionCompleta) {
-                document.getElementById('ubicacion').value = ubicacionCompleta;
-            }
-        }
+        actualizarUbicacionCompleta();
         
         let ubicacion = document.getElementById('ubicacion').value;
         let tipoVivienda = document.getElementById('tipo_vivienda').value;
         let superficie = document.getElementById('superficie_disponible').value;
         let objetivo = document.getElementById('objetivo').value;
         
-        // Verificar que tengamos al menos provincia y ciudad
-        if (!document.getElementById('provincia').value || !document.getElementById('ciudad').value) {
+        // Verificar que tengamos al menos provincia y ciudad o coordenadas
+        const provincia = document.getElementById('provincia').value;
+        const ciudad = document.getElementById('ciudad').value;
+        const latitud = document.getElementById('latitud').value;
+        const longitud = document.getElementById('longitud').value;
+        
+        if ((!provincia || !ciudad) && (!latitud || !longitud)) {
             event.preventDefault();
-            alert('Por favor especifique al menos la Provincia/Estado y la Ciudad/Localidad');
+            alert('Por favor especifique al menos Provincia/Estado y Ciudad/Localidad, o seleccione una ubicación en el mapa');
             return;
         }
         
@@ -260,6 +386,12 @@
             event.preventDefault();
             alert('Por favor complete todos los campos obligatorios marcados con *');
         }
+    });
+    
+    // Inicializar valores al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Actualizar ubicación completa con valores iniciales
+        actualizarUbicacionCompleta();
     });
 </script>
 {% endblock %}
