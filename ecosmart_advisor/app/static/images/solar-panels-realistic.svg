@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo de cielo y tierra -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6FB1FC"/>
+      <stop offset="100%" stop-color="#B5D8FF"/>
+    </linearGradient>
+    <linearGradient id="groundGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#76AF62"/>
+      <stop offset="100%" stop-color="#3A7A28"/>
+    </linearGradient>
+    <filter id="shadowFilter" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+    <linearGradient id="panelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121A2E"/>
+      <stop offset="50%" stop-color="#233457"/>
+      <stop offset="100%" stop-color="#121A2E"/>
+    </linearGradient>
+    <pattern id="cellPattern" x="0" y="0" width="60" height="45" patternUnits="userSpaceOnUse">
+      <rect x="2" y="2" width="56" height="41" fill="#2A4572" rx="1"/>
+      <line x1="30" y1="2" x2="30" y2="43" stroke="#1B2C4D" stroke-width="1"/>
+      <line x1="2" y1="22" x2="58" y2="22" stroke="#1B2C4D" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="600" height="280" fill="url(#skyGradient)"/>
+  <rect y="280" width="600" height="120" fill="url(#groundGradient)"/>
+  
+  <!-- Sol con efecto de destello -->
+  <circle cx="520" cy="80" r="35" fill="#FED953" filter="url(#shadowFilter)"/>
+  <circle cx="520" cy="80" r="28" fill="#FEE888"/>
+  
+  <!-- Nubes -->
+  <g fill="#FFFFFF" opacity="0.85">
+    <ellipse cx="120" cy="60" rx="50" ry="20" filter="url(#shadowFilter)"/>
+    <ellipse cx="150" cy="50" rx="60" ry="25" filter="url(#shadowFilter)"/>
+    <ellipse cx="90" cy="65" rx="40" ry="15" filter="url(#shadowFilter)"/>
+  </g>
+  
+  <!-- Casa moderna -->
+  <g transform="translate(70, 150)">
+    <!-- Estructura principal -->
+    <rect x="20" y="70" width="220" height="130" fill="#E8E8E8" filter="url(#shadowFilter)"/>
+    <rect x="20" y="160" width="220" height="40" fill="#D4D4D4"/>
+    <polygon points="20,70 130,10 240,70" fill="#F4F4F4" filter="url(#shadowFilter)"/>
+    
+    <!-- Ventanas y puerta -->
+    <rect x="60" y="110" width="40" height="50" fill="#A4C5F4" stroke="#7A7A7A" stroke-width="2"/>
+    <rect x="160" y="110" width="40" height="50" fill="#A4C5F4" stroke="#7A7A7A" stroke-width="2"/>
+    <rect x="110" y="150" width="40" height="50" fill="#7A5A48" stroke="#5D4639" stroke-width="2"/>
+    
+    <!-- Paneles solares en el techo con apariencia fotorrealista -->
+    <g transform="translate(60, 25)">
+      <rect x="0" y="0" width="120" height="45" fill="url(#panelGradient)" filter="url(#shadowFilter)"/>
+      <rect x="5" y="5" width="110" height="35" fill="url(#cellPattern)"/>
+      
+      <!-- Marco metálico -->
+      <rect x="0" y="0" width="120" height="45" fill="none" stroke="#888" stroke-width="2"/>
+      
+      <!-- Reflejos -->
+      <path d="M10,8 L40,5 L110,30 L90,38" fill="#FFFFFF" opacity="0.1"/>
+      <path d="M50,5 L100,15 L90,38 L30,30" fill="#A4C5F4" opacity="0.1"/>
+    </g>
+  </g>
+  
+  <!-- Paneles solares en el suelo con soporte -->
+  <g transform="translate(320, 200)">
+    <!-- Soportes -->
+    <path d="M0,80 L40,0 L160,0 L200,80" fill="none" stroke="#888" stroke-width="4"/>
+    <rect x="0" y="80" width="200" height="4" fill="#888"/>
+    
+    <!-- Paneles con apariencia fotorrealista -->
+    <g transform="rotate(-15, 100, 40)">
+      <rect x="40" y="10" width="120" height="65" fill="url(#panelGradient)" filter="url(#shadowFilter)"/>
+      <rect x="45" y="15" width="110" height="55" fill="url(#cellPattern)"/>
+      
+      <!-- Marco metálico -->
+      <rect x="40" y="10" width="120" height="65" fill="none" stroke="#888" stroke-width="2"/>
+      
+      <!-- Reflejos -->
+      <path d="M50,18 L80,15 L150,40 L130,68" fill="#FFFFFF" opacity="0.15"/>
+      <path d="M90,15 L140,25 L130,68 L70,60" fill="#A4C5F4" opacity="0.1"/>
+    </g>
+  </g>
+  
+  <!-- Texto informativo con estilo profesional -->
+  <g transform="translate(350, 100)">
+    <rect x="-20" y="-20" width="260" height="100" rx="5" fill="#000000" opacity="0.7"/>
+    <text x="0" y="10" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF">Energía Solar Fotovoltaica</text>
+    <text x="0" y="40" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF">Transforma la radiación solar en electricidad</text>
+    <text x="0" y="65" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF">mediante paneles de silicio que generan</text>
+    <text x="0" y="90" font-family="Arial, sans-serif" font-size="14" fill="#FFFFFF">energía limpia y renovable para tu hogar.</text>
+  </g>
+</svg>

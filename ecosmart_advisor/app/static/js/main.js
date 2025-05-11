@@ -107,25 +107,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Mostrar resultados
                     sugerenciasDiv.innerHTML = '';
                     data.forEach(lugar => {
-                        // Formatear el nombre para que sea más legible
+                        // Formatear el nombre para que sea más legible y completo
                         let nombreLugar = '';
                         
-                        if (lugar.namedetails && lugar.namedetails.name) {
-                            nombreLugar = lugar.namedetails.name;
-                        } else {
-                            // Extraer el nombre de la ciudad/localidad y país
-                            const partes = [];
+                        // Extraer el nombre de la ciudad/localidad, provincia/estado y país
+                        const partes = [];
+                        
+                        if (lugar.address) {
+                            // Localidad principal (ciudad, pueblo, villa, etc.)
+                            if (lugar.address.city) partes.push(lugar.address.city);
+                            else if (lugar.address.town) partes.push(lugar.address.town);
+                            else if (lugar.address.village) partes.push(lugar.address.village);
+                            else if (lugar.address.municipality) partes.push(lugar.address.municipality);
+                            else if (lugar.address.hamlet) partes.push(lugar.address.hamlet);
+                            else if (lugar.address.locality) partes.push(lugar.address.locality);
                             
-                            if (lugar.address) {
-                                if (lugar.address.city) partes.push(lugar.address.city);
-                                else if (lugar.address.town) partes.push(lugar.address.town);
-                                else if (lugar.address.village) partes.push(lugar.address.village);
-                                
-                                if (lugar.address.state) partes.push(lugar.address.state);
-                                if (lugar.address.country) partes.push(lugar.address.country);
-                            }
+                            // Siempre incluir provincia/estado si está disponible
+                            if (lugar.address.state) partes.push(lugar.address.state);
+                            else if (lugar.address.province) partes.push(lugar.address.province);
+                            else if (lugar.address.county) partes.push(lugar.address.county);
+                            else if (lugar.address.region) partes.push(lugar.address.region);
                             
-                            nombreLugar = partes.length > 0 ? partes.join(', ') : lugar.display_name;
+                            // Siempre incluir país
+                            if (lugar.address.country) partes.push(lugar.address.country);
+                        }
+                        
+                        nombreLugar = partes.length > 0 ? partes.join(', ') : lugar.display_name;
+                        
+                        // Si no se pudo obtener un nombre legible, usar el nombre completo proporcionado por la API
+                        if (partes.length < 2) {
+                            nombreLugar = lugar.display_name;
                         }
                         
                         const div = document.createElement('div');
