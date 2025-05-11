@@ -1,29 +1,60 @@
 /* Estilos para el carrusel */
 .carousel {
-    border-radius: 0;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: none;
-    border: none;
-    background-color: #212529;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #f8f9fa;
+    margin-bottom: 20px;
+    height: 400px;  /* Altura fija para el carrusel */
 }
 
 .carousel-inner {
-    border-radius: 0;
-    border: none;
+    height: 100%;  /* Que ocupe todo el alto del carrusel */
+    border-radius: 8px;
 }
 
 .carousel-item {
-    background-color: #212529;
+    height: 100%;  /* Que ocupe todo el alto del carrusel */
+    text-align: center;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .carousel-item img {
-    width: 100%;
-    height: auto; 
-    max-height: 500px;
-    object-fit: contain;
-    border: none;
-    padding: 0;
-    margin: 0;
+    max-width: 100%;
+    max-height: 100%;  /* Limitamos la altura al 100% del contenedor */
+    object-fit: contain;  /* Mantiene la proporción */
+    display: block;
+    margin: 0 auto;
+}
+
+/* Hacemos los controles más visibles */
+.carousel-control-next,
+.carousel-control-prev {
+    width: 10%;
+    opacity: 0.8;
+}
+
+.carousel-control-next-icon,
+.carousel-control-prev-icon {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    padding: 15px;
+}
+
+/* Hacemos los indicadores más visibles */
+.carousel-indicators {
+    margin-bottom: 0.5rem;
+}
+
+.carousel-indicators [data-bs-target] {
+    background-color: #198754;  /* Color verde de Bootstrap */
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    margin: 0 5px;
 }
 
 /* Estilos para la caja de información en el carrusel */

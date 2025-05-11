@@ -20,36 +20,47 @@
 
     
     <div class="col-lg-6 mt-4 mt-lg-0 p-0">
-        <div id="carouselEnergiasRenovables" class="carousel slide d-flex justify-content-center align-items-center" data-bs-ride="carousel">
+        <!-- Carrusel simple con Bootstrap 5 -->
+        <div id="carouselEnergiasRenovables" class="carousel carousel-dark slide" data-bs-ride="carousel">
+            <!-- Indicadores del carrusel -->
             <div class="carousel-indicators">
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Generador Eólico"></button>
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1" aria-label="Paneles Solares"></button>
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2" aria-label="Instalación Paneles"></button>
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3" aria-label="Energía Solar Térmica"></button>
             </div>
+            
+            <!-- Contenido del carrusel -->
             <div class="carousel-inner">
+                <!-- Diapositiva 1: Generador Eólico con información -->
                 <div class="carousel-item active">
                     <div class="position-relative">
                         <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" alt="Generador Eólico">
-                        <!-- Overlay para cubrir la marca de agua con información útil -->
-                        <div class="position-absolute bottom-0 end-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 350px; min-height: 180px; right: 20px; bottom: 20px;">
+                        <div class="position-absolute bottom-0 end-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">Datos de Energía Eólica</h5>
-                            <p class="mb-0 small">Un aerogenerador de tamaño medio (2MW) puede generar suficiente electricidad para abastecer a más de 1,500 hogares durante un año completo.</p>
-                            <p class="mb-0 small mt-2">La energía eólica es una de las fuentes renovables más eficientes, con un retorno energético de 20-25 veces la energía utilizada en su fabricación e instalación.</p>
-                            <p class="mb-0 small mt-2">Las turbinas modernas pueden aprovechar vientos desde 3 m/s hasta 25 m/s y tienen una vida útil de al menos 20 años con mantenimiento adecuado.</p>
+                            <p class="mb-0 small">Un aerogenerador de 2MW puede abastecer a más de 1,500 hogares por año.</p>
+                            <p class="mb-0 small mt-2">Retorno energético de 20-25 veces la energía usada en fabricación.</p>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Diapositiva 2: Paneles Solares Vista Aérea -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" alt="Paneles Solares Vista Aérea">
                 </div>
+                
+                <!-- Diapositiva 3: Instalación de Paneles -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" alt="Instalación de Paneles Solares">
                 </div>
+                
+                <!-- Diapositiva 4: Energía Solar Térmica -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/energia-solar-termica.jpg') }}" alt="Energía Solar Térmica">
                 </div>
             </div>
+            
+            <!-- Controles del carrusel -->
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Anterior</span>
@@ -172,15 +183,39 @@
 
 {% block extra_js %}
 <script>
-    // Configuración avanzada del carrusel
+    // Aseguramos que el carrusel funcione correctamente
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializa el carrusel con opciones personalizadas
-        var carousel = new bootstrap.Carousel(document.getElementById('carouselEnergiasRenovables'), {
-            interval: 5000,  // Cambia de imagen cada 5 segundos
-            pause: 'hover',  // Pausa al pasar el cursor encima
-            ride: 'carousel',
-            wrap: true       // Vuelve al principio al llegar al final
-        });
+        var carouselElement = document.getElementById('carouselEnergiasRenovables');
+        
+        if (carouselElement) {
+            var carousel = new bootstrap.Carousel(carouselElement, {
+                interval: 4000,        // Cambia cada 4 segundos
+                pause: 'hover',        // Pausa al pasar el cursor
+                ride: 'carousel',      // Inicia automáticamente
+                wrap: true,            // Vuelve al principio al final
+                keyboard: true         // Permite navegación con teclado
+            });
+            
+            // Log para debug
+            console.log('Carrusel inicializado correctamente');
+            
+            // Eventos para verificar funcionamiento
+            carouselElement.addEventListener('slide.bs.carousel', function(e) {
+                console.log('Cambiando a diapositiva: ' + e.to);
+            });
+            
+            // Verificar navegación manual
+            document.querySelector('.carousel-control-next').addEventListener('click', function() {
+                console.log('Botón siguiente clickeado');
+            });
+            
+            document.querySelector('.carousel-control-prev').addEventListener('click', function() {
+                console.log('Botón anterior clickeado');
+            });
+        } else {
+            console.error('No se encontró el elemento del carrusel');
+        }
     });
 </script>
 {% endblock %}
