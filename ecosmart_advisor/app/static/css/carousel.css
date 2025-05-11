@@ -4,12 +4,14 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: 450px; /* Altura fija para evitar saltos */
 }
 
 /* Contenedor de items */
 .carousel-inner {
     position: relative;
     width: 100%;
+    height: 450px; /* Altura fija para el contenedor interno */
     overflow: hidden;
     border-radius: 8px;
 }
@@ -20,11 +22,11 @@
     display: none;
     float: left;
     width: 100%;
+    height: 450px; /* Altura fija para cada item */
     margin-right: -100%;
     backface-visibility: hidden;
     transition: transform .6s ease-in-out;
     background-color: #f8f9fa;
-    max-height: 450px; /* Altura máxima para el carrusel */
 }
 
 .carousel-item.active,
@@ -36,19 +38,18 @@
 /* Imágenes dentro del carrusel */
 .carousel-item img {
     display: block;
-    max-width: 100%;
-    height: auto;
-    max-height: 450px; /* Ajustar al tamaño del contenedor */
-    object-fit: contain; /* Mantiene proporción */
+    width: 100%;
+    height: 450px; /* Altura fija para todas las imágenes */
+    object-fit: cover; /* Cubre todo el espacio disponible */
     margin: 0 auto;
 }
 
 /* Video dentro del carrusel */
 .carousel-item video {
     display: block;
-    max-width: 100%;
-    height: auto;
-    max-height: 400px; /* Un poco menor para videos */
+    width: 100%;
+    height: 450px; /* Misma altura que las imágenes */
+    object-fit: cover; /* Cubre todo el espacio disponible */
     margin: 0 auto;
 }
 
