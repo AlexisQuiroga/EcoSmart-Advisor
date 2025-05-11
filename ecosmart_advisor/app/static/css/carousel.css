@@ -1,34 +1,43 @@
-/* Estilos para el carrusel */
+/* Estilos para el carrusel principal */
 .carousel {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #f8f9fa;
     margin-bottom: 20px;
-    height: 450px;  /* Altura fija para el carrusel */
+    height: 400px;  /* Altura fija para el carrusel */
 }
 
 .carousel-inner {
-    height: 100%;  /* Que ocupe todo el alto del carrusel */
+    height: 100%;  /* Ocupa todo el alto del carrusel */
     border-radius: 8px;
+    position: relative;
 }
 
 .carousel-item {
-    height: 100%;  /* Que ocupe todo el alto del carrusel */
+    height: 100%;  /* Ocupa todo el alto del carrusel */
     text-align: center;
     background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important; /* Forzamos flexbox */
+    align-items: center !important;
+    justify-content: center !important;
 }
 
+/* Estilos para imágenes y videos en el carrusel */
 .carousel-item img,
 .carousel-item video {
     max-width: 100%;
-    max-height: 100%;  /* Limitamos la altura al 100% del contenedor */
-    object-fit: contain;  /* Mantiene la proporción */
+    max-height: 400px;  /* Limitamos la altura máxima */
+    object-fit: contain;  /* Mantiene la proporción original */
+    width: auto;  /* Ancho automático para mantener proporción */
+    height: auto;  /* Altura automática para mantener proporción */
     display: block;
     margin: 0 auto;
+}
+
+/* Estilo específico para la diapositiva con video */
+.carousel-item video {
+    max-height: 350px;  /* Altura un poco menor para videos */
 }
 
 /* Hacemos los controles más visibles */
