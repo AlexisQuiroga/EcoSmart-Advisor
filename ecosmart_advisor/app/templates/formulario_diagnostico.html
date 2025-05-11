@@ -17,14 +17,54 @@
                         <h3 class="h5 mb-3">Ubicación y Vivienda</h3>
                         
                         <div class="mb-3">
-                            <label for="ubicacion" class="form-label">Ubicación <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
-                                       placeholder="Ingrese su ubicación" required>
+                            <label class="form-label">Ubicación <span class="text-danger">*</span></label>
+                            
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-4">
+                                    <label for="provincia" class="form-label small">Provincia/Estado</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map"></i></span>
+                                        <input type="text" class="form-control" id="provincia" name="provincia" 
+                                               placeholder="Provincia/Estado">
+                                    </div>
+                                    <div id="sugerenciasProvincia" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ciudad" class="form-label small">Ciudad/Localidad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                        <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                                               placeholder="Ciudad/Localidad">
+                                    </div>
+                                    <div id="sugerenciasCiudad" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="direccion" class="form-label small">Dirección (opcional)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-home"></i></span>
+                                        <input type="text" class="form-control" id="direccion" name="direccion" 
+                                               placeholder="Calle, número...">
+                                    </div>
+                                </div>
                             </div>
-                            <div id="sugerenciasUbicacion" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
-                            <div class="form-text">Ingrese su ubicación o selecciónela en el mapa</div>
+                            
+                            <!-- Campo oculto para almacenar la ubicación completa -->
+                            <input type="hidden" id="ubicacion" name="ubicacion" required>
+                            
+                            <div class="mt-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">O seleccione su ubicación en el mapa</label>
+                                    <button type="button" class="btn btn-sm btn-outline-success" id="mostrarMapa">
+                                        <i class="fas fa-map-marked-alt me-1"></i>Mostrar/Ocultar Mapa
+                                    </button>
+                                </div>
+                                <div id="mapaUbicacion" class="rounded border mb-2" style="height: 300px; display: none;"></div>
+                                <div class="d-flex justify-content-between small text-muted" id="coordenadasSeleccionadas" style="display: none;">
+                                    <span>Latitud: <span id="latitudSeleccionada">-</span></span>
+                                    <span>Longitud: <span id="longitudSeleccionada">-</span></span>
+                                    <button type="button" class="btn btn-sm btn-link p-0" id="usarCoordenadas">Usar estas coordenadas</button>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
