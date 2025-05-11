@@ -11,6 +11,7 @@ load_dotenv()
 
 # Base de conocimiento para respuestas sin IA
 CONOCIMIENTO_BASE = {
+    # Información sobre tecnologías renovables
     "paneles solares": (
         "Los paneles solares fotovoltaicos convierten la luz solar en electricidad. "
         "Su rendimiento depende de la radiación solar de tu ubicación, la orientación "
@@ -28,6 +29,33 @@ CONOCIMIENTO_BASE = {
         "reduciendo el consumo de gas o electricidad. Son simples y efectivos, con capacidades "
         "típicas entre 150-300 litros, suficientes para una familia de 3-6 personas. Pueden "
         "ahorrar hasta un 80% en el consumo energético para calentamiento de agua."
+    ),
+    
+    # Información sobre la funcionalidad de la página
+    "simulador": (
+        "El simulador de EcoSmart Advisor te permite probar diferentes escenarios "
+        "de instalación de energías renovables. Puedes ajustar variables como la capacidad "
+        "de paneles solares, potencia del aerogenerador o tamaño del termotanque, y ver "
+        "estimaciones realistas de generación, ahorro económico e impacto ambiental. "
+        "Para usar el simulador, haz clic en el botón 'Usar Simulador' en la página principal."
+    ),
+    "diagnóstico": (
+        "La herramienta de diagnóstico analiza tu ubicación, consumo energético y condiciones "
+        "locales para recomendarte el sistema de energía renovable más adecuado para tu caso. "
+        "Introduce datos como tu ubicación, consumo mensual, presupuesto y superficie disponible, "
+        "y el sistema calculará qué opción te ofrece mejor relación costo-beneficio."
+    ),
+    "ubicación": (
+        "Para obtener recomendaciones precisas, el sistema necesita conocer tu ubicación. "
+        "Puedes introducir tu provincia, ciudad y calle, o utilizar el mapa interactivo "
+        "para seleccionar tu ubicación exacta. Esto nos permite obtener datos precisos de "
+        "radiación solar, velocidad del viento y clima para tu zona específica."
+    ),
+    "chatbot": (
+        "Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas "
+        "sobre energías renovables, ayudarte a entender cómo funcionan las diferentes tecnologías, "
+        "y guiarte en el uso de nuestra plataforma. Puedes hacerme preguntas sobre paneles solares, "
+        "energía eólica, termotanques solares, o cómo utilizar las herramientas de esta página."
     ),
     "baterías": (
         "Las baterías permiten almacenar la energía generada durante el día para usarla "
