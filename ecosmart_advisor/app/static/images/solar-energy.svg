@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600px" height="400px" viewBox="0 0 600 400" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#2D3B45" x="0" y="0" width="600" height="400"></rect>
+        <!-- Fondo con degradado -->
+        <rect id="sky" fill="#62B0E8" x="0" y="0" width="600" height="280"></rect>
+        <rect id="ground" fill="#66A15A" x="0" y="280" width="600" height="120"></rect>
+        
+        <!-- Sol -->
+        <circle fill="#FFC30F" cx="480" cy="80" r="40"></circle>
+        <g id="sun-rays" stroke="#FFC30F" stroke-width="3">
+            <line x1="480" y1="20" x2="480" y2="5" stroke-linecap="round"></line>
+            <line x1="480" y1="155" x2="480" y2="140" stroke-linecap="round"></line>
+            <line x1="420" y1="80" x2="405" y2="80" stroke-linecap="round"></line>
+            <line x1="555" y1="80" x2="540" y2="80" stroke-linecap="round"></line>
+            <line x1="437" y1="37" x2="426" y2="26" stroke-linecap="round"></line>
+            <line x1="534" y1="134" x2="523" y2="123" stroke-linecap="round"></line>
+            <line x1="437" y1="123" x2="426" y2="134" stroke-linecap="round"></line>
+            <line x1="534" y1="26" x2="523" y2="37" stroke-linecap="round"></line>
+        </g>
+        
+        <!-- Casa con paneles solares -->
+        <g id="house" transform="translate(100, 200)">
+            <!-- Casa -->
+            <rect fill="#E8D0B0" x="50" y="50" width="150" height="100"></rect>
+            <polygon fill="#B77F54" points="50,50 125,0 200,50"></polygon>
+            <rect fill="#7A5C43" x="110" y="100" width="30" height="50"></rect>
+            <rect fill="#4B9CD3" x="70" y="70" width="30" height="30"></rect>
+            <rect fill="#4B9CD3" x="150" y="70" width="30" height="30"></rect>
+            
+            <!-- Paneles solares en el techo -->
+            <g id="solar-panel" transform="translate(85, 20)">
+                <rect fill="#2D3B45" x="0" y="0" width="80" height="60"></rect>
+                <g id="grid" fill="#1751AA">
+                    <rect x="5" y="5" width="22" height="15"></rect>
+                    <rect x="29" y="5" width="22" height="15"></rect>
+                    <rect x="53" y="5" width="22" height="15"></rect>
+                    <rect x="5" y="22" width="22" height="15"></rect>
+                    <rect x="29" y="22" width="22" height="15"></rect>
+                    <rect x="53" y="22" width="22" height="15"></rect>
+                    <rect x="5" y="39" width="22" height="15"></rect>
+                    <rect x="29" y="39" width="22" height="15"></rect>
+                    <rect x="53" y="39" width="22" height="15"></rect>
+                </g>
+            </g>
+        </g>
+        
+        <!-- Texto explicativo -->
+        <g id="text" transform="translate(350, 200)" fill="#FFFFFF" font-family="Arial, sans-serif">
+            <text font-size="24" font-weight="bold">Energía Solar</text>
+            <text y="30" font-size="16">Aprovecha la radiación solar</text>
+            <text y="55" font-size="16">para generar electricidad</text>
+            <text y="80" font-size="16">limpia y renovable</text>
+        </g>
+    </g>
+</svg>
