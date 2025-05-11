@@ -1,27 +1,43 @@
-/* Estilos optimizados para el carrusel */
+/* Estilos para el carrusel */
 .carousel {
+    border-radius: 0;
     overflow: hidden;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+    box-shadow: none;
+    border: none;
+    background-color: #212529;
 }
 
 .carousel-inner {
-    overflow: hidden;
+    border-radius: 0;
+    border: none;
 }
 
 .carousel-item {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 400px; /* Altura fija para todas las diapositivas */
+    height: 450px; /* Altura fija más grande para todas las diapositivas */
+    background-color: #212529;
 }
 
 .carousel-item img {
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain; /* Muestra la imagen completa sin recortes */
-    margin: 0 auto;
+    width: 100%;
+    height: 100%; 
+    object-fit: cover;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilos para la caja de información en el carrusel */
+.info-box {
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+    color: white; /* Texto en blanco */
+    padding: 10px; /* Espaciado */
+    border-radius: 5px; /* Bordes redondeados */
+    position: absolute; /* Posicionamiento absoluto */
+    bottom: 20px; /* Espaciado desde el fondo */
+    left: 20px; /* Espaciado desde la izquierda */
 }
 
 .carousel-indicators {

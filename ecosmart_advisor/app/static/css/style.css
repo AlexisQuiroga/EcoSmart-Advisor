@@ -197,6 +197,85 @@ footer a:hover {
     transform: scale(1.1);
 }
 
+/* Estilos para el autocompletado de ubicación */
+#sugerenciasUbicacion {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#sugerenciasUbicacion .list-group-item {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-left: none;
+    border-right: none;
+    transition: background-color 0.2s ease;
+}
+
+#sugerenciasUbicacion .list-group-item:hover,
+#sugerenciasUbicacion .list-group-item.active {
+    background-color: var(--light-green);
+    color: var(--primary-green);
+}
+
+#sugerenciasUbicacion .list-group-item:first-child {
+    border-top: none;
+}
+
+#sugerenciasUbicacion .list-group-item:last-child {
+    border-bottom: none;
+}
+/* Estilos para el carrusel */
+.carousel {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: none; /* Elimina la sombra */
+}
+
+.carousel-item {
+    display: flex; /* Usar flexbox para centrar el contenido */
+    justify-content: center; /* Centrar imagen */
+    align-items: center; /* Centrar verticalmente */
+}
+
+.carousel-item img {
+    height: auto; /* Ajusta la altura de la imagen automáticamente */
+    max-width: 100%; /* Asegura que la imagen nunca exceda el ancho del contenedor */
+    object-fit: cover; /* Mantiene la relación de aspecto sin distorsión */
+}
+
+/* Estilos para la caja de información en el carrusel */
+.info-box {
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+    color: white; /* Texto en blanco */
+    padding: 10px; /* Espaciado */
+    border-radius: 5px; /* Bordes redondeados */
+    position: absolute; /* Posicionamiento absoluto */
+    bottom: 20px; /* Espaciado desde el fondo */
+    left: 20px; /* Espaciado desde la izquierda */
+}
+
+.carousel-indicators {
+    bottom: 10px;
+}
+
+.carousel-control-prev, 
+.carousel-control-next {
+    width: 10%;
+    opacity: 0.7;
+}
+
+.carousel-control-prev:hover, 
+.carousel-control-next:hover {
+    opacity: 1;
+}
+
 /* Estilos responsivos */
 @media (max-width: 768px) {
     .display-4 {
@@ -209,6 +288,10 @@ footer a:hover {
     
     .metric-value {
         font-size: 1.5rem;
+    }
+    
+    .carousel-item img {
+        height: 250px;
     }
 }
 
