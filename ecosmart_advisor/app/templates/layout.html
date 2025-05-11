@@ -154,6 +154,144 @@
             }
         }
         
+        // Función global para seleccionar una pregunta sugerida y enviarla automáticamente
+        function seleccionarPreguntaSugerida(elemento) {
+            // Obtener el texto de la pregunta
+            const pregunta = elemento.textContent.trim();
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            console.log("Pregunta seleccionada:", pregunta);
+            
+            // Colocar la pregunta en el campo de entrada
+            if (floatingChatInput) {
+                floatingChatInput.value = pregunta;
+            }
+            
+            // Añadir la pregunta como mensaje del usuario (definir en caso de que no exista)
+            if (typeof agregarMensajeUsuario !== 'function') {
+                function agregarMensajeUsuario(texto) {
+                    const mensajeHTML = `
+                        <div class="chat-message user">
+                            <div class="d-flex align-items-start justify-content-end">
+                                <div class="text-end">
+                                    <p class="mb-0">${texto}</p>
+                                </div>
+                                <div class="ms-2 mt-1">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (floatingChatBody) {
+                        floatingChatBody.innerHTML += mensajeHTML;
+                        floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                    }
+                }
+            }
+            
+            // Añadir mensaje del usuario
+            agregarMensajeUsuario(pregunta);
+            
+            // Limpiar el campo de entrada después de enviar
+            if (floatingChatInput) {
+                floatingChatInput.value = '';
+            }
+            
+            // Enviar la pregunta al servidor
+            fetch('/chatbot/consulta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pregunta: pregunta })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Añadir respuesta del bot
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">${data.respuesta}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (floatingChatBody) {
+                    floatingChatBody.innerHTML += mensajeHTML;
+                    floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                    
+                    // Mostrar nuevas preguntas sugeridas
+                    setTimeout(function() {
+                        mostrarNuevasSugerencias();
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error al consultar chatbot:', error);
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, intenta de nuevo más tarde.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (floatingChatBody) {
+                    floatingChatBody.innerHTML += mensajeHTML;
+                    floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                }
+            });
+        }
+        
+        // Función para mostrar nuevas sugerencias
+        function mostrarNuevasSugerencias() {
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            // Eliminar sugerencias anteriores si existen
+            document.querySelectorAll('.chat-suggestion-new').forEach(el => {
+                el.remove();
+            });
+            
+            // Preguntas sugeridas
+            const sugerencias = [
+                "¿Qué sistema de energía renovable es más económico?",
+                "¿Cuánto puedo ahorrar con energía renovable?",
+                "¿Para qué sirve el simulador?",
+                "¿Qué es un termotanque solar?"
+            ];
+            
+            // Crear HTML para sugerencias
+            const sugerenciasHTML = `
+                <div class="chat-suggestions mt-3 chat-suggestion-new">
+                    <div class="small text-muted mb-2">¿Te gustaría saber más sobre:</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        ${sugerencias.map(sugerencia => 
+                            `<span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">
+                                ${sugerencia}
+                            </span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            if (floatingChatBody) {
+                floatingChatBody.innerHTML += sugerenciasHTML;
+                floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const chatIcon = document.getElementById('chatIcon');
             const floatingChat = document.getElementById('floatingChat');
