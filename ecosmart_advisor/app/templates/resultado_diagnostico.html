@@ -223,8 +223,8 @@
                                 <td>USD ${{ opcion.ahorro_anual|round|int }}</td>
                                 <td>{{ opcion.impacto_ambiental|round|int }} kg CO₂</td>
                                 <td>
-                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ opcion.tipo }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-calculator"></i>
+                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ opcion.tipo }}&consumo={{ datos.consumo_mensual }}&provincia={{ datos.provincia|default('') }}&ciudad={{ datos.ciudad|default('') }}&direccion={{ datos.direccion|default('') }}&latitud={{ clima.latitud|default('') }}&longitud={{ clima.longitud|default('') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-calculator"></i> Simular
                                     </a>
                                 </td>
                             </tr>

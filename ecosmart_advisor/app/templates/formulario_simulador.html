@@ -42,13 +42,54 @@
                         <h3 class="h5 mb-3">Ubicación y consumo</h3>
                         
                         <div class="mb-3">
-                            <label for="ubicacion" class="form-label">Ubicación <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
-                                       placeholder="Ciudad o coordenadas (ej. Buenos Aires o -34.6,-58.4)" required>
+                            <label class="form-label">Ubicación <span class="text-danger">*</span></label>
+                            
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-4">
+                                    <label for="provincia" class="form-label small">Provincia/Estado</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map"></i></span>
+                                        <input type="text" class="form-control" id="provincia" name="provincia" 
+                                               placeholder="Provincia">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ciudad" class="form-label small">Ciudad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                        <input type="text" class="form-control" id="ciudad" name="ciudad" 
+                                               placeholder="Ciudad">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="direccion" class="form-label small">Dirección</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-home"></i></span>
+                                        <input type="text" class="form-control" id="direccion" name="direccion" 
+                                               placeholder="Calle, número...">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-text">Ingrese su ciudad o coordenadas para análisis climático</div>
+                            
+                            <!-- Campo oculto para almacenar la ubicación completa -->
+                            <input type="hidden" id="ubicacion" name="ubicacion" required>
+                            
+                            <div class="mt-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">O seleccione su ubicación en el mapa</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="mostrarMapa">
+                                        <i class="fas fa-map-marked-alt me-1"></i>Mostrar/Ocultar Mapa
+                                    </button>
+                                </div>
+                                <div id="mapaUbicacion" class="rounded border mb-2" style="height: 300px; display: none;">
+                                    <!-- El mapa se cargará aquí con JavaScript -->
+                                </div>
+                                <div class="form-text" id="coordenadasSeleccionadas">
+                                    Coordenadas: <span id="latitudDisplay">--</span>, <span id="longitudDisplay">--</span>
+                                </div>
+                                <input type="hidden" id="latitud" name="latitud">
+                                <input type="hidden" id="longitud" name="longitud">
+                            </div>
                         </div>
                         
                         <div class="mb-3">
@@ -141,7 +182,151 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <script>
+    // Variables globales para el mapa
+    let mapa;
+    let marcador;
+
+    // Función para inicializar el mapa
+    function inicializarMapa() {
+        // Si el mapa ya fue inicializado, retornar
+        if (mapa) return;
+        
+        // Crear el mapa centrado en Argentina por defecto
+        mapa = L.map('mapaUbicacion').setView([-34.6037, -58.3816], 5);
+        
+        // Añadir la capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapa);
+        
+        // Refrescar el mapa cuando se muestra (arregla problemas de renderizado)
+        setTimeout(() => {
+            mapa.invalidateSize();
+        }, 100);
+        
+        // Evento para seleccionar ubicación en el mapa
+        mapa.on('click', function(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            
+            // Actualizar campos ocultos
+            document.getElementById('latitud').value = lat;
+            document.getElementById('longitud').value = lng;
+            
+            // Actualizar textos de coordenadas
+            document.getElementById('latitudDisplay').textContent = lat;
+            document.getElementById('longitudDisplay').textContent = lng;
+            
+            // Actualizar el campo de ubicación completa
+            actualizarUbicacionCompleta();
+            
+            // Añadir o mover el marcador
+            if (marcador) {
+                marcador.setLatLng(e.latlng);
+            } else {
+                marcador = L.marker(e.latlng).addTo(mapa);
+            }
+            
+            // Buscar información de la ubicación (geolocalización inversa)
+            buscarInformacionUbicacion(lat, lng);
+        });
+    }
+    
+    // Función para buscar información de ubicación por coordenadas
+    function buscarInformacionUbicacion(lat, lng) {
+        // Usar un servicio de geocodificación inversa
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.address) {
+                    // Extraer información de la dirección
+                    const direccion = data.address.road || data.address.pedestrian || '';
+                    const numero = data.address.house_number || '';
+                    const ciudad = data.address.city || data.address.town || data.address.village || '';
+                    const provincia = data.address.state || data.address.region || '';
+                    
+                    // Actualizar campos del formulario si están vacíos o si el usuario lo prefiere
+                    if (confirm('¿Desea actualizar los campos de ubicación con la información obtenida del mapa?')) {
+                        if (document.getElementById('direccion')) {
+                            document.getElementById('direccion').value = (direccion + ' ' + numero).trim();
+                        }
+                        if (document.getElementById('ciudad')) {
+                            document.getElementById('ciudad').value = ciudad;
+                        }
+                        if (document.getElementById('provincia')) {
+                            document.getElementById('provincia').value = provincia;
+                        }
+                        
+                        // Actualizar ubicación completa
+                        actualizarUbicacionCompleta();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener información de ubicación:', error);
+            });
+    }
+    
+    // Función para actualizar el campo oculto de ubicación completa
+    function actualizarUbicacionCompleta() {
+        const provincia = document.getElementById('provincia') ? document.getElementById('provincia').value.trim() : '';
+        const ciudad = document.getElementById('ciudad') ? document.getElementById('ciudad').value.trim() : '';
+        const direccion = document.getElementById('direccion') ? document.getElementById('direccion').value.trim() : '';
+        const latitud = document.getElementById('latitud') ? document.getElementById('latitud').value.trim() : '';
+        const longitud = document.getElementById('longitud') ? document.getElementById('longitud').value.trim() : '';
+        
+        let ubicacionCompleta = '';
+        
+        // Primero añadir dirección textual si existe
+        if (direccion) {
+            ubicacionCompleta += direccion;
+            if (ciudad || provincia) ubicacionCompleta += ', ';
+        }
+        
+        if (ciudad) {
+            ubicacionCompleta += ciudad;
+            if (provincia) ubicacionCompleta += ', ';
+        }
+        
+        if (provincia) {
+            ubicacionCompleta += provincia;
+        }
+        
+        // Si hay coordenadas y no hay texto, usar las coordenadas
+        if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitud && longitud) {
+            ubicacionCompleta = `${latitud}, ${longitud}`;
+        }
+        
+        // Asignar al campo oculto
+        if (ubicacionCompleta) {
+            document.getElementById('ubicacion').value = ubicacionCompleta;
+        }
+    }
+    
+    // Evento para mostrar/ocultar el mapa
+    document.getElementById('mostrarMapa').addEventListener('click', function() {
+        const mapaDiv = document.getElementById('mapaUbicacion');
+        if (mapaDiv.style.display === 'none') {
+            mapaDiv.style.display = 'block';
+            inicializarMapa();
+        } else {
+            mapaDiv.style.display = 'none';
+        }
+    });
+    
+    // Actualizar ubicación cuando cambian los campos individuales
+    ['provincia', 'ciudad', 'direccion'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', actualizarUbicacionCompleta);
+            element.addEventListener('input', actualizarUbicacionCompleta);
+        }
+    });
+
     // Cambiar unidades y texto según el tipo de instalación
     document.getElementById('tipo_instalacion').addEventListener('change', function() {
         const tipoSeleccionado = this.value;
@@ -174,6 +359,9 @@
     
     // Validaciones del formulario
     document.getElementById('simuladorForm').addEventListener('submit', function(event) {
+        // Asegurar que la ubicación completa se actualice antes de enviar
+        actualizarUbicacionCompleta();
+        
         let tipoInstalacion = document.getElementById('tipo_instalacion').value;
         let capacidad = document.getElementById('capacidad').value;
         let ubicacion = document.getElementById('ubicacion').value;
@@ -185,11 +373,20 @@
         }
     });
     
-    // Obtener tipo de instalación de la URL si viene del diagnóstico
+    // Obtener datos de la URL si viene del diagnóstico
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        const tipoParam = urlParams.get('tipo');
         
+        // Obtener parámetros de la URL
+        const tipoParam = urlParams.get('tipo');
+        const consumoParam = urlParams.get('consumo');
+        const provinciaParam = urlParams.get('provincia');
+        const ciudadParam = urlParams.get('ciudad');
+        const direccionParam = urlParams.get('direccion');
+        const latitudParam = urlParams.get('latitud');
+        const longitudParam = urlParams.get('longitud');
+        
+        // Aplicar tipo de instalación si existe
         if (tipoParam) {
             const selectTipo = document.getElementById('tipo_instalacion');
             selectTipo.value = tipoParam;
@@ -198,6 +395,44 @@
             const event = new Event('change');
             selectTipo.dispatchEvent(event);
         }
+        
+        // Aplicar consumo si existe
+        if (consumoParam) {
+            document.getElementById('consumo_mensual').value = consumoParam;
+        }
+        
+        // Aplicar datos de ubicación si existen
+        if (provinciaParam) {
+            document.getElementById('provincia').value = provinciaParam;
+        }
+        
+        if (ciudadParam) {
+            document.getElementById('ciudad').value = ciudadParam;
+        }
+        
+        if (direccionParam) {
+            document.getElementById('direccion').value = direccionParam;
+        }
+        
+        // Aplicar coordenadas si existen
+        if (latitudParam && longitudParam) {
+            document.getElementById('latitud').value = latitudParam;
+            document.getElementById('longitud').value = longitudParam;
+            document.getElementById('latitudDisplay').textContent = latitudParam;
+            document.getElementById('longitudDisplay').textContent = longitudParam;
+            
+            // Mostrar el mapa y colocar el marcador
+            setTimeout(() => {
+                document.getElementById('mostrarMapa').click();
+                setTimeout(() => {
+                    mapa.setView([latitudParam, longitudParam], 13);
+                    marcador = L.marker([latitudParam, longitudParam]).addTo(mapa);
+                }, 300);
+            }, 500);
+        }
+        
+        // Actualizar ubicación completa con todos los datos
+        actualizarUbicacionCompleta();
     });
 </script>
 {% endblock %}
