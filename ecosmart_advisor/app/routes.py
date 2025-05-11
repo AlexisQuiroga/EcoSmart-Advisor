@@ -29,6 +29,11 @@ def diagnostico():
         # Obtener datos del formulario
         datos = {
             'ubicacion': request.form.get('ubicacion'),
+            'provincia': request.form.get('provincia'),
+            'ciudad': request.form.get('ciudad'),
+            'direccion': request.form.get('direccion'),
+            'latitud': request.form.get('latitud'),
+            'longitud': request.form.get('longitud'),
             'tipo_vivienda': request.form.get('tipo_vivienda'),
             'consumo_mensual': request.form.get('consumo_mensual'),
             'superficie_disponible': request.form.get('superficie_disponible'),
