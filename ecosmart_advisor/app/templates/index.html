@@ -173,7 +173,7 @@
                         </div>
                         <h3 class="h5">Chatbot Educativo</h3>
                         <p class="text-muted">Resuelve tus dudas sobre energías renovables con nuestro asistente virtual basado en IA.</p>
-                        <button id="activarChatbot" class="btn btn-outline-info btn-sm">Hacer Preguntas</button>
+                        <button onclick="abrirChatbot()" class="btn btn-outline-info btn-sm">Hacer Preguntas</button>
                     </div>
                 </div>
             </div>
@@ -297,15 +297,11 @@
         var botonActivarChatbot = document.getElementById('activarChatbot');
         if (botonActivarChatbot) {
             botonActivarChatbot.addEventListener('click', function() {
-                // Mostrar el chatbot flotante
-                var chatbotElement = document.getElementById('floatingChat');
-                if (chatbotElement) {
-                    chatbotElement.classList.add('show-chat');  // Usamos la clase correcta 'show-chat'
-                    // Dar el foco al input del chat
-                    var inputChatElement = document.getElementById('floatingChatInput');
-                    if (inputChatElement) {
-                        inputChatElement.focus();
-                    }
+                // Usando la función global definida en layout.html
+                if (typeof abrirChatbot === 'function') {
+                    abrirChatbot();
+                } else {
+                    console.error('La función abrirChatbot no está disponible');
                 }
             });
         }

@@ -137,6 +137,21 @@
 
     <!-- Script para el chatbot flotante -->
     <script>
+        // Función global para abrir el chatbot (accesible desde cualquier parte de la aplicación)
+        function abrirChatbot() {
+            const floatingChat = document.getElementById('floatingChat');
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            
+            if (floatingChat) {
+                floatingChat.classList.add('show-chat');
+                if (floatingChatInput) {
+                    setTimeout(function() {
+                        floatingChatInput.focus();
+                    }, 100);
+                }
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const chatIcon = document.getElementById('chatIcon');
             const floatingChat = document.getElementById('floatingChat');
@@ -147,8 +162,7 @@
             
             // Abrir chat
             chatIcon.addEventListener('click', function() {
-                floatingChat.classList.add('show-chat');
-                floatingChatInput.focus();
+                abrirChatbot();
             });
             
             // Cerrar chat
