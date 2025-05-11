@@ -39,10 +39,7 @@
                         <a class="nav-link {% if '/simulador' in request.path %}active{% endif %}" 
                            href="{{ url_for('simulador.simulador') }}">Simulador</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/chatbot' in request.path %}active{% endif %}" 
-                           href="{{ url_for('chatbot.chatbot') }}">Chatbot</a>
-                    </li>
+                    <!-- Enlace a chatbot eliminado ya que ahora tenemos chatbot flotante -->
                 </ul>
             </div>
         </div>
@@ -85,9 +82,187 @@
         </div>
     </footer>
 
+    <!-- Chatbot Flotante -->
+    <div class="floating-chatbot">
+        <div class="chat-icon" id="chatIcon">
+            <i class="fas fa-comments"></i>
+        </div>
+    </div>
+
+    <div class="floating-chat-container" id="floatingChat">
+        <div class="floating-chat-header">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <span>Asistente EcoSmart</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" id="closeChat" aria-label="Close"></button>
+        </div>
+        <div class="floating-chat-body" id="floatingChatBody">
+            <!-- Mensaje inicial del bot -->
+            <div class="chat-message bot">
+                <div class="d-flex align-items-start">
+                    <div class="me-2 mt-1">
+                        <i class="fas fa-robot text-info"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0">¡Hola! Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas sobre energías renovables. ¿En qué puedo ayudarte hoy?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="floating-chat-input">
+            <div class="input-group">
+                <input type="text" class="form-control" id="floatingChatInput" placeholder="Escribe tu pregunta aquí...">
+                <button class="btn btn-success" type="button" id="sendFloatingChat">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Script para el chatbot flotante -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatIcon = document.getElementById('chatIcon');
+            const floatingChat = document.getElementById('floatingChat');
+            const closeChat = document.getElementById('closeChat');
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            const sendFloatingChat = document.getElementById('sendFloatingChat');
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            // Abrir chat
+            chatIcon.addEventListener('click', function() {
+                floatingChat.classList.add('show-chat');
+                floatingChatInput.focus();
+            });
+            
+            // Cerrar chat
+            closeChat.addEventListener('click', function() {
+                floatingChat.classList.remove('show-chat');
+            });
+            
+            // Función para agregar mensaje del usuario
+            function agregarMensajeUsuario(texto) {
+                const mensajeHTML = `
+                    <div class="chat-message user">
+                        <div class="d-flex align-items-start">
+                            <div>
+                                <p class="mb-0">${texto}</p>
+                            </div>
+                            <div class="ms-2 mt-1">
+                                <i class="fas fa-user text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                scrollToBottom();
+            }
+            
+            // Función para agregar mensaje del bot
+            function agregarMensajeBot(texto) {
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-info"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">${texto}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                scrollToBottom();
+            }
+            
+            // Función para mostrar indicador de escritura
+            function mostrarEscribiendo() {
+                const mensajeHTML = `
+                    <div class="chat-message bot" id="typing-message">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-info"></i>
+                            </div>
+                            <div class="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                scrollToBottom();
+            }
+            
+            // Función para quitar indicador de escritura
+            function quitarEscribiendo() {
+                const typingMessage = document.getElementById('typing-message');
+                if (typingMessage) {
+                    typingMessage.remove();
+                }
+            }
+            
+            // Función para hacer scroll hasta el final del chat
+            function scrollToBottom() {
+                floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+            }
+            
+            // Función para enviar pregunta al servidor
+            function enviarPregunta() {
+                const pregunta = floatingChatInput.value.trim();
+                if (pregunta === '') return;
+                
+                // Agregar mensaje del usuario al chat
+                agregarMensajeUsuario(pregunta);
+                
+                // Limpiar input
+                floatingChatInput.value = '';
+                
+                // Mostrar indicador de escritura
+                mostrarEscribiendo();
+                
+                // Enviar pregunta a la API
+                fetch('{{ url_for('chatbot.consulta_chatbot') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pregunta: pregunta }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Quitar indicador de escritura
+                    quitarEscribiendo();
+                    
+                    // Agregar respuesta del bot
+                    agregarMensajeBot(data.respuesta);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    quitarEscribiendo();
+                    agregarMensajeBot('Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, inténtalo de nuevo más tarde.');
+                });
+            }
+            
+            // Event listeners
+            sendFloatingChat.addEventListener('click', enviarPregunta);
+            
+            floatingChatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    enviarPregunta();
+                }
+            });
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
