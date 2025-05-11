@@ -113,7 +113,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Cantidad paneles:</strong> {{ recomendacion.principal.detalle.cantidad_paneles|round|int }}</p>
-                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual estimado:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }} (dólares)</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% elif recomendacion.principal.tipo == 'eolica' %}
@@ -124,7 +124,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Velocidad mínima:</strong> {{ recomendacion.principal.detalle.velocidad_minima }} m/s</p>
-                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual estimado:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }} (dólares)</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% elif recomendacion.principal.tipo == 'termotanque_solar' %}
@@ -135,7 +135,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Personas abastecidas:</strong> {{ recomendacion.principal.detalle.personas }}</p>
-                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual estimado:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }} (dólares)</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% endif %}
