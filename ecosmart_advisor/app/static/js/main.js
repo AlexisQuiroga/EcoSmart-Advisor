@@ -3,9 +3,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ubicacionInput = document.getElementById('ubicacion');
     const sugerenciasDiv = document.getElementById('sugerenciasUbicacion');
-    const btnMapa = document.getElementById('btnMapa');
-    const mapaModal = new bootstrap.Modal(document.getElementById('mapaModal'));
-    let map, marker;
 
     if (ubicacionInput) {
         // Autocompletado
@@ -37,52 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Configuración del mapa
-        btnMapa.addEventListener('click', function() {
-            mapaModal.show();
-            setTimeout(() => {
-                if (!map) {
-                    map = L.map('mapa', {
-                        minZoom: 2,
-                        maxZoom: 18,
-                        zoomControl: true,
-                        scrollWheelZoom: true
-                    }).setView([-34.6037, -58.3816], 4);
-                    
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-                    
-                    marker = L.marker([-34.6037, -58.3816], {
-                        draggable: true,
-                        autoPan: true
-                    }).addTo(map);
-                    
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                    });
-                }
-                
-                // Forzar actualización del mapa después de que el modal esté completamente visible
-                setTimeout(() => {
-                    map.invalidateSize(true);
-                }, 300);
-            }, 100);
-        });
-
-        // Evento para cuando el modal se cierra
-        document.getElementById('mapaModal').addEventListener('hidden.bs.modal', function () {
-            if (map) {
-                map.invalidateSize();
-            }
-        });
-
-        // Confirmar ubicación seleccionada en el mapa
-        document.getElementById('confirmarUbicacion').addEventListener('click', function() {
-            const latlng = marker.getLatLng();
-            ubicacionInput.value = `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
-            mapaModal.hide();
-        });
+        
     }
 });
 
