@@ -121,19 +121,48 @@ def generar_respuesta_chatbot(pregunta):
     # Limpiar y preparar la pregunta
     pregunta_limpia = pregunta.lower().strip()
     
+    # Manejar preguntas de ejemplo específicas que mostramos en la interfaz
+    preguntas_ejemplo = {
+        "¿qué sistema de energía renovable me conviene?": 
+            "Para determinar qué sistema de energía renovable te conviene, necesitamos considerar varios factores: tu ubicación geográfica, consumo energético, presupuesto disponible y espacio. En general, los paneles solares son versátiles y funcionan bien en la mayoría de las regiones con buena exposición solar. Los sistemas eólicos son mejores en áreas con vientos constantes. Los termotanques solares son una excelente opción si buscas reducir el consumo para calentar agua. Te recomiendo usar nuestra herramienta de diagnóstico que analizará tu situación particular y te dará una recomendación personalizada.",
+        
+        "¿cuánto cuesta instalar paneles solares?": 
+            "El costo de instalar paneles solares varía según la capacidad del sistema, calidad de los componentes y tu ubicación. En promedio, un sistema residencial de 3-5 kW puede costar entre $1,000 y $3,000 USD por kW instalado, incluyendo paneles, inversor, estructura, instalación y trámites. Los factores que más influyen son: capacidad total (kW), tipo y eficiencia de los paneles, tipo de instalación (techo o suelo), complejidad del montaje y costos laborales locales. El retorno de inversión suele ser de 4-7 años, dependiendo de las tarifas eléctricas de tu zona.",
+        
+        "¿cuánto puedo ahorrar con energía renovable?": 
+            "El ahorro con energía renovable depende de varios factores: tu consumo actual, costo de la electricidad en tu zona, tamaño y tipo del sistema instalado. En promedio, un sistema solar bien dimensionado puede reducir tu factura eléctrica entre un 50% y 90%. Un termotanque solar puede reducir el costo de calentar agua en 70-80%. Con sistemas de baterías, el ahorro puede ser aún mayor. A largo plazo, considerando que estos sistemas duran 25-30 años y las tarifas eléctricas tienden a aumentar, el ahorro acumulado puede superar varias veces la inversión inicial.",
+        
+        "¿qué es un termotanque solar?": 
+            "Un termotanque solar es un sistema que utiliza la energía del sol para calentar agua sin consumir electricidad o gas. Consta de colectores solares (donde el agua o un fluido caloportador se calienta) y un tanque aislado térmicamente para almacenar el agua caliente. Existen dos tipos principales: circulación natural (termosifón) donde el agua circula por diferencia de densidad, y circulación forzada que usa una pequeña bomba. Son muy eficientes, pudiendo reducir hasta un 80% del consumo energético para calentar agua y tienen una vida útil de 15-20 años con mínimo mantenimiento.",
+            
+        "¿qué sistema de energía renovable es más económico?": 
+            "El sistema de energía renovable más económico en términos de inversión inicial suele ser el termotanque solar, con costos desde $800-1,500 USD para una familia pequeña. Ofrece un excelente retorno de inversión (2-4 años) al reducir significativamente el consumo para calentar agua. Los paneles solares fotovoltaicos tienen una inversión inicial mayor ($3,000-9,000 USD para sistemas residenciales), pero generan electricidad para todos tus equipos con retornos de inversión de 4-7 años. Los sistemas eólicos domésticos suelen tener costos similares a los solares pero requieren condiciones de viento específicas. La opción más económica para tu caso específico dependerá de tu consumo, ubicación y necesidades particulares.",
+            
+        "¿para qué sirve el simulador?": 
+            "El simulador de EcoSmart Advisor te permite probar diferentes configuraciones de sistemas de energía renovable sin compromiso y ver resultados personalizados en tiempo real. Puedes ajustar parámetros como la capacidad de paneles solares, potencia de aerogeneradores o tamaño de termotanques, y obtener estimaciones de generación energética, ahorro económico e impacto ambiental. El simulador toma en cuenta tu ubicación geográfica, consumo energético y datos climáticos locales para brindarte resultados precisos. Es una herramienta ideal para explorar opciones antes de decidirte por una inversión específica."
+    }
+    
+    # Verificar si la pregunta es una de las preguntas de ejemplo o muy similar
+    for ejemplo, respuesta in preguntas_ejemplo.items():
+        if pregunta_limpia == ejemplo.lower() or pregunta_limpia in ejemplo.lower() or ejemplo.lower() in pregunta_limpia:
+            print(f"Coincidencia con pregunta de ejemplo: {ejemplo}")
+            return respuesta
+    
     # Creamos un sistema de puntuación para seleccionar la mejor respuesta
     mejores_coincidencias = {}
     
     # Verificar primero en la base de conocimiento para palabras clave exactas
     for palabra_clave, respuesta in CONOCIMIENTO_BASE.items():
-        if palabra_clave == pregunta_limpia:  # Coincidencia exacta
+        if palabra_clave.lower() == pregunta_limpia:  # Coincidencia exacta
+            print(f"Coincidencia exacta con palabra clave: {palabra_clave}")
             return respuesta
-        elif palabra_clave in pregunta_limpia:  # Palabras clave en la pregunta
-            palabras_clave = palabra_clave.split()
+        elif palabra_clave.lower() in pregunta_limpia:  # Palabras clave en la pregunta
+            palabras_clave = palabra_clave.lower().split()
             palabras_pregunta = pregunta_limpia.split()
             # Calcular un puntaje basado en la proporción de palabras que coinciden
             proporcion = len(palabras_clave) / len(palabras_pregunta) if palabras_pregunta else 0
             mejores_coincidencias[palabra_clave] = proporcion * 0.8  # 80% de confianza si contiene la palabra clave
+            print(f"Coincidencia parcial con: {palabra_clave}, puntuación: {proporcion * 0.8}")
     
     # Buscar coincidencias en palabras relacionadas
     palabras_pregunta = pregunta_limpia.split()
@@ -146,31 +175,40 @@ def generar_respuesta_chatbot(pregunta):
                     mejores_coincidencias[tema] += 0.6  # Aumentar la puntuación si ya existe
                 else:
                     mejores_coincidencias[tema] = 0.6  # 60% de confianza
+                print(f"Coincidencia exacta con término relacionado: {termino_relacionado} -> {tema}")
             elif termino_relacionado in palabra:  # El término relacionado es parte de la palabra
                 if tema in mejores_coincidencias:
                     mejores_coincidencias[tema] += 0.3  # Aumentar la puntuación
                 else:
                     mejores_coincidencias[tema] = 0.3  # 30% de confianza
+                print(f"Coincidencia parcial con término relacionado: {termino_relacionado} -> {tema}")
     
     # Determinar la mejor coincidencia
     mejor_tema = None
-    mejor_puntuacion = 0.4  # Umbral mínimo para considerar una coincidencia como relevante
+    mejor_puntuacion = 0.3  # Bajamos el umbral mínimo para considerar una coincidencia como relevante
+    
+    print(f"Mejores coincidencias: {mejores_coincidencias}")
     
     for tema, puntuacion in mejores_coincidencias.items():
         if puntuacion > mejor_puntuacion:
             mejor_puntuacion = puntuacion
             mejor_tema = tema
     
+    print(f"Mejor tema encontrado: {mejor_tema}, puntuación: {mejor_puntuacion if mejor_tema else 0}")
+    
     # Si encontramos una buena coincidencia, devolver la respuesta correspondiente
     if mejor_tema:
+        print(f"Retornando respuesta para: {mejor_tema}")
         return CONOCIMIENTO_BASE[mejor_tema]
     
     # Verificar casos especiales
     respuesta_especial = verificar_casos_especiales(pregunta_limpia)
     if respuesta_especial:
+        print("Encontrada respuesta especial")
         return respuesta_especial
     
     # Si no hay coincidencias suficientemente buenas, generar una respuesta genérica
+    print("No se encontraron coincidencias suficientes, utilizando respuesta genérica")
     return respuesta_generica(pregunta_limpia)
 
 def get_palabras_relacionadas():
@@ -191,6 +229,8 @@ def get_palabras_relacionadas():
         "solar": "paneles solares",
         "sol": "paneles solares",
         "techo": "paneles solares",
+        "fotovoltaicos": "paneles solares",
+        "solares": "paneles solares",
         
         # Eólico
         "aerogenerador": "energía eólica",
@@ -199,6 +239,10 @@ def get_palabras_relacionadas():
         "molino": "energía eólica",
         "eolica": "energía eólica",
         "eolico": "energía eólica",
+        "aerogeneradores": "energía eólica",
+        "turbinas": "energía eólica",
+        "eólico": "energía eólica",
+        "eólica": "energía eólica",
         
         # Termotanque
         "calentador": "termotanque solar",
@@ -207,6 +251,10 @@ def get_palabras_relacionadas():
         "calefon": "termotanque solar",
         "termica": "termotanque solar",
         "termico": "termotanque solar",
+        "calentadores": "termotanque solar",
+        "termotanques": "termotanque solar",
+        "térmico": "termotanque solar",
+        "térmica": "termotanque solar",
         
         # Baterías
         "bateria": "baterías",
@@ -215,6 +263,8 @@ def get_palabras_relacionadas():
         "almacenar": "baterías",
         "litio": "baterías",
         "powerwall": "baterías",
+        "baterias": "baterías",
+        "acumuladores": "baterías",
         
         # Retorno de inversión
         "inversion": "retorno inversión",
@@ -222,10 +272,104 @@ def get_palabras_relacionadas():
         "amortizar": "retorno inversión",
         "roi": "retorno inversión",
         "rentabilidad": "retorno inversión",
-        "rentable": "retorno inversión",
-        "pagar": "retorno inversión",
+        "rendimiento": "retorno inversión",
+        "ganancia": "retorno inversión",
+        
+        # Costos e instalación
+        "costo": "costos",
+        "precio": "costos",
+        "vale": "costos",
+        "valen": "costos",
+        "cuesta": "costos",
+        "cuestan": "costos",
+        "instalacion": "instalación",
+        "instalar": "instalación",
+        "montar": "instalación",
+        "colocar": "instalación",
+        
+        # Mantenimiento
+        "limpiar": "mantenimiento",
+        "limpieza": "mantenimiento",
+        "cuidado": "mantenimiento",
+        "servicio": "mantenimiento",
+        "reparar": "mantenimiento",
+        "duracion": "mantenimiento",
+        "duran": "mantenimiento",
+        
+        # Ahorro
+        "ahorrar": "ahorro",
+        "economizar": "ahorro",
+        "economico": "ahorro",
+        "economica": "ahorro",
+        "beneficio": "ahorro",
+        "conviene": "ahorro",
+        
+        # Impacto ambiental
+        "ambiente": "impacto ambiental",
+        "ecologico": "impacto ambiental",
+        "ecologia": "impacto ambiental",
+        "contaminacion": "impacto ambiental",
+        "carbono": "impacto ambiental",
+        "co2": "impacto ambiental",
+        "sostenible": "impacto ambiental",
+        "planeta": "impacto ambiental",
+        "huella": "impacto ambiental",
+        "verde": "impacto ambiental",
+        "emisiones": "impacto ambiental",
+        
+        # Funcionalidades de la aplicación
+        "diagnóstico": "funcionalidades",
+        "diagnostico": "funcionalidades",
+        "simulador": "funcionalidades",
+        "simulacion": "funcionalidades",
+        "chatbot": "funcionalidades",
+        "asistente": "funcionalidades",
+        "herramienta": "funcionalidades",
+        "app": "funcionalidades",
+        "aplicación": "funcionalidades",
+        "aplicacion": "funcionalidades",
         "cuanto tarda": "retorno inversión",
         "años": "retorno inversión",
+        
+        # Simulador
+        "simular": "simulador",
+        "simulacion": "simulador",
+        "probar": "simulador",
+        "escenario": "simulador",
+        "ajustar": "simulador",
+        "calcular": "simulador",
+        "usar simulador": "simulador",
+        "como usar el simulador": "simulador",
+        "para que sirve el simulador": "simulador",
+        
+        # Diagnóstico
+        "diagnosticar": "diagnóstico",
+        "analizar": "diagnóstico",
+        "recomendar": "diagnóstico",
+        "recomendacion": "diagnóstico",
+        "que me conviene": "diagnóstico",
+        "que sistema": "diagnóstico",
+        "para que sirve el diagnostico": "diagnóstico",
+        "como funciona el diagnostico": "diagnóstico",
+        
+        # Ubicación
+        "coordenadas": "ubicación",
+        "direccion": "ubicación", 
+        "geolocalizacion": "ubicación",
+        "mapa": "ubicación",
+        "provincia": "ubicación",
+        "ciudad": "ubicación",
+        "seleccionar ubicacion": "ubicación",
+        "como elegir ubicacion": "ubicación",
+        
+        # Chatbot
+        "asistente": "chatbot",
+        "bot": "chatbot",
+        "ayudante": "chatbot",
+        "preguntar": "chatbot",
+        "responder": "chatbot",
+        "para que sirve el chat": "chatbot",
+        "como usar el chat": "chatbot",
         
         # Mantenimiento
         "mantenimiento": "mantenimiento",
@@ -493,6 +637,27 @@ def respuesta_generica(pregunta):
             "más eficientes. Los termotanques solares ofrecen excelente retorno de inversión "
             "para calentar agua. Una evaluación personalizada es la mejor manera de determinar "
             "qué sistema se adapta mejor a tus necesidades."
+        )
+    # Verificar si la pregunta está completamente fuera de tema
+    palabras_energia = ["energia", "energía", "renovable", "solar", "eolica", "eólica", 
+                       "panel", "termotanque", "simulador", "diagnóstico", "ubicación", 
+                       "consumo", "ahorro", "electricidad", "instalación", "viento", "sol"]
+    
+    es_tema_relacionado = False
+    pregunta_lower = pregunta.lower()
+    for palabra in palabras_energia:
+        if palabra in pregunta_lower:
+            es_tema_relacionado = True
+            break
+    
+    if not es_tema_relacionado:
+        return (
+            "Lo siento, pero estoy especializado en temas de energías renovables y "
+            "en el uso de la plataforma EcoSmart Advisor. Por favor, reformula tu "
+            "pregunta para que esté relacionada con estos temas. Puedo ayudarte con "
+            "información sobre paneles solares, energía eólica, termotanques solares, "
+            "o cómo utilizar las diferentes herramientas de nuestra plataforma como "
+            "el diagnóstico y el simulador."
         )
     else:
         return (
