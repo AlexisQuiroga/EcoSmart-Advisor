@@ -434,3 +434,37 @@ footer a:hover {
     50% { transform: translateY(-5px); }
     100% { transform: translateY(0); }
 }
+
+/* Sugerencias de preguntas para el chatbot */
+.chat-suggestions {
+    margin-bottom: 15px;
+}
+
+.chat-suggestion-pill {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f0f7ff;
+    border: 1px solid #d0e3ff;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--primary-green);
+}
+
+.chat-suggestion-pill:hover {
+    background-color: #e0f0ff;
+    border-color: #a0c3ff;
+    transform: translateY(-2px);
+}
+
+/* Animación para nuevas sugerencias */
+@keyframes suggestionAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-suggestion-new {
+    animation: suggestionAppear 0.3s ease-out;
+}

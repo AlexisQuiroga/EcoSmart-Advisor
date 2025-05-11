@@ -109,6 +109,17 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Sugerencias de preguntas iniciales -->
+            <div class="chat-suggestions mt-3">
+                <div class="small text-muted mb-2">Puedes preguntarme sobre:</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Qué sistema de energía renovable me conviene?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Cuánto cuesta instalar paneles solares?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Cuánto puedo ahorrar con energía renovable?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Qué es un termotanque solar?</span>
+                </div>
+            </div>
         </div>
         <div class="floating-chat-input">
             <div class="input-group">
@@ -178,7 +189,95 @@
                     </div>
                 `;
                 floatingChatBody.innerHTML += mensajeHTML;
+                
+                // Después de cada respuesta, mostrar sugerencias de preguntas relacionadas
+                mostrarSugerenciasPreguntas();
+                
                 scrollToBottom();
+            }
+            
+            // Función para mostrar sugerencias de preguntas basadas en el contexto
+            function mostrarSugerenciasPreguntas() {
+                // Sugerencias basadas en categorías comunes
+                const sugerencias = obtenerSugerenciasContextuales();
+                
+                // Crear el HTML para las sugerencias
+                const sugerenciasHTML = `
+                    <div class="chat-suggestions mt-3 chat-suggestion-new">
+                        <div class="small text-muted mb-2">¿Te gustaría saber más sobre:</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${sugerencias.map(sugerencia => 
+                                `<span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">${sugerencia}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                floatingChatBody.innerHTML += sugerenciasHTML;
+                scrollToBottom();
+            }
+            
+            // Función para obtener sugerencias contextuales (rotamos categorías)
+            function obtenerSugerenciasContextuales() {
+                const todasLasSugerencias = {
+                    solar: [
+                        "¿Cuántos paneles solares necesito para mi casa?",
+                        "¿Cómo funcionan los paneles fotovoltaicos?",
+                        "¿Cuál es la vida útil de los paneles solares?"
+                    ],
+                    eolica: [
+                        "¿Funciona la energía eólica en zonas urbanas?",
+                        "¿Qué condiciones de viento se necesitan?",
+                        "¿Es ruidoso un aerogenerador doméstico?"
+                    ],
+                    termotanque: [
+                        "¿En qué se diferencia un termotanque solar de los paneles?",
+                        "¿Qué mantenimiento necesita un termotanque solar?",
+                        "¿Funciona en días nublados?"
+                    ],
+                    economia: [
+                        "¿Existen incentivos fiscales para energías renovables?",
+                        "¿Cuánto tiempo toma recuperar la inversión?",
+                        "¿Puedo vender energía a la red eléctrica?"
+                    ],
+                    instalacion: [
+                        "¿Qué permisos necesito para instalar paneles solares?",
+                        "¿Cuánto tiempo toma la instalación?",
+                        "¿Puedo instalar sistemas renovables en un apartamento?"
+                    ]
+                };
+                
+                // Seleccionar 2-3 categorías aleatorias
+                const categorias = Object.keys(todasLasSugerencias);
+                const categoriasSugeridas = [];
+                
+                while (categoriasSugeridas.length < 2) {
+                    const categoriaAleatoria = categorias[Math.floor(Math.random() * categorias.length)];
+                    if (!categoriasSugeridas.includes(categoriaAleatoria)) {
+                        categoriasSugeridas.push(categoriaAleatoria);
+                    }
+                }
+                
+                // Seleccionar 1 pregunta aleatoria de cada categoría seleccionada
+                const preguntasSugeridas = [];
+                categoriasSugeridas.forEach(categoria => {
+                    const preguntasCategoria = todasLasSugerencias[categoria];
+                    const preguntaAleatoria = preguntasCategoria[Math.floor(Math.random() * preguntasCategoria.length)];
+                    preguntasSugeridas.push(preguntaAleatoria);
+                });
+                
+                // Añadir 1-2 preguntas adicionales específicas
+                preguntasSugeridas.push("¿Qué sistema de energía renovable es más económico?");
+                
+                return preguntasSugeridas;
+            }
+            
+            // Función para seleccionar una pregunta sugerida
+            function seleccionarPreguntaSugerida(elemento) {
+                floatingChatInput.value = elemento.textContent;
+                floatingChatInput.focus();
+                // Opcionalmente, enviar automáticamente
+                // enviarPregunta();
             }
             
             // Función para mostrar indicador de escritura
