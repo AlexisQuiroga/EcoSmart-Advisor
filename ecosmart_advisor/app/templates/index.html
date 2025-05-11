@@ -292,6 +292,23 @@
         window.addEventListener('load', function() {
             initCarousel();
         });
+        
+        // Evento para activar el chatbot desde el botón de la sección de herramientas
+        var botonActivarChatbot = document.getElementById('activarChatbot');
+        if (botonActivarChatbot) {
+            botonActivarChatbot.addEventListener('click', function() {
+                // Mostrar el chatbot flotante
+                var chatbotElement = document.getElementById('floatingChat');
+                if (chatbotElement) {
+                    chatbotElement.classList.add('show');
+                    // Dar el foco al input del chat
+                    var inputChatElement = document.getElementById('floatingChatInput');
+                    if (inputChatElement) {
+                        inputChatElement.focus();
+                    }
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

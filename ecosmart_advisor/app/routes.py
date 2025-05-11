@@ -106,8 +106,10 @@ chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
 
 @chatbot_bp.route('/', methods=['GET'])
 def chatbot():
-    """Muestra la interfaz del chatbot"""
-    return render_template('chatbot.html')
+    """Redirige a la página principal donde está el chatbot flotante"""
+    # Ya no mostramos una página separada para el chatbot
+    from flask import redirect, url_for
+    return redirect(url_for('main.index'))
 
 @chatbot_bp.route('/consulta', methods=['POST'])
 def consulta_chatbot():
