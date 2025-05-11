@@ -40,15 +40,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configuración del mapa
         btnMapa.addEventListener('click', function() {
             mapaModal.show();
-            if (!map) {
-                map = L.map('mapa').setView([-34.6037, -58.3816], 4);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                marker = L.marker([-34.6037, -58.3816], {draggable: true}).addTo(map);
-                
-                map.on('click', function(e) {
-                    marker.setLatLng(e.latlng);
-                });
-            }
+            setTimeout(() => {
+                if (!map) {
+                    map = L.map('mapa').setView([-34.6037, -58.3816], 4);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    marker = L.marker([-34.6037, -58.3816], {draggable: true}).addTo(map);
+                    
+                    map.on('click', function(e) {
+                        marker.setLatLng(e.latlng);
+                    });
+                }
+                map.invalidateSize();
+            }, 250);
         });
 
         // Confirmar ubicación seleccionada en el mapa
