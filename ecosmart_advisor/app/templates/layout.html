@@ -91,18 +91,20 @@
 
     <div class="floating-chat-container" id="floatingChat">
         <div class="floating-chat-header">
-            <div>
+            <h5>
                 <i class="fas fa-robot me-2"></i>
                 <span>Asistente EcoSmart</span>
-            </div>
-            <button type="button" class="btn-close btn-close-white" id="closeChat" aria-label="Close"></button>
+            </h5>
+            <span class="close-chat" id="closeChat">
+                <i class="fas fa-times"></i>
+            </span>
         </div>
         <div class="floating-chat-body" id="floatingChatBody">
             <!-- Mensaje inicial del bot -->
             <div class="chat-message bot">
                 <div class="d-flex align-items-start">
                     <div class="me-2 mt-1">
-                        <i class="fas fa-robot text-info"></i>
+                        <i class="fas fa-robot text-success"></i>
                     </div>
                     <div>
                         <p class="mb-0">¡Hola! Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas sobre energías renovables. ¿En qué puedo ayudarte hoy?</p>
@@ -221,12 +223,20 @@
                         <div class="small text-muted mb-2">¿Te gustaría saber más sobre:</div>
                         <div class="d-flex flex-wrap gap-2">
                             ${sugerencias.map(sugerencia => 
-                                `<span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">${sugerencia}</span>`
+                                `<span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">
+                                    ${sugerencia}
+                                </span>`
                             ).join('')}
                         </div>
                     </div>
                 `;
                 
+                // Eliminar sugerencias anteriores si existen
+                document.querySelectorAll('.chat-suggestion-new').forEach(el => {
+                    el.remove();
+                });
+                
+                // Añadir nuevas sugerencias
                 floatingChatBody.innerHTML += sugerenciasHTML;
                 scrollToBottom();
             }
