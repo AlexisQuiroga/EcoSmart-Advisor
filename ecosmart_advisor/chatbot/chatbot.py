@@ -51,6 +51,14 @@ CONOCIMIENTO_BASE = {
         "para seleccionar tu ubicación exacta. Esto nos permite obtener datos precisos de "
         "radiación solar, velocidad del viento y clima para tu zona específica."
     ),
+    
+    "funcionalidades": (
+        "EcoSmart Advisor ofrece tres herramientas principales: 1) El Diagnóstico analiza tu ubicación, "
+        "consumo y necesidades para recomendarte el sistema de energía renovable más adecuado. "
+        "2) El Simulador te permite experimentar con diferentes configuraciones de sistemas y ver "
+        "resultados personalizados en tiempo real. 3) El Chatbot (donde estás ahora) responde preguntas "
+        "educativas sobre energías renovables y te guía en el uso de la aplicación."
+    ),
     "chatbot": (
         "Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas "
         "sobre energías renovables, ayudarte a entender cómo funcionan las diferentes tecnologías, "
@@ -660,12 +668,25 @@ def respuesta_generica(pregunta):
             "el diagnóstico y el simulador."
         )
     else:
+        # Ofrecer una respuesta más orientativa con ejemplos de preguntas específicas
+        preguntas_sugeridas = [
+            "¿Qué sistema de energía renovable me conviene?",
+            "¿Cuánto cuesta instalar paneles solares?",
+            "¿Qué es un termotanque solar?",
+            "¿Cuánto puedo ahorrar con energía renovable?",
+            "¿Para qué sirve el simulador?"
+        ]
+        
+        # Seleccionar 3 preguntas sugeridas aleatorias
+        import random
+        muestra_preguntas = random.sample(preguntas_sugeridas, min(3, len(preguntas_sugeridas)))
+        
+        sugerencias = "<br>".join([f"• {p}" for p in muestra_preguntas])
+        
         return (
-            "Gracias por tu pregunta sobre energías renovables. Para brindarte "
-            "información más precisa y personalizada, te recomendamos usar "
-            "nuestro diagnóstico inteligente o el simulador, donde podrás obtener "
-            "recomendaciones específicas para tu situación particular. "
-            "También puedes reformular tu pregunta con más detalles sobre "
-            "qué tipo de sistema te interesa (solar, eólico, termotanque solar) "
-            "o qué aspecto específico quieres conocer (costos, rendimiento, instalación)."
+            "Gracias por tu interés en energías renovables. Para darte información "
+            "más precisa, te invito a ser más específico en tu pregunta o a probar "
+            "con alguna de estas consultas:<br><br>" + sugerencias + "<br><br>"
+            "También puedes utilizar nuestro diagnóstico inteligente o el simulador "
+            "para obtener recomendaciones personalizadas según tu ubicación y consumo energético."
         )
