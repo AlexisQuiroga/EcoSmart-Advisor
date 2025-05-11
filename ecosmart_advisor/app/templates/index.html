@@ -20,25 +20,25 @@
 
     
     <div class="col-lg-6 mt-4 mt-lg-0 p-0">
-        <!-- Carrusel con todas las imágenes y el video -->
-        <div id="carouselEnergiasRenovables" class="carousel carousel-dark slide" data-bs-ride="carousel">
-            <!-- Indicadores del carrusel -->
+        <!-- Carrusel con todas las imágenes y el video (reconstruido completamente) -->
+        <div id="carouselEnergiasRenovables" class="carousel slide" data-bs-ride="true">
+            <!-- Indicadores -->
             <div class="carousel-indicators">
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Generador Eólico"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1" aria-label="Aerogenerador Eólico"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2" aria-label="Video Generador Eólico"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3" aria-label="Paneles Solares Vista Aérea"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="4" aria-label="Instalación Paneles"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="5" aria-label="Energía Solar Térmica"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="6" aria-label="Planta de Energía Alternativa"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="4"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="5"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="6"></button>
             </div>
             
-            <!-- Contenido del carrusel -->
+            <!-- Items del carrusel -->
             <div class="carousel-inner">
-                <!-- Diapositiva 1: Generador Eólico con información -->
+                <!-- Diapositiva 1: Generador Eólico con overlay -->
                 <div class="carousel-item active">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" alt="Generador Eólico">
+                        <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
                         <div class="position-absolute bottom-0 end-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">Datos de Energía Eólica</h5>
                             <p class="mb-0 small">Un aerogenerador de 2MW puede abastecer a más de 1,500 hogares por año.</p>
@@ -49,12 +49,12 @@
                 
                 <!-- Diapositiva 2: Imagen de Generador Eólico -->
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" alt="Aerogenerador Eólico">
+                    <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" class="d-block w-100" alt="Aerogenerador Eólico">
                 </div>
                 
                 <!-- Diapositiva 3: Video de Generador Eólico -->
                 <div class="carousel-item">
-                    <video controls autoplay muted loop>
+                    <video controls muted class="d-block w-100">
                         <source src="{{ url_for('static', filename='images/carousel/video generador eolico.mp4') }}" type="video/mp4">
                         Tu navegador no soporta videos HTML5.
                     </video>
@@ -62,22 +62,22 @@
                 
                 <!-- Diapositiva 4: Paneles Solares Vista Aérea -->
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" alt="Paneles Solares Vista Aérea">
+                    <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" class="d-block w-100" alt="Paneles Solares Vista Aérea">
                 </div>
                 
                 <!-- Diapositiva 5: Instalación de Paneles -->
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" alt="Instalación de Paneles Solares">
+                    <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" class="d-block w-100" alt="Instalación de Paneles Solares">
                 </div>
                 
                 <!-- Diapositiva 6: Energía Solar Térmica -->
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/energia-solar-termica.jpg') }}" alt="Energía Solar Térmica">
+                    <img src="{{ url_for('static', filename='images/carousel/energia-solar-termica.jpg') }}" class="d-block w-100" alt="Energía Solar Térmica">
                 </div>
                 
                 <!-- Diapositiva 7: Planta de Energía Alternativa -->
                 <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg') }}" alt="Planta de Energía Alternativa">
+                    <img src="{{ url_for('static', filename='images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg') }}" class="d-block w-100" alt="Planta de Energía Alternativa">
                 </div>
             </div>
             
@@ -204,39 +204,52 @@
 
 {% block extra_js %}
 <script>
-    // Aseguramos que el carrusel funcione correctamente
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializa el carrusel con opciones personalizadas
+    // Función para inicializar el carrusel
+    function initCarousel() {
         var carouselElement = document.getElementById('carouselEnergiasRenovables');
         
-        if (carouselElement) {
-            var carousel = new bootstrap.Carousel(carouselElement, {
-                interval: 4000,        // Cambia cada 4 segundos
-                pause: 'hover',        // Pausa al pasar el cursor
-                ride: 'carousel',      // Inicia automáticamente
-                wrap: true,            // Vuelve al principio al final
-                keyboard: true         // Permite navegación con teclado
-            });
-            
-            // Log para debug
-            console.log('Carrusel inicializado correctamente');
-            
-            // Eventos para verificar funcionamiento
-            carouselElement.addEventListener('slide.bs.carousel', function(e) {
-                console.log('Cambiando a diapositiva: ' + e.to);
-            });
-            
-            // Verificar navegación manual
-            document.querySelector('.carousel-control-next').addEventListener('click', function() {
-                console.log('Botón siguiente clickeado');
-            });
-            
-            document.querySelector('.carousel-control-prev').addEventListener('click', function() {
-                console.log('Botón anterior clickeado');
-            });
-        } else {
+        if (!carouselElement) {
             console.error('No se encontró el elemento del carrusel');
+            return;
         }
+        
+        // Destruir cualquier instancia previa para evitar conflictos
+        var carouselInstance = bootstrap.Carousel.getInstance(carouselElement);
+        if (carouselInstance) {
+            carouselInstance.dispose();
+        }
+        
+        // Crear nueva instancia con configuración óptima
+        var carousel = new bootstrap.Carousel(carouselElement, {
+            interval: 5000,        // Intervalo entre diapositivas (5 segundos)
+            pause: false,          // No pausar al hover (puede causar problemas)
+            wrap: true,            // Ciclo continuo
+            touch: true,           // Soporte para touch
+            keyboard: true,        // Soporte para teclado
+            ride: true             // Iniciar automáticamente al cargar
+        });
+        
+        console.log('Carrusel inicializado correctamente');
+        
+        // Detector para cambios de diapositiva
+        carouselElement.addEventListener('slide.bs.carousel', function(e) {
+            console.log('Cambiando a diapositiva: ' + e.to);
+        });
+        
+        // Forzar transición a la primera diapositiva para activar el carrusel
+        setTimeout(function() {
+            carousel.to(0);
+        }, 500);
+    }
+    
+    // Inicializar cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        initCarousel();
+        
+        // También inicializar cuando la ventana esté completamente cargada
+        window.addEventListener('load', function() {
+            initCarousel();
+        });
     });
 </script>
 {% endblock %}
