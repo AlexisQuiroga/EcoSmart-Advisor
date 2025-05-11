@@ -35,21 +35,21 @@
             
             <!-- Items del carrusel -->
             <div class="carousel-inner">
-                <!-- Diapositiva 1: Generador Eólico con overlay -->
+                <!-- Diapositiva 1: Generador Eólico sin overlay -->
                 <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                </div>
+                
+                <!-- Diapositiva 2: Imagen de Generador Eólico con overlay para tapar marca de agua -->
+                <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                        <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" class="d-block w-100" alt="Aerogenerador Eólico">
                         <div class="position-absolute bottom-0 end-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">Datos de Energía Eólica</h5>
                             <p class="mb-0 small">Un aerogenerador de 2MW puede abastecer a más de 1,500 hogares por año.</p>
                             <p class="mb-0 small mt-2">Retorno energético de 20-25 veces la energía usada en fabricación.</p>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Diapositiva 2: Imagen de Generador Eólico -->
-                <div class="carousel-item">
-                    <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" class="d-block w-100" alt="Aerogenerador Eólico">
                 </div>
                 
                 <!-- Diapositiva 3: Video de Generador Eólico -->
