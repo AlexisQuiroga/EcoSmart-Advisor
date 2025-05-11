@@ -21,9 +21,30 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                                 <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
-                                       placeholder="Ciudad o coordenadas (ej. Buenos Aires o -34.6,-58.4)" required>
+                                       placeholder="Buscar ubicación..." required>
+                                <button type="button" class="btn btn-outline-secondary" id="btnMapa">
+                                    <i class="fas fa-map"></i>
+                                </button>
                             </div>
-                            <div class="form-text">Ingrese su ciudad o coordenadas para análisis climático</div>
+                            <div id="sugerenciasUbicacion" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                            <div id="mapaModal" class="modal fade" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Seleccionar Ubicación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="mapa" style="height: 400px;"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            <button type="button" class="btn btn-primary" id="confirmarUbicacion">Confirmar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text">Ingrese su ubicación o selecciónela en el mapa</div>
                         </div>
                         
                         <div class="mb-3">

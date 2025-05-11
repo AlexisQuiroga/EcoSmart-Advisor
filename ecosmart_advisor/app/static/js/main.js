@@ -1,3 +1,65 @@
+
+// Configuración del mapa y autocompletado
+document.addEventListener('DOMContentLoaded', function() {
+    const ubicacionInput = document.getElementById('ubicacion');
+    const sugerenciasDiv = document.getElementById('sugerenciasUbicacion');
+    const btnMapa = document.getElementById('btnMapa');
+    const mapaModal = new bootstrap.Modal(document.getElementById('mapaModal'));
+    let map, marker;
+
+    if (ubicacionInput) {
+        // Autocompletado
+        ubicacionInput.addEventListener('input', async function() {
+            const texto = this.value;
+            if (texto.length < 3) {
+                sugerenciasDiv.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${texto}`);
+                const data = await response.json();
+                
+                sugerenciasDiv.innerHTML = '';
+                data.slice(0, 5).forEach(lugar => {
+                    const div = document.createElement('div');
+                    div.className = 'list-group-item list-group-item-action';
+                    div.textContent = lugar.display_name;
+                    div.addEventListener('click', () => {
+                        ubicacionInput.value = lugar.display_name;
+                        sugerenciasDiv.style.display = 'none';
+                    });
+                    sugerenciasDiv.appendChild(div);
+                });
+                sugerenciasDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error en autocompletado:', error);
+            }
+        });
+
+        // Configuración del mapa
+        btnMapa.addEventListener('click', function() {
+            mapaModal.show();
+            if (!map) {
+                map = L.map('mapa').setView([-34.6037, -58.3816], 4);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                marker = L.marker([-34.6037, -58.3816], {draggable: true}).addTo(map);
+                
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                });
+            }
+        });
+
+        // Confirmar ubicación seleccionada en el mapa
+        document.getElementById('confirmarUbicacion').addEventListener('click', function() {
+            const latlng = marker.getLatLng();
+            ubicacionInput.value = `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
+            mapaModal.hide();
+        });
+    }
+});
+
 /**
  * EcoSmart Advisor - JavaScript principal
  * Funcionalidades generales para todas las páginas
