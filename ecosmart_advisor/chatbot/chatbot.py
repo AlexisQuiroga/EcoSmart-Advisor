@@ -78,6 +78,7 @@ def generar_respuesta_chatbot(pregunta):
     """
     Genera una respuesta educativa a preguntas sobre energía renovable
     usando un sistema basado en coincidencia de palabras clave y reglas.
+    También devuelve sugerencias de preguntas relacionadas.
     
     Args:
         pregunta (str): Pregunta del usuario
@@ -92,18 +93,229 @@ def generar_respuesta_chatbot(pregunta):
     # Limpiar y preparar la pregunta
     pregunta_limpia = pregunta.lower().strip()
     
-    # Verificar primero en la base de conocimiento para palabras clave
+    # Creamos un sistema de puntuación para seleccionar la mejor respuesta
+    mejores_coincidencias = {}
+    
+    # Verificar primero en la base de conocimiento para palabras clave exactas
     for palabra_clave, respuesta in CONOCIMIENTO_BASE.items():
-        if palabra_clave in pregunta_limpia:
+        if palabra_clave == pregunta_limpia:  # Coincidencia exacta
             return respuesta
+        elif palabra_clave in pregunta_limpia:  # Palabras clave en la pregunta
+            palabras_clave = palabra_clave.split()
+            palabras_pregunta = pregunta_limpia.split()
+            # Calcular un puntaje basado en la proporción de palabras que coinciden
+            proporcion = len(palabras_clave) / len(palabras_pregunta) if palabras_pregunta else 0
+            mejores_coincidencias[palabra_clave] = proporcion * 0.8  # 80% de confianza si contiene la palabra clave
     
-    # Si no hay coincidencia exacta, buscar palabras relacionadas
-    respuesta_relacionada = buscar_respuesta_relacionada(pregunta_limpia)
-    if respuesta_relacionada:
-        return respuesta_relacionada
+    # Buscar coincidencias en palabras relacionadas
+    palabras_pregunta = pregunta_limpia.split()
+    palabras_relacionadas_puntuacion = {}
     
-    # Si no hay coincidencias, generar una respuesta genérica
+    for palabra in palabras_pregunta:
+        for termino_relacionado, tema in get_palabras_relacionadas().items():
+            if palabra == termino_relacionado:  # Coincidencia exacta con un término relacionado
+                if tema in mejores_coincidencias:
+                    mejores_coincidencias[tema] += 0.6  # Aumentar la puntuación si ya existe
+                else:
+                    mejores_coincidencias[tema] = 0.6  # 60% de confianza
+            elif termino_relacionado in palabra:  # El término relacionado es parte de la palabra
+                if tema in mejores_coincidencias:
+                    mejores_coincidencias[tema] += 0.3  # Aumentar la puntuación
+                else:
+                    mejores_coincidencias[tema] = 0.3  # 30% de confianza
+    
+    # Determinar la mejor coincidencia
+    mejor_tema = None
+    mejor_puntuacion = 0.4  # Umbral mínimo para considerar una coincidencia como relevante
+    
+    for tema, puntuacion in mejores_coincidencias.items():
+        if puntuacion > mejor_puntuacion:
+            mejor_puntuacion = puntuacion
+            mejor_tema = tema
+    
+    # Si encontramos una buena coincidencia, devolver la respuesta correspondiente
+    if mejor_tema:
+        return CONOCIMIENTO_BASE[mejor_tema]
+    
+    # Verificar casos especiales
+    respuesta_especial = verificar_casos_especiales(pregunta_limpia)
+    if respuesta_especial:
+        return respuesta_especial
+    
+    # Si no hay coincidencias suficientemente buenas, generar una respuesta genérica
     return respuesta_generica(pregunta_limpia)
+
+def get_palabras_relacionadas():
+    """
+    Devuelve un diccionario de palabras relacionadas con los temas de la base de conocimiento
+    
+    Returns:
+        dict: Diccionario de palabras relacionadas a términos en la base de conocimiento
+    """
+    # Mapeo de palabras relacionadas a términos en la base de conocimiento
+    return {
+        # Solar
+        "fotovoltaica": "paneles solares",
+        "fotovoltaico": "paneles solares",
+        "placa": "paneles solares",
+        "placas": "paneles solares",
+        "panel": "paneles solares",
+        "solar": "paneles solares",
+        "sol": "paneles solares",
+        "techo": "paneles solares",
+        
+        # Eólico
+        "aerogenerador": "energía eólica",
+        "turbina": "energía eólica",
+        "viento": "energía eólica",
+        "molino": "energía eólica",
+        "eolica": "energía eólica",
+        "eolico": "energía eólica",
+        
+        # Termotanque
+        "calentador": "termotanque solar",
+        "termotanque": "termotanque solar",
+        "agua caliente": "termotanque solar",
+        "calefon": "termotanque solar",
+        "termica": "termotanque solar",
+        "termico": "termotanque solar",
+        
+        # Baterías
+        "bateria": "baterías",
+        "acumulador": "baterías",
+        "almacenamiento": "baterías",
+        "almacenar": "baterías",
+        "litio": "baterías",
+        "powerwall": "baterías",
+        
+        # Retorno de inversión
+        "inversion": "retorno inversión",
+        "recuperar": "retorno inversión",
+        "amortizar": "retorno inversión",
+        "roi": "retorno inversión",
+        "rentabilidad": "retorno inversión",
+        "rentable": "retorno inversión",
+        "pagar": "retorno inversión",
+        "cuanto tarda": "retorno inversión",
+        "años": "retorno inversión",
+        
+        # Mantenimiento
+        "mantenimiento": "mantenimiento",
+        "limpiar": "mantenimiento",
+        "limpieza": "mantenimiento",
+        "duración": "mantenimiento",
+        "dura": "mantenimiento",
+        "vida util": "mantenimiento",
+        "reparar": "mantenimiento",
+        "cuidados": "mantenimiento",
+        
+        # Incentivos
+        "incentivo": "incentivos",
+        "subsidio": "incentivos",
+        "fiscal": "incentivos",
+        "impuesto": "incentivos",
+        "descuento": "incentivos",
+        "financiamiento": "incentivos",
+        "credito": "incentivos",
+        "prestamo": "incentivos",
+        "ayuda": "incentivos",
+        
+        # Instalación
+        "instalar": "instalación",
+        "montar": "instalación",
+        "colocar": "instalación",
+        "implementar": "instalación",
+        "instalacion": "instalación",
+        "proceso": "instalación",
+        "requisitos": "instalación",
+        
+        # Ahorro
+        "ahorro": "ahorro",
+        "ahorrar": "ahorro",
+        "factura": "ahorro",
+        "consumo": "ahorro",
+        "economizar": "ahorro",
+        "reducir": "ahorro",
+        "reduccion": "ahorro",
+        "bajar": "ahorro",
+        "euro": "ahorro",
+        "dinero": "ahorro",
+        
+        # Impacto ambiental
+        "ambiental": "impacto ambiental",
+        "huella": "impacto ambiental",
+        "carbono": "impacto ambiental",
+        "co2": "impacto ambiental",
+        "contaminacion": "impacto ambiental",
+        "contaminar": "impacto ambiental",
+        "medioambiente": "impacto ambiental",
+        "ambiente": "impacto ambiental",
+        "ecologia": "impacto ambiental",
+        "ecologico": "impacto ambiental",
+        "planeta": "impacto ambiental"
+    }
+
+def verificar_casos_especiales(pregunta):
+    """
+    Verifica casos especiales o preguntas compuestas que requieren respuestas más específicas
+    
+    Args:
+        pregunta (str): Pregunta limpia del usuario
+        
+    Returns:
+        str: Respuesta específica o None si no aplica
+    """
+    # Preguntas sobre comparación y recomendaciones
+    if any(palabra in pregunta for palabra in ["mejor", "recomendable", "recomiendas", "conviene"]) and "sistema" in pregunta:
+        return ("La mejor opción depende de varios factores específicos de tu ubicación y necesidades. "
+                "En general, los sistemas solares fotovoltaicos son los más versátiles y fáciles de instalar "
+                "en entornos urbanos. Los sistemas eólicos son más efectivos en zonas rurales o costeras "
+                "con buena exposición al viento. Los termotanques solares ofrecen excelente relación "
+                "costo-beneficio para calentar agua. Te recomendamos usar nuestro diagnóstico "
+                "personalizado para obtener una recomendación específica para tu caso.")
+    
+    # Funcionamiento de paneles solares
+    if "como funciona" in pregunta and any(palabra in pregunta for palabra in ["panel", "solar", "fotovoltaico"]):
+        return ("Los paneles solares fotovoltaicos funcionan convirtiendo la luz solar en electricidad "
+                "mediante el efecto fotoeléctrico. Están compuestos por células solares de silicio que, "
+                "al recibir fotones de luz, generan un flujo de electrones (corriente continua). "
+                "Esta electricidad luego pasa por un inversor que la convierte en corriente alterna "
+                "utilizable en el hogar. La eficiencia típica de conversión está entre 15-22% "
+                "dependiendo de la tecnología del panel.")
+                
+    # Funcionamiento de energía eólica
+    if "como funciona" in pregunta and any(palabra in pregunta for palabra in ["eolica", "eolico", "viento", "aerogenerador", "turbina"]):
+        return ("Los aerogeneradores convierten la energía cinética del viento en electricidad. "
+                "Las palas del aerogenerador, diseñadas aerodinámicamente, giran cuando el viento "
+                "las empuja, moviendo un eje conectado a un generador. Este generador transforma "
+                "la energía mecánica en electricidad. Los sistemas domésticos suelen comenzar a "
+                "generar con vientos de 3-4 m/s y alcanzan su máxima potencia con vientos de "
+                "11-15 m/s, dependiendo del modelo.")
+    
+    # Preguntas sobre costos específicos
+    if any(palabra in pregunta for palabra in ["costo", "precio", "vale", "valor"]):
+        if "panel" in pregunta or "solar" in pregunta or "fotovoltaico" in pregunta:
+            return ("El costo de los sistemas solares fotovoltaicos varía según la capacidad y calidad. "
+                    "Una instalación doméstica típica (3-5 kW) puede costar entre $1,000-$1,500 por kW "
+                    "instalado, incluyendo paneles, inversor y montaje. Para una casa promedio, esto "
+                    "significa una inversión de $3,000-$7,500. Los sistemas premium con baterías y "
+                    "monitorización avanzada pueden costar más. Sin embargo, con los incentivos y el "
+                    "ahorro en la factura eléctrica, el retorno de inversión suele ser de 4-8 años.")
+        elif "eolico" in pregunta or "eolica" in pregunta or "viento" in pregunta:
+            return ("Los sistemas eólicos domésticos tienen un costo aproximado de $2,000-$5,000 por "
+                    "kW de capacidad instalada. Un sistema pequeño (1-3 kW) para una casa puede costar "
+                    "entre $3,000-$15,000 dependiendo del fabricante, altura de la torre y equipamiento "
+                    "adicional. Son generalmente más costosos que los sistemas solares para la misma "
+                    "capacidad, pero pueden ser más eficientes en ubicaciones con buen recurso eólico.")
+        elif "termotanque" in pregunta or "agua caliente" in pregunta:
+            return ("Un sistema de termotanque solar para una familia típica (150-300 litros) "
+                    "cuesta entre $800-$2,500 dependiendo de la capacidad, tipo de colector (plano o "
+                    "tubos de vacío) y si incluye un sistema de respaldo. Son una de las inversiones "
+                    "en energía renovable con mejor retorno, generalmente entre 2-5 años, especialmente "
+                    "si sustituyen a sistemas eléctricos de calentamiento de agua.")
+    
+    # No se encontró un caso especial
+    return None
 
 def buscar_respuesta_relacionada(pregunta):
     """
