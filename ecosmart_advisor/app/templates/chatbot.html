@@ -1,0 +1,323 @@
+{% extends "layout.html" %}
+
+{% block title %}Chatbot Educativo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-height: 500px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #f8f9fa;
+    }
+    
+    .chat-message {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.375rem;
+    }
+    
+    .chat-message.user {
+        background-color: #e9f5ff;
+        margin-right: 1.5rem;
+        margin-left: 0.5rem;
+        border-top-right-radius: 0;
+    }
+    
+    .chat-message.bot {
+        background-color: #f0f7f0;
+        margin-left: 1.5rem;
+        margin-right: 0.5rem;
+        border-top-left-radius: 0;
+    }
+    
+    .chat-input-container {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: #fff;
+    }
+    
+    .chat-input {
+        border: none;
+        resize: none;
+    }
+    
+    .chat-input:focus {
+        box-shadow: none;
+        outline: none;
+    }
+    
+    .suggestions-container {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+    }
+    
+    .suggestion-chip {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin-right: 0.5rem;
+        background-color: #f0f0f0;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .suggestion-chip:hover {
+        background-color: #e0e0e0;
+    }
+    
+    .typing-indicator {
+        display: inline-block;
+    }
+    
+    .typing-indicator span {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #198754;
+        margin-right: 3px;
+        animation: typing 1s infinite ease-in-out;
+    }
+    
+    .typing-indicator span:nth-child(1) {
+        animation-delay: 0s;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+        margin-right: 0;
+    }
+    
+    @keyframes typing {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-robot me-2"></i>Chatbot Educativo sobre Energías Renovables</h2>
+            </div>
+            <div class="card-body p-4">
+                <p class="lead mb-4">Haz preguntas sobre energías renovables, sistemas fotovoltaicos, eólicos, termotanques solares o cualquier duda relacionada.</p>
+                
+                <!-- Contenedor del chat -->
+                <div class="chat-container p-3 mb-3" id="chatContainer">
+                    <!-- Mensaje inicial del bot -->
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-info"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">¡Hola! Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas sobre energías renovables. ¿En qué puedo ayudarte hoy?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sugerencias de preguntas -->
+                <div class="suggestions-container mb-3">
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Qué energía renovable me conviene más?</div>
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Cuánto cuesta un sistema solar?</div>
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Cuánto ahorro con paneles solares?</div>
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Qué mantenimiento necesitan?</div>
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Qué es un termotanque solar?</div>
+                    <div class="suggestion-chip" onclick="seleccionarPregunta(this)">¿Qué incentivos existen?</div>
+                </div>
+                
+                <!-- Formulario de entrada -->
+                <div class="chat-input-container p-2">
+                    <div class="input-group">
+                        <textarea class="form-control chat-input" id="preguntaInput" rows="2" placeholder="Escribe tu pregunta aquí..."></textarea>
+                        <button class="btn btn-info" type="button" id="enviarBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-text mt-2">
+                    <i class="fas fa-info-circle me-1"></i>Para preguntas específicas sobre tu caso, utiliza el <a href="{{ url_for('diagnostico.diagnostico') }}">diagnóstico personalizado</a>.
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3 class="h5 mb-3">Temas populares</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-solar-panel text-warning me-2"></i>Energía Solar</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Tipos de paneles solares</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Eficiencia de paneles solares</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Instalación de paneles solares</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-wind text-primary me-2"></i>Energía Eólica</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Requisitos para instalar eólica</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Aerogeneradores para hogar</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Velocidad mínima de viento</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-leaf text-success me-2"></i>Sostenibilidad</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Impacto ambiental</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Huella de carbono</a></li>
+                            <li><a href="#" onclick="seleccionarPregunta(this)">Reciclaje de componentes</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chatContainer = document.getElementById('chatContainer');
+    const preguntaInput = document.getElementById('preguntaInput');
+    const enviarBtn = document.getElementById('enviarBtn');
+    
+    // Función para agregar mensaje del usuario
+    function agregarMensajeUsuario(texto) {
+        const mensajeHTML = `
+            <div class="chat-message user">
+                <div class="d-flex align-items-start">
+                    <div>
+                        <p class="mb-0">${texto}</p>
+                    </div>
+                    <div class="ms-2 mt-1">
+                        <i class="fas fa-user text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatContainer.innerHTML += mensajeHTML;
+        scrollToBottom();
+    }
+    
+    // Función para agregar mensaje del bot
+    function agregarMensajeBot(texto) {
+        const mensajeHTML = `
+            <div class="chat-message bot">
+                <div class="d-flex align-items-start">
+                    <div class="me-2 mt-1">
+                        <i class="fas fa-robot text-info"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0">${texto}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatContainer.innerHTML += mensajeHTML;
+        scrollToBottom();
+    }
+    
+    // Función para mostrar indicador de escritura
+    function mostrarEscribiendo() {
+        const mensajeHTML = `
+            <div class="chat-message bot" id="typing-message">
+                <div class="d-flex align-items-start">
+                    <div class="me-2 mt-1">
+                        <i class="fas fa-robot text-info"></i>
+                    </div>
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatContainer.innerHTML += mensajeHTML;
+        scrollToBottom();
+    }
+    
+    // Función para quitar indicador de escritura
+    function quitarEscribiendo() {
+        const typingMessage = document.getElementById('typing-message');
+        if (typingMessage) {
+            typingMessage.remove();
+        }
+    }
+    
+    // Función para hacer scroll hasta el final del chat
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    // Función para enviar pregunta al servidor
+    function enviarPregunta() {
+        const pregunta = preguntaInput.value.trim();
+        if (pregunta === '') return;
+        
+        // Agregar mensaje del usuario al chat
+        agregarMensajeUsuario(pregunta);
+        
+        // Limpiar input
+        preguntaInput.value = '';
+        
+        // Mostrar indicador de escritura
+        mostrarEscribiendo();
+        
+        // Enviar pregunta a la API
+        fetch('{{ url_for('chatbot.consulta_chatbot') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pregunta: pregunta }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Quitar indicador de escritura
+            quitarEscribiendo();
+            
+            // Agregar respuesta del bot
+            agregarMensajeBot(data.respuesta);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            quitarEscribiendo();
+            agregarMensajeBot('Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, inténtalo de nuevo más tarde.');
+        });
+    }
+    
+    // Función para seleccionar pregunta sugerida
+    function seleccionarPregunta(elemento) {
+        preguntaInput.value = elemento.textContent || elemento.innerText;
+        preguntaInput.focus();
+    }
+    
+    // Event listeners
+    enviarBtn.addEventListener('click', enviarPregunta);
+    
+    preguntaInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            enviarPregunta();
+        }
+    });
+    
+    // Asegurarse de que el chat esté en el fondo al cargar
+    document.addEventListener('DOMContentLoaded', scrollToBottom);
+</script>
+{% endblock %}

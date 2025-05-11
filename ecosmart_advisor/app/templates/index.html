@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold text-success">Asesoramiento Inteligente en Energías Renovables</h1>
+        <p class="lead">EcoSmart Advisor te ayuda a elegir el sistema de energía renovable perfecto para tu hogar o negocio con análisis personalizados basados en IA.</p>
+        <div class="mt-4">
+            <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-success btn-lg me-2">
+                <i class="fas fa-solar-panel me-2"></i>Comenzar Diagnóstico
+            </a>
+            <a href="{{ url_for('simulador.simulador') }}" class="btn btn-outline-success btn-lg">
+                <i class="fas fa-calculator me-2"></i>Usar Simulador
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6 mt-4 mt-lg-0">
+        <div class="card bg-dark text-white">
+            <div class="card-body p-4 text-center">
+                <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+                    <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_2znxgjyt.json" 
+                        background="transparent" speed="1" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" loop autoplay>
+                    </lottie-player>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="py-5 bg-white rounded-3 shadow-sm mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Nuestras Herramientas</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-search-location fa-3x text-success"></i>
+                        </div>
+                        <h3 class="h5">Diagnóstico Inteligente</h3>
+                        <p class="text-muted">Analiza tu ubicación, consumo y preferencias para recomendarte el sistema de energía renovable ideal.</p>
+                        <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-outline-success btn-sm">Iniciar Diagnóstico</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="h5">Simulador Avanzado</h3>
+                        <p class="text-muted">Simula diferentes escenarios y configuraciones para visualizar rendimiento y retorno de inversión.</p>
+                        <a href="{{ url_for('simulador.simulador') }}" class="btn btn-outline-primary btn-sm">Probar Simulador</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-robot fa-3x text-info"></i>
+                        </div>
+                        <h3 class="h5">Chatbot Educativo</h3>
+                        <p class="text-muted">Resuelve tus dudas sobre energías renovables con nuestro asistente virtual basado en IA.</p>
+                        <a href="{{ url_for('chatbot.chatbot') }}" class="btn btn-outline-info btn-sm">Hacer Preguntas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="text-center mb-4">¿Por qué elegir energías renovables?</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-success bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-wallet text-success fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Ahorro económico</h3>
+                    </div>
+                    <p class="mb-0">Reduce tu factura energética hasta un 70% y obtén retorno de inversión en 4-8 años.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-primary bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-tree text-primary fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Impacto ambiental</h3>
+                    </div>
+                    <p class="mb-0">Reduce tu huella de carbono equivalente a plantar cientos de árboles cada año.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-warning bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-plug text-warning fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Independencia</h3>
+                    </div>
+                    <p class="mb-0">Genera tu propia energía y reduce tu dependencia de la red eléctrica y combustibles fósiles.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-info bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-home text-info fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Valor inmobiliario</h3>
+                    </div>
+                    <p class="mb-0">Aumenta el valor de tu propiedad con instalaciones modernas de energía renovable.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-light p-5 rounded-3 shadow-sm mb-5">
+    <div class="text-center mb-4">
+        <h2>¿Listo para comenzar?</h2>
+        <p class="lead">Obtén tu diagnóstico personalizado en menos de 5 minutos</p>
+    </div>
+    <div class="d-flex justify-content-center">
+        <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-success btn-lg px-5">
+            <i class="fas fa-lightbulb me-2"></i>Comenzar Ahora
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+{% endblock %}

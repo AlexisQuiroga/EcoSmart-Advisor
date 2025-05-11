@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+
+{% block title %}Resultados del Diagnóstico{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        {% if not recomendacion.opciones %}
+        <div class="alert alert-warning">
+            <h4 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>No se encontraron opciones viables</h4>
+            <p>{{ recomendacion.mensaje }}</p>
+            <hr>
+            <p class="mb-0">
+                Le recomendamos considerar:
+                <ul>
+                    <li>Aumentar la superficie disponible para la instalación</li>
+                    <li>Implementar medidas de eficiencia energética para reducir su consumo</li>
+                    <li>Explorar otras tecnologías renovables complementarias</li>
+                </ul>
+                <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-outline-warning mt-2">
+                    <i class="fas fa-redo me-2"></i>Intentar nuevamente
+                </a>
+            </p>
+        </div>
+        {% else %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-check-circle me-2"></i>Resultados de su Diagnóstico</h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-success bg-success bg-opacity-10 border-success">
+                    <i class="fas fa-lightbulb me-2"></i>{{ recomendacion.mensaje }}
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Datos de entrada</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Ubicación:</th>
+                                <td>{{ clima.ubicacion }}</td>
+                            </tr>
+                            <tr>
+                                <th>Tipo de vivienda:</th>
+                                <td>{{ datos.tipo_vivienda|replace('_', ' ')|capitalize }}</td>
+                            </tr>
+                            <tr>
+                                <th>Consumo mensual:</th>
+                                <td>{{ datos.consumo_mensual }} kWh</td>
+                            </tr>
+                            <tr>
+                                <th>Superficie disponible:</th>
+                                <td>{{ datos.superficie_disponible }} m²</td>
+                            </tr>
+                            <tr>
+                                <th>Objetivo principal:</th>
+                                <td>{{ datos.objetivo|capitalize }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Condiciones climáticas</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <th><i class="fas fa-sun me-2 text-warning"></i>Radiación solar:</th>
+                                <td>{{ clima.radiacion_solar }} kWh/m²/día</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-wind me-2 text-primary"></i>Velocidad del viento:</th>
+                                <td>{{ clima.velocidad_viento }} m/s</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-temperature-high me-2 text-danger"></i>Temperatura promedio:</th>
+                                <td>{{ clima.temperatura_promedio }}°C</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <h3 class="h5 mb-3">Mejor opción recomendada</h3>
+                <div class="card mb-4 bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3 mb-md-0">
+                                {% if recomendacion.principal.tipo == 'solar' %}
+                                <i class="fas fa-solar-panel fa-4x text-warning mb-3"></i>
+                                <h4>Sistema Solar Fotovoltaico</h4>
+                                {% elif recomendacion.principal.tipo == 'eolica' %}
+                                <i class="fas fa-wind fa-4x text-primary mb-3"></i>
+                                <h4>Sistema Eólico</h4>
+                                {% elif recomendacion.principal.tipo == 'termotanque_solar' %}
+                                <i class="fas fa-shower fa-4x text-info mb-3"></i>
+                                <h4>Termotanque Solar</h4>
+                                {% endif %}
+                                <div class="d-flex justify-content-center">
+                                    <div class="text-center">
+                                        <div class="progress" style="height: 8px; width: 100px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ recomendacion.principal.cobertura }}%"></div>
+                                        </div>
+                                        <div class="mt-2 fw-bold">{{ recomendacion.principal.cobertura|round|int }}% de cobertura</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h5>Detalles técnicos</h5>
+                                <div class="row">
+                                    {% if recomendacion.principal.tipo == 'solar' %}
+                                    <div class="col-sm-6">
+                                        <p><strong>Potencia instalable:</strong> {{ recomendacion.principal.detalle.potencia_instalable }} kWp</p>
+                                        <p><strong>Generación mensual:</strong> {{ recomendacion.principal.generacion_mensual }} kWh</p>
+                                        <p><strong>Superficie paneles:</strong> {{ recomendacion.principal.detalle.superficie_paneles }} m²</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p><strong>Cantidad paneles:</strong> {{ recomendacion.principal.detalle.cantidad_paneles|round|int }}</p>
+                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
+                                    </div>
+                                    {% elif recomendacion.principal.tipo == 'eolica' %}
+                                    <div class="col-sm-6">
+                                        <p><strong>Potencia instalable:</strong> {{ recomendacion.principal.detalle.potencia_instalable }} kW</p>
+                                        <p><strong>Generación mensual:</strong> {{ recomendacion.principal.generacion_mensual }} kWh</p>
+                                        <p><strong>Factor de viabilidad:</strong> {{ recomendacion.principal.detalle.factor_viabilidad * 100 }}%</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p><strong>Velocidad mínima:</strong> {{ recomendacion.principal.detalle.velocidad_minima }} m/s</p>
+                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
+                                    </div>
+                                    {% elif recomendacion.principal.tipo == 'termotanque_solar' %}
+                                    <div class="col-sm-6">
+                                        <p><strong>Consumo agua caliente:</strong> {{ recomendacion.principal.detalle.consumo_agua_caliente }} L/día</p>
+                                        <p><strong>Energía aportada:</strong> {{ recomendacion.principal.detalle.energia_aportada }} kWh/día</p>
+                                        <p><strong>Ahorro mensual:</strong> {{ recomendacion.principal.generacion_mensual }} kWh</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p><strong>Personas abastecidas:</strong> {{ recomendacion.principal.detalle.personas }}</p>
+                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end mt-3">
+                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ recomendacion.principal.tipo }}" class="btn btn-outline-success">
+                                        <i class="fas fa-calculator me-2"></i>Simular ajustes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if recomendacion.combinaciones %}
+                <h3 class="h5 mb-3">Combinaciones recomendadas</h3>
+                
+                <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+                    {% for combinacion in recomendacion.combinaciones %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary bg-opacity-10">
+                                <h5 class="mb-0 card-title">Combinación: {{ combinacion.cobertura|round|int }}% de cobertura</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>{{ combinacion.detalle }}</p>
+                                
+                                <div class="d-flex align-items-center mb-3">
+                                    {% for tipo in combinacion.tipos %}
+                                    <div class="me-3 text-center">
+                                        {% if tipo == 'solar' %}
+                                        <i class="fas fa-solar-panel fa-2x text-warning mb-2"></i>
+                                        <div>Solar</div>
+                                        {% elif tipo == 'eolica' %}
+                                        <i class="fas fa-wind fa-2x text-primary mb-2"></i>
+                                        <div>Eólica</div>
+                                        {% elif tipo == 'termotanque_solar' %}
+                                        <i class="fas fa-shower fa-2x text-info mb-2"></i>
+                                        <div>Termotanque</div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="progress mb-3" style="height: 10px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ combinacion.cobertura }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if recomendacion.opciones|length > 1 %}
+                <h3 class="h5 mb-3">Todas las opciones viables</h3>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sistema</th>
+                                <th>Cobertura</th>
+                                <th>Generación mensual</th>
+                                <th>Ahorro anual est.</th>
+                                <th>Impacto ambiental</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opcion in recomendacion.opciones %}
+                            <tr>
+                                <td>
+                                    {% if opcion.tipo == 'solar' %}
+                                    <i class="fas fa-solar-panel text-warning me-2"></i>Solar fotovoltaico
+                                    {% elif opcion.tipo == 'eolica' %}
+                                    <i class="fas fa-wind text-primary me-2"></i>Eólico
+                                    {% elif opcion.tipo == 'termotanque_solar' %}
+                                    <i class="fas fa-shower text-info me-2"></i>Termotanque solar
+                                    {% endif %}
+                                </td>
+                                <td>{{ opcion.cobertura|round|int }}%</td>
+                                <td>{{ opcion.generacion_mensual }} kWh</td>
+                                <td>${{ opcion.ahorro_anual|round|int }}</td>
+                                <td>{{ opcion.impacto_ambiental|round|int }} kg CO₂</td>
+                                <td>
+                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ opcion.tipo }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-calculator"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>Estas recomendaciones son estimaciones basadas en datos promedio. 
+                    Para una evaluación más precisa, consulte con un instalador cualificado.
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-2"></i>Nuevo diagnóstico
+                    </a>
+                    <a href="{{ url_for('chatbot.chatbot') }}" class="btn btn-primary">
+                        <i class="fas fa-question-circle me-2"></i>Hacer preguntas
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

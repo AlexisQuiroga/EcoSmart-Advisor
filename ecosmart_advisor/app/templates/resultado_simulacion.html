@@ -1,0 +1,468 @@
+{% extends "layout.html" %}
+
+{% block title %}Resultados de la Simulación{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metric-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        border: 8px solid;
+    }
+    
+    .metric-circle-primary {
+        border-color: rgba(13, 110, 253, 0.2);
+        color: #0d6efd;
+    }
+    
+    .metric-circle-success {
+        border-color: rgba(25, 135, 84, 0.2);
+        color: #198754;
+    }
+    
+    .metric-circle-warning {
+        border-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .metric-circle-info {
+        border-color: rgba(13, 202, 240, 0.2);
+        color: #0dcaf0;
+    }
+    
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0">
+                    {% if resultados.tipo == 'solar' %}
+                    <i class="fas fa-solar-panel me-2"></i>Simulación de Sistema Solar Fotovoltaico
+                    {% elif resultados.tipo == 'eolica' %}
+                    <i class="fas fa-wind me-2"></i>Simulación de Sistema Eólico
+                    {% elif resultados.tipo == 'termotanque_solar' %}
+                    <i class="fas fa-shower me-2"></i>Simulación de Termotanque Solar
+                    {% endif %}
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h3 class="h5 mb-3">Parámetros de entrada</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Tipo de sistema:</th>
+                                <td>
+                                    {% if resultados.tipo == 'solar' %}
+                                    Sistema solar fotovoltaico
+                                    {% elif resultados.tipo == 'eolica' %}
+                                    Sistema eólico
+                                    {% elif resultados.tipo == 'termotanque_solar' %}
+                                    Termotanque solar
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Capacidad:</th>
+                                <td>
+                                    {% if resultados.tipo == 'solar' %}
+                                    {{ resultados.capacidad_kw }} kWp
+                                    {% elif resultados.tipo == 'eolica' %}
+                                    {{ resultados.capacidad_kw }} kW
+                                    {% elif resultados.tipo == 'termotanque_solar' %}
+                                    {{ resultados.capacidad_litros|int }} L
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ubicación:</th>
+                                <td>
+                                    {% if resultados.tipo == 'solar' %}
+                                    {{ resultados.detalle_clima.ubicacion }}
+                                    {% elif resultados.tipo == 'eolica' %}
+                                    {{ resultados.detalle_viento.ubicacion }}
+                                    {% elif resultados.tipo == 'termotanque_solar' %}
+                                    {{ resultados.detalle_clima.ubicacion }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Consumo mensual:</th>
+                                <td>{{ datos.consumo_mensual }} kWh</td>
+                            </tr>
+                            {% if resultados.tipo == 'solar' %}
+                            <tr>
+                                <th>Radiación solar:</th>
+                                <td>{{ resultados.detalle_clima.radiacion_solar }} kWh/m²/día</td>
+                            </tr>
+                            {% elif resultados.tipo == 'eolica' %}
+                            <tr>
+                                <th>Velocidad viento:</th>
+                                <td>{{ resultados.detalle_viento.velocidad_viento }} m/s</td>
+                            </tr>
+                            {% elif resultados.tipo == 'termotanque_solar' %}
+                            <tr>
+                                <th>Radiación solar:</th>
+                                <td>{{ resultados.detalle_clima.radiacion_solar }} kWh/m²/día</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row row-cols-2 g-3">
+                            <div class="col">
+                                <div class="metric-circle metric-circle-primary">
+                                    <div class="metric-value">{{ resultados.cobertura|round|int }}%</div>
+                                    <div class="metric-label">Cobertura</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="metric-circle metric-circle-success">
+                                    <div class="metric-value">${{ resultados.ahorro_anual_usd|round|int }}</div>
+                                    <div class="metric-label">Ahorro anual</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="metric-circle metric-circle-warning">
+                                    <div class="metric-value">{{ resultados.generacion_mensual|round|int }}</div>
+                                    <div class="metric-label">kWh mensuales</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="metric-circle metric-circle-info">
+                                    {% if resultados.retorno_inversion_anos %}
+                                    <div class="metric-value">{{ resultados.retorno_inversion_anos|round(1) }}</div>
+                                    <div class="metric-label">Años retorno</div>
+                                    {% else %}
+                                    <div class="metric-value">-</div>
+                                    <div class="metric-label">Retorno N/D</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">Detalles técnicos</h3>
+                            </div>
+                            <div class="card-body">
+                                {% if resultados.tipo == 'solar' %}
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><strong>Superficie:</strong> {{ resultados.superficie_m2 }} m²</p>
+                                        <p><strong>Factor de capacidad:</strong> {{ resultados.factor_capacidad }}%</p>
+                                        <p><strong>Eficiencia sistema:</strong> {{ resultados.eficiencia_sistema }}%</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Generación diaria:</strong> {{ resultados.generacion_diaria }} kWh</p>
+                                        <p><strong>Generación anual:</strong> {{ resultados.generacion_anual }} kWh</p>
+                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                    </div>
+                                </div>
+                                {% elif resultados.tipo == 'eolica' %}
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><strong>Factor de capacidad:</strong> {{ resultados.factor_capacidad }}%</p>
+                                        <p><strong>Factor de viabilidad:</strong> {{ resultados.factor_viabilidad * 100 }}%</p>
+                                        <p><strong>Velocidad arranque:</strong> {{ resultados.detalle_viento.velocidad_arranque }} m/s</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Generación diaria:</strong> {{ resultados.generacion_diaria }} kWh</p>
+                                        <p><strong>Generación anual:</strong> {{ resultados.generacion_anual }} kWh</p>
+                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                    </div>
+                                </div>
+                                {% elif resultados.tipo == 'termotanque_solar' %}
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><strong>Personas abastecidas:</strong> {{ resultados.personas_abastecidas|round(1) }}</p>
+                                        <p><strong>Energía diaria necesaria:</strong> {{ resultados.energia_necesaria_diaria|round(1) }} kWh</p>
+                                        <p><strong>Energía diaria aportada:</strong> {{ resultados.energia_aportada_diaria|round(1) }} kWh</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Eficiencia:</strong> {{ resultados.eficiencia }}%</p>
+                                        <p><strong>Ahorro anual:</strong> {{ resultados.generacion_anual }} kWh</p>
+                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">Impacto ambiental</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><strong>CO₂ evitado:</strong> {{ resultados.metricas_ambientales.co2_evitado }} kg/año</p>
+                                        <p><strong>Árboles equivalentes:</strong> {{ resultados.metricas_ambientales.arboles_equivalentes }} árboles</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Km no recorridos en auto:</strong> {{ resultados.metricas_ambientales.km_auto_equivalentes }} km</p>
+                                        <p><strong>Ahorro en 25 años:</strong> {{ (resultados.metricas_ambientales.co2_evitado * 25)|round }} kg CO₂</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="progress" style="height: 24px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {{ resultados.cobertura }}%" 
+                                             aria-valuenow="{{ resultados.cobertura }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ resultados.cobertura|round|int }}% cobertura
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">Proyección financiera</h3>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary active" id="btn-5-years">5 años</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btn-10-years">10 años</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="btn-25-years">25 años</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="h5 mb-3">Ajustar simulación</h3>
+                        <form id="ajusteForm" method="POST" action="{{ url_for('simulador.simulador') }}">
+                            <input type="hidden" name="ubicacion" value="{{ datos.ubicacion }}">
+                            <input type="hidden" name="consumo_mensual" value="{{ datos.consumo_mensual }}">
+                            <input type="hidden" name="tipo_instalacion" value="{{ datos.tipo_instalacion }}">
+                            
+                            <div class="row align-items-end">
+                                <div class="col-md-5">
+                                    <label for="capacidad" class="form-label">Ajustar capacidad:</label>
+                                    <div class="input-group">
+                                        <input type="range" class="form-range" id="capacidadRange" 
+                                               min="{{ resultados.capacidad_kw * 0.5 if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros * 0.5 }}" 
+                                               max="{{ resultados.capacidad_kw * 2 if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros * 2 }}" 
+                                               step="{{ 0.1 if resultados.tipo != 'termotanque_solar' else 10 }}" 
+                                               value="{{ resultados.capacidad_kw if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="capacidad" name="capacidad" 
+                                               min="{{ resultados.capacidad_kw * 0.5 if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros * 0.5 }}" 
+                                               max="{{ resultados.capacidad_kw * 2 if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros * 2 }}" 
+                                               step="{{ 0.1 if resultados.tipo != 'termotanque_solar' else 10 }}" 
+                                               value="{{ resultados.capacidad_kw if resultados.tipo != 'termotanque_solar' else resultados.capacidad_litros }}">
+                                        <span class="input-group-text">
+                                            {% if resultados.tipo == 'solar' %}kWp{% elif resultados.tipo == 'eolica' %}kW{% else %}L{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-sync-alt me-2"></i>Recalcular
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Esta simulación es una aproximación basada en modelos matemáticos 
+                    y datos climáticos. Los valores reales pueden variar según factores específicos de la instalación,
+                    condiciones meteorológicas y otros factores locales.
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('simulador.simulador') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-2"></i>Nueva simulación
+                    </a>
+                    <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-success">
+                        <i class="fas fa-clipboard-check me-2"></i>Obtener diagnóstico completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Sincronizar input number y range
+    document.getElementById('capacidadRange').addEventListener('input', function() {
+        document.getElementById('capacidad').value = this.value;
+    });
+    
+    document.getElementById('capacidad').addEventListener('input', function() {
+        document.getElementById('capacidadRange').value = this.value;
+    });
+    
+    // Gráfico financiero
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos para el gráfico
+        const costoInicial = {{ resultados.costo_estimado }};
+        const ahorroAnual = {{ resultados.ahorro_anual_usd }};
+        const ahorroMensual = {{ resultados.ahorro_mensual_usd }};
+        const inflacionEnergia = 0.05; // 5% de incremento anual en costos de energía
+        
+        // Preparar datos para diferentes plazos
+        function generarDatosFinancieros(years) {
+            const labels = [];
+            const inversionAcumulada = [costoInicial];
+            const ahorroAcumulado = [0];
+            const balanceNeto = [-costoInicial];
+            
+            for (let i = 1; i <= years; i++) {
+                labels.push('Año ' + i);
+                inversionAcumulada.push(costoInicial);
+                
+                // El ahorro aumenta cada año debido a la inflación del costo de energía
+                const ahorroAjustado = ahorroAnual * Math.pow(1 + inflacionEnergia, i - 1);
+                ahorroAcumulado.push(ahorroAcumulado[i - 1] + ahorroAjustado);
+                
+                balanceNeto.push(ahorroAcumulado[i] - inversionAcumulada[i]);
+            }
+            
+            return {
+                labels: ['Inicio', ...labels],
+                inversionAcumulada,
+                ahorroAcumulado,
+                balanceNeto
+            };
+        }
+        
+        // Crear gráfico inicial (5 años)
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        let datosFinancieros = generarDatosFinancieros(5);
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datosFinancieros.labels,
+                datasets: [
+                    {
+                        label: 'Inversión acumulada',
+                        data: datosFinancieros.inversionAcumulada,
+                        borderColor: 'rgba(220, 53, 69, 0.8)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    },
+                    {
+                        label: 'Ahorro acumulado',
+                        data: datosFinancieros.ahorroAcumulado,
+                        borderColor: 'rgba(25, 135, 84, 0.8)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        borderWidth: 2,
+                        fill: true
+                    },
+                    {
+                        label: 'Balance neto',
+                        data: datosFinancieros.balanceNeto,
+                        borderColor: 'rgba(13, 110, 253, 0.8)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + Math.round(context.raw);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Cambiar entre diferentes plazos
+        document.getElementById('btn-5-years').addEventListener('click', function() {
+            actualizarGrafico(5);
+            setActiveButton(this);
+        });
+        
+        document.getElementById('btn-10-years').addEventListener('click', function() {
+            actualizarGrafico(10);
+            setActiveButton(this);
+        });
+        
+        document.getElementById('btn-25-years').addEventListener('click', function() {
+            actualizarGrafico(25);
+            setActiveButton(this);
+        });
+        
+        function actualizarGrafico(years) {
+            datosFinancieros = generarDatosFinancieros(years);
+            
+            chart.data.labels = datosFinancieros.labels;
+            chart.data.datasets[0].data = datosFinancieros.inversionAcumulada;
+            chart.data.datasets[1].data = datosFinancieros.ahorroAcumulado;
+            chart.data.datasets[2].data = datosFinancieros.balanceNeto;
+            
+            chart.update();
+        }
+        
+        function setActiveButton(button) {
+            document.querySelectorAll('.btn-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

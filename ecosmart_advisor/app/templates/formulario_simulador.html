@@ -1,0 +1,203 @@
+{% extends "layout.html" %}
+
+{% block title %}Simulador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-chart-line me-2"></i>Simulador de Energía Renovable</h2>
+            </div>
+            <div class="card-body p-4">
+                <p class="lead mb-4">Ajuste los parámetros para simular diferentes escenarios y evaluar el rendimiento de los sistemas de energía renovable.</p>
+                
+                <form id="simuladorForm" method="POST" action="{{ url_for('simulador.simulador') }}">
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Tipo de instalación</h3>
+                        
+                        <div class="mb-3">
+                            <label for="tipo_instalacion" class="form-label">Sistema a simular <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipo_instalacion" name="tipo_instalacion" required>
+                                <option value="" selected disabled>Seleccione una opción</option>
+                                <option value="solar">Sistema solar fotovoltaico</option>
+                                <option value="eolica">Sistema eólico</option>
+                                <option value="termotanque_solar">Termotanque solar</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="capacidad" class="form-label">Capacidad del sistema <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tachometer-alt"></i></span>
+                                <input type="number" class="form-control" id="capacidad" name="capacidad" 
+                                       placeholder="Capacidad del sistema" min="0.1" step="0.1" required>
+                                <span class="input-group-text unidad-capacidad">kW</span>
+                            </div>
+                            <div class="form-text" id="texto-capacidad">Potencia nominal del sistema en kilowatts (kW)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Ubicación y consumo</h3>
+                        
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                                       placeholder="Ciudad o coordenadas (ej. Buenos Aires o -34.6,-58.4)" required>
+                            </div>
+                            <div class="form-text">Ingrese su ciudad o coordenadas para análisis climático</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="consumo_mensual" class="form-label">Consumo Eléctrico Mensual <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-bolt"></i></span>
+                                <input type="number" class="form-control" id="consumo_mensual" name="consumo_mensual" 
+                                       placeholder="Consumo promedio mensual" min="1" required>
+                                <span class="input-group-text">kWh</span>
+                            </div>
+                            <div class="form-text">Consumo mensual para calcular porcentaje de cobertura</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play me-2"></i>Ejecutar Simulación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="h5 mb-3">Guía del simulador</h3>
+                <div class="accordion" id="acordeonGuia">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseSolar">
+                                <i class="fas fa-solar-panel me-2 text-warning"></i>Sistema solar fotovoltaico
+                            </button>
+                        </h2>
+                        <div id="colapseSolar" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
+                            <div class="accordion-body">
+                                <p><strong>Capacidad:</strong> La potencia nominal del sistema en kilowatts pico (kWp). Valores típicos:</p>
+                                <ul>
+                                    <li>1-3 kWp: Viviendas pequeñas o consumo bajo</li>
+                                    <li>3-6 kWp: Viviendas medianas con consumo estándar</li>
+                                    <li>6-10 kWp: Viviendas grandes o consumo elevado</li>
+                                    <li>>10 kWp: Comercios, oficinas o industrias pequeñas</li>
+                                </ul>
+                                <p>Un panel estándar tiene alrededor de 330-400Wp, por lo que un sistema de 3kWp equivale a 8-9 paneles aproximadamente.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseEolico">
+                                <i class="fas fa-wind me-2 text-primary"></i>Sistema eólico
+                            </button>
+                        </h2>
+                        <div id="colapseEolico" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
+                            <div class="accordion-body">
+                                <p><strong>Capacidad:</strong> La potencia nominal del aerogenerador en kilowatts (kW). Valores típicos:</p>
+                                <ul>
+                                    <li>0.4-1 kW: Sistemas muy pequeños para aplicaciones específicas</li>
+                                    <li>1-3 kW: Sistemas residenciales pequeños</li>
+                                    <li>3-10 kW: Sistemas residenciales grandes o rurales</li>
+                                    <li>>10 kW: Aplicaciones comerciales o agrícolas</li>
+                                </ul>
+                                <p>Los sistemas eólicos domésticos son más efectivos en zonas rurales o costeras con velocidades de viento promedio superiores a 4 m/s.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseTermotanque">
+                                <i class="fas fa-shower me-2 text-info"></i>Termotanque solar
+                            </button>
+                        </h2>
+                        <div id="colapseTermotanque" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
+                            <div class="accordion-body">
+                                <p><strong>Capacidad:</strong> El volumen del tanque en litros (L). Valores típicos:</p>
+                                <ul>
+                                    <li>100-150 L: 1-2 personas</li>
+                                    <li>150-200 L: 2-3 personas</li>
+                                    <li>200-300 L: 3-5 personas</li>
+                                    <li>>300 L: Más de 5 personas o aplicaciones comerciales</li>
+                                </ul>
+                                <p>Los termotanques solares pueden cubrir entre 60-90% de las necesidades de agua caliente sanitaria durante el año, dependiendo de la radiación solar de la zona.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cambiar unidades y texto según el tipo de instalación
+    document.getElementById('tipo_instalacion').addEventListener('change', function() {
+        const tipoSeleccionado = this.value;
+        const unidadCapacidad = document.querySelector('.unidad-capacidad');
+        const textoCapacidad = document.getElementById('texto-capacidad');
+        const inputCapacidad = document.getElementById('capacidad');
+        
+        if (tipoSeleccionado === 'solar') {
+            unidadCapacidad.textContent = 'kWp';
+            textoCapacidad.textContent = 'Potencia nominal del sistema en kilowatts pico (kWp)';
+            inputCapacidad.placeholder = 'Ej: 3.0 para una instalación residencial típica';
+            inputCapacidad.min = 0.5;
+            inputCapacidad.step = 0.1;
+        } 
+        else if (tipoSeleccionado === 'eolica') {
+            unidadCapacidad.textContent = 'kW';
+            textoCapacidad.textContent = 'Potencia nominal del aerogenerador en kilowatts (kW)';
+            inputCapacidad.placeholder = 'Ej: 1.5 para una pequeña turbina doméstica';
+            inputCapacidad.min = 0.4;
+            inputCapacidad.step = 0.1;
+        } 
+        else if (tipoSeleccionado === 'termotanque_solar') {
+            unidadCapacidad.textContent = 'L';
+            textoCapacidad.textContent = 'Capacidad del tanque en litros (L)';
+            inputCapacidad.placeholder = 'Ej: 200 para una familia de 3-4 personas';
+            inputCapacidad.min = 80;
+            inputCapacidad.step = 10;
+        }
+    });
+    
+    // Validaciones del formulario
+    document.getElementById('simuladorForm').addEventListener('submit', function(event) {
+        let tipoInstalacion = document.getElementById('tipo_instalacion').value;
+        let capacidad = document.getElementById('capacidad').value;
+        let ubicacion = document.getElementById('ubicacion').value;
+        let consumo = document.getElementById('consumo_mensual').value;
+        
+        if (!tipoInstalacion || !capacidad || !ubicacion || !consumo) {
+            event.preventDefault();
+            alert('Por favor complete todos los campos obligatorios marcados con *');
+        }
+    });
+    
+    // Obtener tipo de instalación de la URL si viene del diagnóstico
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tipoParam = urlParams.get('tipo');
+        
+        if (tipoParam) {
+            const selectTipo = document.getElementById('tipo_instalacion');
+            selectTipo.value = tipoParam;
+            
+            // Disparar el evento change manualmente
+            const event = new Event('change');
+            selectTipo.dispatchEvent(event);
+        }
+    });
+</script>
+{% endblock %}

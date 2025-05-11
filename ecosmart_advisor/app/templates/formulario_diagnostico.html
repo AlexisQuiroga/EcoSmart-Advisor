@@ -1,0 +1,189 @@
+{% extends "layout.html" %}
+
+{% block title %}Diagnóstico{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h2 class="h4 mb-0"><i class="fas fa-clipboard-check me-2"></i>Diagnóstico de Energía Renovable</h2>
+            </div>
+            <div class="card-body p-4">
+                <p class="lead mb-4">Complete el siguiente formulario para recibir una recomendación personalizada del sistema de energía renovable más adecuado para su caso.</p>
+                
+                <form id="diagnosticoForm" method="POST" action="{{ url_for('diagnostico.diagnostico') }}">
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Ubicación y Vivienda</h3>
+                        
+                        <div class="mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                                       placeholder="Ciudad o coordenadas (ej. Buenos Aires o -34.6,-58.4)" required>
+                            </div>
+                            <div class="form-text">Ingrese su ciudad o coordenadas para análisis climático</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipo_vivienda" class="form-label">Tipo de Vivienda <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipo_vivienda" name="tipo_vivienda" required>
+                                <option value="" selected disabled>Seleccione una opción</option>
+                                <option value="casa_pequena">Casa pequeña (hasta 90m²)</option>
+                                <option value="casa_mediana">Casa mediana (90-150m²)</option>
+                                <option value="casa_grande">Casa grande (más de 150m²)</option>
+                                <option value="apartamento">Apartamento</option>
+                                <option value="oficina">Oficina</option>
+                                <option value="comercio">Local comercial</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Consumo Energético</h3>
+                        
+                        <div class="mb-3">
+                            <label for="consumo_mensual" class="form-label">Consumo Eléctrico Mensual (kWh)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-bolt"></i></span>
+                                <input type="number" class="form-control" id="consumo_mensual" name="consumo_mensual" 
+                                       placeholder="Consumo promedio mensual" min="0">
+                                <span class="input-group-text">kWh</span>
+                            </div>
+                            <div class="form-text">Si no conoce su consumo, déjelo en blanco y lo estimaremos por usted</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Equipos Eléctricos (seleccione todos los que apliquen)</label>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="aire_acondicionado" id="equipo_aire" name="equipos">
+                                        <label class="form-check-label" for="equipo_aire">Aire acondicionado</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="calefaccion_electrica" id="equipo_calefaccion" name="equipos">
+                                        <label class="form-check-label" for="equipo_calefaccion">Calefacción eléctrica</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="bomba_calor" id="equipo_bomba" name="equipos">
+                                        <label class="form-check-label" for="equipo_bomba">Bomba de calor</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="refrigerador" id="equipo_refri" name="equipos">
+                                        <label class="form-check-label" for="equipo_refri">Refrigerador/Congelador</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="lavadora" id="equipo_lavadora" name="equipos">
+                                        <label class="form-check-label" for="equipo_lavadora">Lavadora</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="secadora" id="equipo_secadora" name="equipos">
+                                        <label class="form-check-label" for="equipo_secadora">Secadora</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="lavavajillas" id="equipo_lavavajillas" name="equipos">
+                                        <label class="form-check-label" for="equipo_lavavajillas">Lavavajillas</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="horno_electrico" id="equipo_horno" name="equipos">
+                                        <label class="form-check-label" for="equipo_horno">Horno eléctrico</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="computadoras" id="equipo_computadoras" name="equipos">
+                                        <label class="form-check-label" for="equipo_computadoras">Computadoras (más de 8h/día)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="iluminacion_led" id="equipo_led" name="equipos">
+                                        <label class="form-check-label" for="equipo_led">Iluminación LED</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="iluminacion_tradicional" id="equipo_trad" name="equipos">
+                                        <label class="form-check-label" for="equipo_trad">Iluminación tradicional</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="piscina" id="equipo_piscina" name="equipos">
+                                        <label class="form-check-label" for="equipo_piscina">Piscina (bomba/climatización)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h3 class="h5 mb-3">Instalación Potencial</h3>
+                        
+                        <div class="mb-3">
+                            <label for="superficie_disponible" class="form-label">Superficie Disponible <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-vector-square"></i></span>
+                                <input type="number" class="form-control" id="superficie_disponible" name="superficie_disponible" 
+                                       placeholder="Área disponible para instalación" min="1" required>
+                                <span class="input-group-text">m²</span>
+                            </div>
+                            <div class="form-text">Superficie en techo, terreno u otra área donde podría instalar paneles o equipos</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="objetivo" class="form-label">Objetivo Principal <span class="text-danger">*</span></label>
+                            <select class="form-select" id="objetivo" name="objetivo" required>
+                                <option value="" selected disabled>Seleccione una opción</option>
+                                <option value="ahorro">Maximizar ahorro económico</option>
+                                <option value="ambiental">Minimizar impacto ambiental</option>
+                                <option value="equilibrado">Equilibrio entre ahorro e impacto</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-lightbulb me-2"></i>Generar Recomendación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validaciones del formulario
+    document.getElementById('diagnosticoForm').addEventListener('submit', function(event) {
+        let ubicacion = document.getElementById('ubicacion').value;
+        let tipoVivienda = document.getElementById('tipo_vivienda').value;
+        let superficie = document.getElementById('superficie_disponible').value;
+        let objetivo = document.getElementById('objetivo').value;
+        
+        if (!ubicacion || !tipoVivienda || !superficie || !objetivo) {
+            event.preventDefault();
+            alert('Por favor complete todos los campos obligatorios marcados con *');
+        }
+    });
+</script>
+{% endblock %}
