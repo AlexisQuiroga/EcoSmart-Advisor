@@ -14,6 +14,8 @@
         align-items: center;
         margin: 0 auto;
         border: 8px solid;
+        text-align: center;
+        padding: 10px;
     }
 
     .metric-circle-primary {
@@ -39,12 +41,16 @@
     .metric-value {
         font-size: 1.8rem;
         font-weight: bold;
-        line-height: 1;
+        line-height: 1.2;
+        width: 100%;
+        text-align: center;
     }
 
     .metric-label {
         font-size: 0.8rem;
+        width: 100%;
         text-align: center;
+        margin-top: 5px;
     }
 
     .chart-container {
@@ -135,30 +141,30 @@
                         <div class="row row-cols-2 g-3">
                             <div class="col">
                                 <div class="metric-circle metric-circle-primary">
-                                    <div class="metric-value">{{ resultados.cobertura|round|int }}%</div>
-                                    <div class="metric-label">Cobertura</div>
+                                    <div class="metric-value text-center">{{ resultados.cobertura|round|int }}%</div>
+                                    <div class="metric-label text-center">Cobertura</div>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="metric-circle metric-circle-success">
-                                    <div class="metric-value">USD ${{ resultados.ahorro_anual_usd|round|int }}</div>
-                                    <div class="metric-label">Ahorro anual (USD)</div>
+                                    <div class="metric-value text-center">USD<br>${{ resultados.ahorro_anual_usd|round|int }}</div>
+                                    <div class="metric-label text-center">Ahorro anual (USD)</div>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="metric-circle metric-circle-warning">
-                                    <div class="metric-value">{{ resultados.generacion_mensual|round|int }}</div>
-                                    <div class="metric-label">kWh mensuales</div>
+                                    <div class="metric-value text-center">{{ resultados.generacion_mensual|round|int }}</div>
+                                    <div class="metric-label text-center">kWh mensuales</div>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="metric-circle metric-circle-info">
                                     {% if resultados.retorno_inversion_anos %}
-                                    <div class="metric-value">{{ resultados.retorno_inversion_anos|round(1) }}</div>
-                                    <div class="metric-label">Años retorno</div>
+                                    <div class="metric-value text-center">{{ resultados.retorno_inversion_anos|round(1) }}</div>
+                                    <div class="metric-label text-center">Años retorno</div>
                                     {% else %}
-                                    <div class="metric-value">-</div>
-                                    <div class="metric-label">Retorno N/D</div>
+                                    <div class="metric-value text-center">-</div>
+                                    <div class="metric-label text-center">Retorno N/D</div>
                                     {% endif %}
                                 </div>
                             </div>

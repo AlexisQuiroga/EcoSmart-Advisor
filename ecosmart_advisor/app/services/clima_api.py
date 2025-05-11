@@ -73,6 +73,8 @@ def obtener_datos_por_ciudad(ciudad):
             'velocidad_viento': 3.5,
             'temperatura_promedio': 15,
             'ubicacion': ciudad,
+            'latitud': None,
+            'longitud': None,
             'fuente': 'datos_estimados'
         }
 
