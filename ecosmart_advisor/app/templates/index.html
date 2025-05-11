@@ -20,14 +20,17 @@
 
     
     <div class="col-lg-6 mt-4 mt-lg-0 p-0">
-        <!-- Carrusel simple con Bootstrap 5 -->
+        <!-- Carrusel con todas las imágenes y el video -->
         <div id="carouselEnergiasRenovables" class="carousel carousel-dark slide" data-bs-ride="carousel">
             <!-- Indicadores del carrusel -->
             <div class="carousel-indicators">
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Generador Eólico"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1" aria-label="Paneles Solares"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2" aria-label="Instalación Paneles"></button>
-                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3" aria-label="Energía Solar Térmica"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1" aria-label="Aerogenerador Eólico"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2" aria-label="Video Generador Eólico"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3" aria-label="Paneles Solares Vista Aérea"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="4" aria-label="Instalación Paneles"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="5" aria-label="Energía Solar Térmica"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="6" aria-label="Planta de Energía Alternativa"></button>
             </div>
             
             <!-- Contenido del carrusel -->
@@ -44,19 +47,37 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 2: Paneles Solares Vista Aérea -->
+                <!-- Diapositiva 2: Imagen de Generador Eólico -->
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" alt="Aerogenerador Eólico">
+                </div>
+                
+                <!-- Diapositiva 3: Video de Generador Eólico -->
+                <div class="carousel-item">
+                    <video controls autoplay muted loop>
+                        <source src="{{ url_for('static', filename='images/carousel/video generador eolico.mp4') }}" type="video/mp4">
+                        Tu navegador no soporta videos HTML5.
+                    </video>
+                </div>
+                
+                <!-- Diapositiva 4: Paneles Solares Vista Aérea -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" alt="Paneles Solares Vista Aérea">
                 </div>
                 
-                <!-- Diapositiva 3: Instalación de Paneles -->
+                <!-- Diapositiva 5: Instalación de Paneles -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" alt="Instalación de Paneles Solares">
                 </div>
                 
-                <!-- Diapositiva 4: Energía Solar Térmica -->
+                <!-- Diapositiva 6: Energía Solar Térmica -->
                 <div class="carousel-item">
                     <img src="{{ url_for('static', filename='images/carousel/energia-solar-termica.jpg') }}" alt="Energía Solar Térmica">
+                </div>
+                
+                <!-- Diapositiva 7: Planta de Energía Alternativa -->
+                <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg') }}" alt="Planta de Energía Alternativa">
                 </div>
             </div>
             
