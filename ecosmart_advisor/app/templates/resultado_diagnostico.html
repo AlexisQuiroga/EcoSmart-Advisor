@@ -31,7 +31,7 @@
                 <div class="alert alert-success bg-success bg-opacity-10 border-success">
                     <i class="fas fa-lightbulb me-2"></i>{{ recomendacion.mensaje }}
                 </div>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h3 class="h5 mb-3">Datos de entrada</h3>
@@ -76,7 +76,7 @@
                         </table>
                     </div>
                 </div>
-                
+
                 <h3 class="h5 mb-3">Mejor opción recomendada</h3>
                 <div class="card mb-4 bg-light">
                     <div class="card-body">
@@ -113,7 +113,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Cantidad paneles:</strong> {{ recomendacion.principal.detalle.cantidad_paneles|round|int }}</p>
-                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% elif recomendacion.principal.tipo == 'eolica' %}
@@ -124,7 +124,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Velocidad mínima:</strong> {{ recomendacion.principal.detalle.velocidad_minima }} m/s</p>
-                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% elif recomendacion.principal.tipo == 'termotanque_solar' %}
@@ -135,7 +135,7 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <p><strong>Personas abastecidas:</strong> {{ recomendacion.principal.detalle.personas }}</p>
-                                        <p><strong>Ahorro anual est.:</strong> ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
+                                        <p><strong>Ahorro anual est.:</strong> USD ${{ recomendacion.principal.ahorro_anual|round|int }}</p>
                                         <p><strong>Impacto ambiental:</strong> {{ recomendacion.principal.impacto_ambiental|round|int }} kg CO₂/año</p>
                                     </div>
                                     {% endif %}
@@ -149,10 +149,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 {% if recomendacion.combinaciones %}
                 <h3 class="h5 mb-3">Combinaciones recomendadas</h3>
-                
+
                 <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
                     {% for combinacion in recomendacion.combinaciones %}
                     <div class="col">
@@ -162,7 +162,7 @@
                             </div>
                             <div class="card-body">
                                 <p>{{ combinacion.detalle }}</p>
-                                
+
                                 <div class="d-flex align-items-center mb-3">
                                     {% for tipo in combinacion.tipos %}
                                     <div class="me-3 text-center">
@@ -179,7 +179,7 @@
                                     </div>
                                     {% endfor %}
                                 </div>
-                                
+
                                 <div class="progress mb-3" style="height: 10px;">
                                     <div class="progress-bar bg-success" role="progressbar" 
                                          style="width: {{ combinacion.cobertura }}%"></div>
@@ -190,10 +190,10 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                
+
                 {% if recomendacion.opciones|length > 1 %}
                 <h3 class="h5 mb-3">Todas las opciones viables</h3>
-                
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
@@ -220,7 +220,7 @@
                                 </td>
                                 <td>{{ opcion.cobertura|round|int }}%</td>
                                 <td>{{ opcion.generacion_mensual }} kWh</td>
-                                <td>${{ opcion.ahorro_anual|round|int }}</td>
+                                <td>USD ${{ opcion.ahorro_anual|round|int }}</td>
                                 <td>{{ opcion.impacto_ambiental|round|int }} kg CO₂</td>
                                 <td>
                                     <a href="{{ url_for('simulador.simulador') }}?tipo={{ opcion.tipo }}" class="btn btn-sm btn-outline-primary">
@@ -233,12 +233,12 @@
                     </table>
                 </div>
                 {% endif %}
-                
+
                 <div class="alert alert-info mt-4">
                     <i class="fas fa-info-circle me-2"></i>Estas recomendaciones son estimaciones basadas en datos promedio. 
                     Para una evaluación más precisa, consulte con un instalador cualificado.
                 </div>
-                
+
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ url_for('diagnostico.diagnostico') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-redo me-2"></i>Nuevo diagnóstico

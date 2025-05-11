@@ -15,38 +15,38 @@
         margin: 0 auto;
         border: 8px solid;
     }
-    
+
     .metric-circle-primary {
         border-color: rgba(13, 110, 253, 0.2);
         color: #0d6efd;
     }
-    
+
     .metric-circle-success {
         border-color: rgba(25, 135, 84, 0.2);
         color: #198754;
     }
-    
+
     .metric-circle-warning {
         border-color: rgba(255, 193, 7, 0.2);
         color: #ffc107;
     }
-    
+
     .metric-circle-info {
         border-color: rgba(13, 202, 240, 0.2);
         color: #0dcaf0;
     }
-    
+
     .metric-value {
         font-size: 1.8rem;
         font-weight: bold;
         line-height: 1;
     }
-    
+
     .metric-label {
         font-size: 0.8rem;
         text-align: center;
     }
-    
+
     .chart-container {
         height: 300px;
     }
@@ -165,7 +165,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="card">
@@ -183,7 +183,7 @@
                                     <div class="col-6">
                                         <p><strong>Generación diaria:</strong> {{ resultados.generacion_diaria }} kWh</p>
                                         <p><strong>Generación anual:</strong> {{ resultados.generacion_anual }} kWh</p>
-                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                        <p><strong>Costo estimado:</strong> USD ${{ resultados.costo_estimado|int }}</p>
                                     </div>
                                 </div>
                                 {% elif resultados.tipo == 'eolica' %}
@@ -196,7 +196,7 @@
                                     <div class="col-6">
                                         <p><strong>Generación diaria:</strong> {{ resultados.generacion_diaria }} kWh</p>
                                         <p><strong>Generación anual:</strong> {{ resultados.generacion_anual }} kWh</p>
-                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                        <p><strong>Costo estimado:</strong> USD ${{ resultados.costo_estimado|int }}</p>
                                     </div>
                                 </div>
                                 {% elif resultados.tipo == 'termotanque_solar' %}
@@ -209,7 +209,7 @@
                                     <div class="col-6">
                                         <p><strong>Eficiencia:</strong> {{ resultados.eficiencia }}%</p>
                                         <p><strong>Ahorro anual:</strong> {{ resultados.generacion_anual }} kWh</p>
-                                        <p><strong>Costo estimado:</strong> ${{ resultados.costo_estimado|int }}</p>
+                                        <p><strong>Costo estimado:</strong> USD ${{ resultados.costo_estimado|int }}</p>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -245,7 +245,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card mb-4">
                     <div class="card-header bg-light">
                         <div class="d-flex justify-content-between align-items-center">
@@ -263,7 +263,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-4">
                     <div class="col-12">
                         <h3 class="h5 mb-3">Ajustar simulación</h3>
@@ -271,7 +271,7 @@
                             <input type="hidden" name="ubicacion" value="{{ datos.ubicacion }}">
                             <input type="hidden" name="consumo_mensual" value="{{ datos.consumo_mensual }}">
                             <input type="hidden" name="tipo_instalacion" value="{{ datos.tipo_instalacion }}">
-                            
+
                             <div class="row align-items-end">
                                 <div class="col-md-5">
                                     <label for="capacidad" class="form-label">Ajustar capacidad:</label>
@@ -304,13 +304,13 @@
                         </form>
                     </div>
                 </div>
-                
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>Esta simulación es una aproximación basada en modelos matemáticos 
                     y datos climáticos. Los valores reales pueden variar según factores específicos de la instalación,
                     condiciones meteorológicas y otros factores locales.
                 </div>
-                
+
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ url_for('simulador.simulador') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-redo me-2"></i>Nueva simulación
@@ -332,11 +332,11 @@
     document.getElementById('capacidadRange').addEventListener('input', function() {
         document.getElementById('capacidad').value = this.value;
     });
-    
+
     document.getElementById('capacidad').addEventListener('input', function() {
         document.getElementById('capacidadRange').value = this.value;
     });
-    
+
     // Gráfico financiero
     document.addEventListener('DOMContentLoaded', function() {
         // Datos para el gráfico
@@ -344,25 +344,25 @@
         const ahorroAnual = {{ resultados.ahorro_anual_usd }};
         const ahorroMensual = {{ resultados.ahorro_mensual_usd }};
         const inflacionEnergia = 0.05; // 5% de incremento anual en costos de energía
-        
+
         // Preparar datos para diferentes plazos
         function generarDatosFinancieros(years) {
             const labels = [];
             const inversionAcumulada = [costoInicial];
             const ahorroAcumulado = [0];
             const balanceNeto = [-costoInicial];
-            
+
             for (let i = 1; i <= years; i++) {
                 labels.push('Año ' + i);
                 inversionAcumulada.push(costoInicial);
-                
+
                 // El ahorro aumenta cada año debido a la inflación del costo de energía
                 const ahorroAjustado = ahorroAnual * Math.pow(1 + inflacionEnergia, i - 1);
                 ahorroAcumulado.push(ahorroAcumulado[i - 1] + ahorroAjustado);
-                
+
                 balanceNeto.push(ahorroAcumulado[i] - inversionAcumulada[i]);
             }
-            
+
             return {
                 labels: ['Inicio', ...labels],
                 inversionAcumulada,
@@ -370,11 +370,11 @@
                 balanceNeto
             };
         }
-        
+
         // Crear gráfico inicial (5 años)
         const ctx = document.getElementById('financialChart').getContext('2d');
         let datosFinancieros = generarDatosFinancieros(5);
-        
+
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -429,34 +429,34 @@
                 }
             }
         });
-        
+
         // Cambiar entre diferentes plazos
         document.getElementById('btn-5-years').addEventListener('click', function() {
             actualizarGrafico(5);
             setActiveButton(this);
         });
-        
+
         document.getElementById('btn-10-years').addEventListener('click', function() {
             actualizarGrafico(10);
             setActiveButton(this);
         });
-        
+
         document.getElementById('btn-25-years').addEventListener('click', function() {
             actualizarGrafico(25);
             setActiveButton(this);
         });
-        
+
         function actualizarGrafico(years) {
             datosFinancieros = generarDatosFinancieros(years);
-            
+
             chart.data.labels = datosFinancieros.labels;
             chart.data.datasets[0].data = datosFinancieros.inversionAcumulada;
             chart.data.datasets[1].data = datosFinancieros.ahorroAcumulado;
             chart.data.datasets[2].data = datosFinancieros.balanceNeto;
-            
+
             chart.update();
         }
-        
+
         function setActiveButton(button) {
             document.querySelectorAll('.btn-group .btn').forEach(btn => {
                 btn.classList.remove('active');
