@@ -651,8 +651,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                             if (!marker) {
                                                 console.error("No se pudo crear el marcador. Intentando nuevamente...");
                                                 // Intentar nuevamente con coordenadas verificadas
-                                                addOrUpdateMarker(map, parseFloat(lat), parseFloat(lng), zoom);
+                                                marker = addOrUpdateMarker(map, parseFloat(lat), parseFloat(lng), zoom);
+                                                
+                                                // Si aún falla, usar método de emergencia
+                                                if (!marker && window.debugEcosmart) {
+                                                    console.warn("Intentando método de emergencia para crear marcador");
+                                                    window.debugEcosmart.emergencyCreateMarker(lat, lng);
+                                                }
                                             }
+                                            
+                                            // Verificar después de un momento que el marcador sigue visible
+                                            setTimeout(function() {
+                                                if (window.debugEcosmart) {
+                                                    window.debugEcosmart.verifyMarker();
+                                                    window.debugEcosmart.logState();
+                                                }
+                                            }, 500);
                                             
                                             // Actualizar datos de la ubicación
                                             updateLocationData(lat.toFixed(6), lng.toFixed(6));

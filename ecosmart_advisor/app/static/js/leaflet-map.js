@@ -22,10 +22,45 @@ window.debugEcosmart = {
         }
         return "Mapa no inicializado";
     },
+    verifyMarker: function() {
+        // Verificar si el marcador existe pero no está en el mapa
+        if (ecosmartMarker && ecosmartMap && !ecosmartMap.hasLayer(ecosmartMarker)) {
+            console.warn("Marcador existe pero no está en el mapa - reañadiendo");
+            ecosmartMarker.addTo(ecosmartMap);
+            return "Marcador reañadido al mapa";
+        }
+        return "Marcador OK o no existe";
+    },
+    emergencyCreateMarker: function(lat, lng) {
+        try {
+            // Crear un marcador de emergencia cuando otros métodos fallan
+            console.log("Creando marcador de emergencia");
+            
+            // Eliminar marcador existente si hay uno
+            if (ecosmartMarker) {
+                try { 
+                    ecosmartMarker.remove(); 
+                } catch(e) { 
+                    console.warn("Error al eliminar marcador:", e); 
+                }
+            }
+            
+            // Crear nuevo marcador
+            ecosmartMarker = null;
+            ecosmartMarker = new L.Marker([parseFloat(lat), parseFloat(lng)]);
+            ecosmartMap.addLayer(ecosmartMarker);
+            ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
+            return "Marcador de emergencia creado";
+        } catch(e) {
+            console.error("Error en creación de marcador de emergencia:", e);
+            return "Error: " + e.message;
+        }
+    },
     logState: function() { 
         console.log({
             mapInitialized: !!ecosmartMap,
             markerExists: !!ecosmartMarker,
+            markerInMap: ecosmartMarker && ecosmartMap ? ecosmartMap.hasLayer(ecosmartMarker) : false,
             geocodingInProgress: geocodingInProgress
         });
         return "Estado logueado en consola";
@@ -191,6 +226,18 @@ function toggleMap(containerId) {
 function reverseGeocode(lat, lng, callback) {
     console.log("Realizando geocodificación inversa para:", lat, lng);
     
+    // Verificar que las coordenadas son válidas
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        console.error("Coordenadas inválidas para geocodificación inversa:", lat, lng);
+        if (typeof callback === 'function') {
+            callback(null, new Error("Coordenadas inválidas"));
+        }
+        return;
+    }
+    
     if (geocodingInProgress) {
         console.log("Ya hay una solicitud de geocodificación en progreso");
         return;
@@ -198,17 +245,48 @@ function reverseGeocode(lat, lng, callback) {
     
     geocodingInProgress = true;
     
-    // Usar Nominatim para la geocodificación inversa
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-        .then(response => response.json())
+    // Configurar timeout para evitar bloqueos
+    const timeoutId = setTimeout(() => {
+        console.warn("Timeout en geocodificación inversa después de 5 segundos");
+        geocodingInProgress = false;
+        if (typeof callback === 'function') {
+            callback(null, new Error("Timeout en geocodificación"));
+        }
+    }, 5000);
+    
+    // Usar Nominatim para la geocodificación inversa con parámetros optimizados
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`)
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log("Datos de geocodificación recibidos:", data);
+            console.log("Datos de geocodificación inversa recibidos:", data);
             geocodingInProgress = false;
+            
+            // Enriquecer los datos de dirección para mejorar la precisión
+            if (data && data.address) {
+                // Si no tenemos road pero tenemos otros datos que pueden funcionar como calle
+                if (!data.address.road) {
+                    if (data.address.pedestrian) data.address.road = data.address.pedestrian;
+                    else if (data.address.footway) data.address.road = data.address.footway;
+                    else if (data.address.path) data.address.road = data.address.path;
+                }
+                
+                // Determinar si es una dirección urbana
+                data.isUrbanAddress = !!(data.address.road || data.address.suburb || 
+                                      data.address.neighbourhood || data.address.residential);
+            }
+            
             if (typeof callback === 'function') {
                 callback(data);
             }
         })
         .catch(error => {
+            clearTimeout(timeoutId);
             console.error("Error en geocodificación inversa:", error);
             geocodingInProgress = false;
             if (typeof callback === 'function') {
