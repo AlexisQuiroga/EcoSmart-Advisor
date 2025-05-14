@@ -7,6 +7,31 @@ let ecosmartMap = null;  // Instancia del mapa
 let ecosmartMarker = null;  // Marcador en el mapa
 let geocodingInProgress = false; // Evita múltiples solicitudes simultáneas
 
+// Para debugging y diagnóstico
+window.debugEcosmart = {
+    getMap: function() { return ecosmartMap; },
+    getMarker: function() { return ecosmartMarker; },
+    createTestMarker: function(lat, lng) {
+        if (ecosmartMap) {
+            if (ecosmartMarker) {
+                ecosmartMarker.remove();
+            }
+            ecosmartMarker = L.marker([lat, lng]).addTo(ecosmartMap);
+            ecosmartMap.setView([lat, lng], 18);
+            return "Marcador creado en " + lat + ", " + lng;
+        }
+        return "Mapa no inicializado";
+    },
+    logState: function() { 
+        console.log({
+            mapInitialized: !!ecosmartMap,
+            markerExists: !!ecosmartMarker,
+            geocodingInProgress: geocodingInProgress
+        });
+        return "Estado logueado en consola";
+    }
+};
+
 /**
  * Inicializa el mapa en el contenedor especificado
  * @param {string} containerId - ID del contenedor del mapa
@@ -328,15 +353,49 @@ function addOrUpdateMarker(map, lat, lng, zoom = 15) {
     
     console.log("Agregando/actualizando marcador en:", lat, lng, "con zoom:", zoom);
     
-    // Crear o actualizar el marcador
-    if (ecosmartMarker) {
-        ecosmartMarker.setLatLng([lat, lng]);
-    } else {
-        ecosmartMarker = L.marker([lat, lng]).addTo(map);
+    // Parsear coordenadas para asegurar que son números válidos
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    
+    if (isNaN(lat) || isNaN(lng)) {
+        console.error("Coordenadas inválidas:", lat, lng);
+        return null;
     }
     
-    // Centrar el mapa en la ubicación del marcador con el zoom especificado
-    map.setView([lat, lng], zoom);
+    // Asegurar que las coordenadas están en rangos válidos
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        console.error("Coordenadas fuera de rango:", lat, lng);
+        return null;
+    }
     
-    return ecosmartMarker;
+    // Remover marcador existente si ya hay uno
+    if (ecosmartMarker) {
+        try {
+            console.log("Removiendo marcador existente");
+            ecosmartMarker.remove();
+            ecosmartMarker = null;
+        } catch (e) {
+            console.error("Error al remover marcador:", e);
+        }
+    }
+    
+    try {
+        // Crear un nuevo marcador
+        console.log("Creando nuevo marcador en:", lat, lng);
+        ecosmartMarker = L.marker([lat, lng]).addTo(map);
+        
+        // Añadir un popup para hacer más visible el marcador
+        ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
+        
+        // Centrar el mapa en la ubicación del marcador con el zoom especificado
+        map.setView([lat, lng], zoom);
+        
+        // Log para verificar que el marcador se creó correctamente
+        console.log("Marcador creado exitosamente:", ecosmartMarker);
+        
+        return ecosmartMarker;
+    } catch (e) {
+        console.error("Error al crear marcador:", e);
+        return null;
+    }
 }

@@ -443,20 +443,77 @@ document.addEventListener('DOMContentLoaded', function() {
         
         direccionInput.addEventListener('change', function() {
             updateFullLocation();
+            
             // Verificar si tenemos todos los datos necesarios para una geocodificación completa
-            if (direccionInput.value.trim() && ciudadInput.value.trim() && 
-                provinciaInput.value.trim() && paisInput.value.trim()) {
+            const todosLosCamposCompletos = paisInput.value.trim() && 
+                                          provinciaInput.value.trim() && 
+                                          ciudadInput.value.trim() && 
+                                          direccionInput.value.trim();
+            
+            if (todosLosCamposCompletos) {
                 console.log("Dirección completa, realizando geocodificación precisa");
-                tryToGeocodeAddress();
+                // Actualizar indicador visual
+                const indicador = document.getElementById('direccion-estado');
+                const ayudaTexto = document.getElementById('direccion-ayuda');
+                if (indicador) {
+                    indicador.className = 'input-group-text bg-success text-white';
+                    indicador.innerHTML = '<i class="fas fa-check"></i>';
+                }
+                if (ayudaTexto) {
+                    ayudaTexto.textContent = 'Dirección completa - Se colocará un pin en el mapa';
+                    ayudaTexto.className = 'form-text text-success';
+                }
+                
+                // Forzar un pequeño retraso para que termine de procesar el evento change
+                setTimeout(function() {
+                    tryToGeocodeAddress();
+                }, 100);
             }
         });
         
         direccionInput.addEventListener('blur', function() {
             // Al perder el foco, intentar geocodificar si tenemos datos suficientes
-            if (direccionInput.value.trim() && ciudadInput.value.trim() && 
-                provinciaInput.value.trim() && paisInput.value.trim()) {
+            const todosLosCamposCompletos = paisInput.value.trim() && 
+                                           provinciaInput.value.trim() && 
+                                           ciudadInput.value.trim() && 
+                                           direccionInput.value.trim();
+            
+            if (todosLosCamposCompletos) {
                 console.log("Dirección completa (blur), realizando geocodificación precisa");
-                tryToGeocodeAddress();
+                
+                // Actualizar indicador visual
+                const indicador = document.getElementById('direccion-estado');
+                const ayudaTexto = document.getElementById('direccion-ayuda');
+                if (indicador) {
+                    indicador.className = 'input-group-text bg-success text-white';
+                    indicador.innerHTML = '<i class="fas fa-check"></i>';
+                }
+                if (ayudaTexto) {
+                    ayudaTexto.textContent = 'Dirección completa - Se colocará un pin en el mapa';
+                    ayudaTexto.className = 'form-text text-success';
+                }
+                
+                // Forzar un pequeño retraso para asegurar que los cambios de UI se apliquen
+                setTimeout(function() {
+                    tryToGeocodeAddress();
+                }, 100);
+            } else if (direccionInput.value.trim()) {
+                // La dirección está parcialmente completa
+                const indicador = document.getElementById('direccion-estado');
+                const ayudaTexto = document.getElementById('direccion-ayuda');
+                if (indicador) {
+                    indicador.className = 'input-group-text bg-warning text-white';
+                    indicador.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                }
+                if (ayudaTexto) {
+                    const camposFaltantes = [];
+                    if (!paisInput.value.trim()) camposFaltantes.push('país');
+                    if (!provinciaInput.value.trim()) camposFaltantes.push('provincia');
+                    if (!ciudadInput.value.trim()) camposFaltantes.push('ciudad');
+                    
+                    ayudaTexto.textContent = 'Falta completar: ' + camposFaltantes.join(', ');
+                    ayudaTexto.className = 'form-text text-warning';
+                }
             }
         });
         
