@@ -20,7 +20,8 @@
                             <label class="form-label">Ubicación <span class="text-danger">*</span></label>
                             
                             <div class="row g-3 mb-2">
-                                <div class="col-md-3">
+                                <!-- Primera fila: País y Provincia juntos -->
+                                <div class="col-md-6">
                                     <label for="pais" class="form-label small">País <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
@@ -28,7 +29,7 @@
                                                placeholder="País" value="Argentina" style="text-overflow: ellipsis;" title="Argentina">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <label for="provincia" class="form-label small">Provincia/Estado <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-map"></i></span>
@@ -37,7 +38,11 @@
                                     </div>
                                     <div id="sugerenciasProvincia" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
-                                <div class="col-md-3">
+                            </div>
+                            
+                            <div class="row g-3 mb-2">
+                                <!-- Segunda fila: Ciudad y Dirección juntos -->
+                                <div class="col-md-6">
                                     <label for="ciudad" class="form-label small">Ciudad/Localidad <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-city"></i></span>
@@ -46,7 +51,7 @@
                                     </div>
                                     <div id="sugerenciasCiudad" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <label for="direccion" class="form-label small">Dirección <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-home"></i></span>

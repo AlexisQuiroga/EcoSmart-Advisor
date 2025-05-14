@@ -314,6 +314,10 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
     
     console.log("Realizando geocodificación para dirección normalizada:", normalizedAddress);
     
+    // Extraer partes de la dirección original para mejor formato y búsqueda múltiple
+    const addressParts = extractAddressParts(address);
+    console.log("Partes extraídas de la dirección:", addressParts);
+    
     // Verificar si tenemos la dirección en caché
     const cacheKey = `geocode_${normalizedAddress}`;
     const cachedResult = sessionStorage.getItem(cacheKey);
@@ -334,15 +338,14 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
             return;
         } catch (e) {
             console.warn("Error al usar datos en caché:", e);
-            // Continuar con la búsqueda normal si hay error con la caché
         }
     }
     
     if (geocodingInProgress) {
-        console.log("Ya hay una solicitud de geocodificación en progreso, intentando nuevamente en 500ms");
+        console.log("Ya hay una solicitud de geocodificación en progreso, intentando nuevamente en 300ms");
         setTimeout(() => {
             geocodeAddress(address, callback, zoomLevel);
-        }, 500);
+        }, 300);
         return;
     }
     
@@ -352,104 +355,347 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
     const loadingEl = document.getElementById('map-loading-indicator');
     if (loadingEl) loadingEl.style.display = 'block';
     
-    // Usar Nominatim para geocodificación directa con parámetros optimizados
-    const encodedAddress = encodeURIComponent(normalizedAddress);
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&addressdetails=1&limit=5&accept-language=es`;
-    
-    console.log("Realizando petición a URL:", url);
-    
-    // Crear un timeout para abortar la solicitud si tarda demasiado
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-    
-    fetch(url, { signal: controller.signal })
-        .then(response => {
-            clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
+    // Primero intentaremos con formatos optimizados para Argentina
+    performMultipleGeocodingRequests(addressParts, (result) => {
+        geocodingInProgress = false;
+        
+        // Ocultar indicador de carga
+        if (loadingEl) loadingEl.style.display = 'none';
+        
+        if (result && result.lat && result.lon) {
+            // Éxito - Guardar en caché
+            try {
+                sessionStorage.setItem(cacheKey, JSON.stringify({
+                    lat: result.lat,
+                    lon: result.lon,
+                    result: result,
+                    zoomLevel: result.zoomLevel || zoomLevel
+                }));
+            } catch (e) {
+                console.warn("No se pudo guardar en caché:", e);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Datos de geocodificación directa recibidos:", data);
-            geocodingInProgress = false;
-            
-            // Ocultar indicador de carga
-            if (loadingEl) loadingEl.style.display = 'none';
-            
-            if (data && data.length > 0) {
-                // Priorizar resultados por relevancia y tipo
-                const typeWeights = {
-                    'house': 10,
-                    'building': 9,
-                    'residential': 8,
-                    'address': 7,
-                    'street': 6,
-                    'quarter': 5,
-                    'suburb': 4,
-                    'village': 3,
-                    'town': 2,
-                    'city': 1
-                };
-                
-                // Ordenar resultados por relevancia
-                data.sort((a, b) => {
-                    const weightA = typeWeights[a.type] || 0;
-                    const weightB = typeWeights[b.type] || 0;
-                    return weightB - weightA;
-                });
-                
-                let bestResult = data[0];
-                
-                const lat = parseFloat(bestResult.lat);
-                const lon = parseFloat(bestResult.lon);
-                
-                // Determinar el nivel de zoom según el tipo de resultado
-                let autoZoom = zoomLevel;
-                if (bestResult.type === 'house' || bestResult.type === 'building') {
-                    autoZoom = 18; // Máximo zoom para casas/edificios
-                } else if (bestResult.type === 'street' || bestResult.type === 'residential') {
-                    autoZoom = 17; // Zoom alto para calles
-                } else if (bestResult.type === 'suburb' || bestResult.type === 'quarter') {
-                    autoZoom = 15; // Zoom medio para barrios
-                } else if (bestResult.type === 'city' || bestResult.type === 'town') {
-                    autoZoom = 12; // Zoom bajo para ciudades
-                }
-                
-                // Guardar en caché
-                try {
-                    sessionStorage.setItem(cacheKey, JSON.stringify({
-                        lat: lat,
-                        lon: lon,
-                        result: bestResult,
-                        zoomLevel: autoZoom
-                    }));
-                } catch (e) {
-                    console.warn("No se pudo guardar en caché:", e);
-                }
-                
-                if (typeof callback === 'function') {
-                    callback(lat, lon, bestResult, autoZoom);
-                }
-            } else {
-                console.warn("No se encontraron resultados para la dirección:", address);
-                if (typeof callback === 'function') {
-                    callback(null, null, null);
-                }
-            }
-        })
-        .catch(error => {
-            clearTimeout(timeoutId);
-            console.error("Error en geocodificación directa:", error);
-            geocodingInProgress = false;
-            
-            // Ocultar indicador de carga
-            if (loadingEl) loadingEl.style.display = 'none';
             
             if (typeof callback === 'function') {
-                callback(null, null, error);
+                callback(
+                    parseFloat(result.lat), 
+                    parseFloat(result.lon), 
+                    result, 
+                    result.zoomLevel || zoomLevel
+                );
             }
-        });
+        } else {
+            console.warn("No se encontraron resultados para ninguna variante de la dirección:", address);
+            if (typeof callback === 'function') {
+                callback(null, null, null);
+            }
+        }
+    });
+}
+
+/**
+ * Extrae partes significativas de una dirección para mejorar la búsqueda
+ * @param {string} fullAddress - Dirección completa a analizar
+ * @returns {Object} - Objeto con las partes de la dirección
+ */
+function extractAddressParts(fullAddress) {
+    const parts = {};
+    
+    // Intentar extraer país, provincia, ciudad y dirección específica
+    const segments = fullAddress.split(',').map(s => s.trim());
+    
+    // Extraer número de la calle si existe
+    const streetNumberMatch = fullAddress.match(/(\d+)/);
+    if (streetNumberMatch) {
+        parts.number = streetNumberMatch[0];
+    }
+    
+    // Extraer nombre de la calle (todo antes del número si hay)
+    if (parts.number) {
+        const streetNameMatch = fullAddress.match(/([^\d,]+)[\s]*\d+/);
+        if (streetNameMatch) {
+            parts.street = streetNameMatch[1].trim();
+        }
+    }
+    
+    // Si no pudimos extraer calle y número por el patrón, usar el último segmento
+    if (!parts.street && segments.length > 0) {
+        parts.specificAddress = segments[0];
+    }
+    
+    // Asignar el resto de segmentos a ciudad, provincia, país
+    if (segments.length > 1) parts.city = segments[1]; 
+    if (segments.length > 2) parts.province = segments[2];
+    if (segments.length > 3) parts.country = segments[3];
+    
+    // Reconstruir dirección completa en diferentes formatos
+    parts.fullAddress = fullAddress;
+    
+    return parts;
+}
+
+/**
+ * Realiza múltiples intentos de geocodificación con diferentes formatos y proveedores
+ * @param {Object} addressParts - Partes de la dirección extraídas
+ * @param {Function} finalCallback - Función final a llamar con el mejor resultado
+ */
+function performMultipleGeocodingRequests(addressParts, finalCallback) {
+    // Crear diferentes variantes de consulta para aumentar probabilidad de éxito
+    const queryVariants = createQueryVariants(addressParts);
+    console.log("Variantes de consulta generadas:", queryVariants);
+    
+    // Formatos adicionales específicos para Argentina
+    // 1. Usar el formato argentino de dirección: "Calle Número, Ciudad, Provincia, Argentina"
+    // 2. Buscar sólo con nombre de calle y ciudad si el número no se encuentra
+    
+    let bestResult = null;
+    let requestsCompleted = 0;
+    const totalRequests = queryVariants.length;
+    
+    // Función para procesar resultados de cada petición
+    const processResults = (results, queryVariant) => {
+        requestsCompleted++;
+        
+        if (results && results.length > 0) {
+            // Filtrar y priorizar resultados por país y relevancia
+            const filteredResults = filterResultsByCountry(results, 'Argentina');
+            if (filteredResults.length > 0) {
+                const prioritizedResult = prioritizeResults(filteredResults, addressParts);
+                
+                // Si este es el primer resultado o mejor que el anterior, actualizarlo
+                if (!bestResult || (prioritizedResult.score > bestResult.score)) {
+                    bestResult = prioritizedResult;
+                    console.log("Nuevo mejor resultado encontrado:", bestResult);
+                }
+            }
+        }
+        
+        // Verificar si hemos completado todas las peticiones
+        if (requestsCompleted >= totalRequests) {
+            finalCallback(bestResult);
+        }
+    };
+    
+    // Realizar peticiones para cada variante
+    queryVariants.forEach((query, index) => {
+        setTimeout(() => {
+            // Usar Nominatim para geocodificación
+            const encodedQuery = encodeURIComponent(query);
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&addressdetails=1&limit=5&accept-language=es`;
+            
+            console.log(`Realizando petición ${index+1}/${totalRequests} a:`, url);
+            
+            // Crear un timeout para abortar la solicitud si tarda demasiado
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            fetch(url, { signal: controller.signal })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Datos recibidos para consulta ${index+1}:`, data);
+                    processResults(data, query);
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+                    console.error(`Error en consulta ${index+1}:`, error);
+                    requestsCompleted++;
+                    
+                    // Si todas las peticiones fallaron, devolver el callback con error
+                    if (requestsCompleted >= totalRequests) {
+                        finalCallback(bestResult);
+                    }
+                });
+        }, index * 200); // Espaciar las peticiones para no sobrecargar el servidor
+    });
+    
+    // Si no hay variantes (improbable), devolver error
+    if (queryVariants.length === 0) {
+        finalCallback(null);
+    }
+}
+
+/**
+ * Crea múltiples variantes de consulta para aumentar probabilidad de éxito
+ * @param {Object} parts - Partes de la dirección
+ * @returns {Array} - Array de strings con diferentes formatos de consulta
+ */
+function createQueryVariants(parts) {
+    const variants = [];
+    
+    // Variante 1: Dirección completa original
+    if (parts.fullAddress) {
+        variants.push(parts.fullAddress);
+    }
+    
+    // Variante 2: Formato argentino estricto si tenemos calle y número
+    if (parts.street && parts.number) {
+        let argentineFormat = `${parts.street} ${parts.number}`;
+        if (parts.city) argentineFormat += `, ${parts.city}`;
+        if (parts.province) argentineFormat += `, ${parts.province}`;
+        argentineFormat += `, Argentina`;
+        
+        variants.push(argentineFormat);
+    }
+    
+    // Variante 3: Calle y ciudad (sin número, útil cuando el número no se encuentra)
+    if (parts.street && parts.city) {
+        variants.push(`${parts.street}, ${parts.city}, Argentina`);
+    }
+    
+    // Variante 4: Calle, número y ciudad sin otros detalles
+    if (parts.street && parts.number && parts.city) {
+        variants.push(`${parts.street} ${parts.number}, ${parts.city}`);
+    }
+    
+    // Variante 5: Especialmente para Río Tercero, Córdoba
+    if (parts.city && parts.city.toLowerCase().includes('rio tercero') || 
+        parts.city && parts.city.toLowerCase().includes('río tercero')) {
+        if (parts.street && parts.number) {
+            variants.push(`${parts.street} ${parts.number}, Río Tercero, Córdoba, Argentina`);
+        }
+    }
+    
+    // Variante 6: Ciudad y provincia simplificado
+    if (parts.city && parts.province) {
+        variants.push(`${parts.city}, ${parts.province}, Argentina`);
+    }
+    
+    // Eliminar duplicados
+    return [...new Set(variants)];
+}
+
+/**
+ * Filtra resultados por país para asegurar que son de Argentina
+ * @param {Array} results - Resultados de geocodificación
+ * @param {string} countryName - Nombre del país a filtrar
+ * @returns {Array} - Resultados filtrados
+ */
+function filterResultsByCountry(results, countryName) {
+    return results.filter(result => {
+        // Verificar en addressdetails.country
+        if (result.address && result.address.country) {
+            return result.address.country.toLowerCase() === countryName.toLowerCase();
+        }
+        
+        // Verificar en display_name como fallback
+        if (result.display_name) {
+            return result.display_name.toLowerCase().includes(countryName.toLowerCase());
+        }
+        
+        return false;
+    });
+}
+
+/**
+ * Prioriza y puntúa resultados según relevancia para la dirección buscada
+ * @param {Array} results - Resultados de geocodificación
+ * @param {Object} addressParts - Partes de la dirección buscada
+ * @returns {Object} - El mejor resultado con su puntuación
+ */
+function prioritizeResults(results, addressParts) {
+    // Puntuar resultados según criterios de relevancia
+    const scoredResults = results.map(result => {
+        let score = 0;
+        let zoomLevel = 15; // Zoom predeterminado
+        
+        // Priorizar por tipo de resultado
+        const typeWeights = {
+            'house': 50,
+            'building': 45,
+            'residential': 40,
+            'address': 35,
+            'street': 30,
+            'road': 25,
+            'pedestrian': 20,
+            'path': 15,
+            'quarter': 10,
+            'suburb': 8,
+            'village': 5,
+            'town': 3,
+            'city': 2
+        };
+        
+        // Añadir puntos por tipo
+        score += typeWeights[result.type] || 0;
+        
+        // Ajustar zoom según tipo
+        if (result.type === 'house' || result.type === 'building') {
+            zoomLevel = 18;
+        } else if (result.type === 'street' || result.type === 'road') {
+            zoomLevel = 17;
+        } else if (result.type === 'suburb' || result.type === 'quarter') {
+            zoomLevel = 15;
+        } else if (result.type === 'city' || result.type === 'town') {
+            zoomLevel = 13;
+        }
+        
+        // Verificar coincidencia de dirección específica
+        if (addressParts.street && result.address && result.address.road) {
+            // Normalizar para comparación
+            const normStreet = addressParts.street.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normResultStreet = result.address.road.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            // Puntuar por coincidencia exacta o parcial
+            if (normStreet === normResultStreet) {
+                score += 30;
+            } else if (normResultStreet.includes(normStreet) || normStreet.includes(normResultStreet)) {
+                score += 20;
+            }
+        }
+        
+        // Verificar coincidencia de número
+        if (addressParts.number && result.address && result.address.house_number) {
+            if (addressParts.number === result.address.house_number) {
+                score += 30;
+            }
+        }
+        
+        // Verificar coincidencia de ciudad
+        if (addressParts.city && result.address) {
+            const cityMatches = ['city', 'town', 'village', 'hamlet'].some(cityType => {
+                if (!result.address[cityType]) return false;
+                
+                const normCity = addressParts.city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const normResultCity = result.address[cityType].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                return normCity === normResultCity || normResultCity.includes(normCity) || normCity.includes(normResultCity);
+            });
+            
+            if (cityMatches) score += 20;
+        }
+        
+        // Verificar coincidencia de provincia
+        if (addressParts.province && result.address && result.address.state) {
+            const normProvince = addressParts.province.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const normResultProvince = result.address.state.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            
+            if (normProvince === normResultProvince || normResultProvince.includes(normProvince)) {
+                score += 15;
+            }
+        }
+        
+        // Caso especial para Río Tercero, Córdoba
+        if ((addressParts.city && addressParts.city.toLowerCase().includes('rio tercero')) || 
+            (result.display_name && result.display_name.toLowerCase().includes('rio tercero'))) {
+            score += 10; // Bonus para Río Tercero
+        }
+        
+        // Añadir metadatos necesarios al resultado
+        return {
+            ...result,
+            score,
+            zoomLevel
+        };
+    });
+    
+    // Ordenar por puntuación y devolver el mejor
+    scoredResults.sort((a, b) => b.score - a.score);
+    return scoredResults[0] || results[0];
 }
 
 /**
