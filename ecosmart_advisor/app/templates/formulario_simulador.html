@@ -73,7 +73,11 @@
                                         <span class="input-group-text"><i class="fas fa-home"></i></span>
                                         <input type="text" class="form-control" id="direccion" name="direccion" 
                                                placeholder="Calle, número...">
+                                        <span class="input-group-text bg-transparent" id="direccion-estado">
+                                            <i class="fas fa-map-marker-alt text-muted"></i>
+                                        </span>
                                     </div>
+                                    <div class="form-text" id="direccion-ayuda">Ingrese la calle y número para ubicación exacta</div>
                                 </div>
                             </div>
                             
@@ -186,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const longitudInput = document.getElementById('longitud');
     const latitudDisplay = document.getElementById('latitudDisplay');
     const longitudDisplay = document.getElementById('longitudDisplay');
+    const paisInput = document.getElementById('pais');
     const provinciaInput = document.getElementById('provincia');
     const ciudadInput = document.getElementById('ciudad');
     const direccionInput = document.getElementById('direccion');
@@ -209,8 +214,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const numero = data.address.house_number || '';
                 const ciudad = data.address.city || data.address.town || data.address.village || '';
                 const provincia = data.address.state || '';
+                const pais = data.address.country || '';
                 
                 // Actualizar campos si están disponibles
+                if (pais) paisInput.value = pais;
                 if (provincia) provinciaInput.value = provincia;
                 if (ciudad) ciudadInput.value = ciudad;
                 if (direccion) {
@@ -292,11 +299,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Configurar eventos para los campos de ubicación
+    // País: actualizar al cambiar
+    if (paisInput) {
+        paisInput.addEventListener('change', function() {
+            updateFullLocation();
+            if (provinciaInput.value.trim()) {
+                tryToGeocodeAddress();
+            }
+        });
+        paisInput.addEventListener('input', updateFullLocation);
+    }
+    
     // Provincia: geocodificar inmediatamente al cambiar
     if (provinciaInput) {
         provinciaInput.addEventListener('change', function() {
             updateFullLocation();
-            if (provinciaInput.value.trim()) {
+            if (provinciaInput.value.trim() && paisInput.value.trim()) {
                 tryToGeocodeAddress();
             }
         });
@@ -307,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (ciudadInput) {
         ciudadInput.addEventListener('change', function() {
             updateFullLocation();
-            if (ciudadInput.value.trim() && provinciaInput.value.trim()) {
+            if (ciudadInput.value.trim() && provinciaInput.value.trim() && paisInput.value.trim()) {
                 tryToGeocodeAddress();
             }
         });
@@ -317,15 +335,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Dirección: geocodificar después de una pequeña pausa al escribir
     if (direccionInput) {
         let typingTimer;
-        const doneTypingInterval = 1000; // Tiempo en ms
+        const doneTypingInterval = 800; // Tiempo en ms (reducido para mayor reactividad)
         
         direccionInput.addEventListener('keyup', function() {
             clearTimeout(typingTimer);
             if (direccionInput.value.trim()) {
                 typingTimer = setTimeout(function() {
                     updateFullLocation();
-                    if (provinciaInput.value.trim()) {
+                    // Verificar si tenemos suficiente información para geocodificar
+                    const todosLosCamposCompletos = paisInput.value.trim() && 
+                                                  provinciaInput.value.trim() && 
+                                                  ciudadInput.value.trim() && 
+                                                  direccionInput.value.trim();
+                    
+                    // Siempre actualizar el mapa para mostrar la vista general
+                    if (provinciaInput.value.trim() && paisInput.value.trim()) {
                         tryToGeocodeAddress();
+                    }
+                    
+                    // Si tenemos una dirección completa, actualizar la UI para indicar que está lista
+                    if (todosLosCamposCompletos) {
+                        console.log("Dirección completa lista para geocodificación precisa");
+                        // Aquí podríamos añadir elementos visuales para indicar que la dirección está completa
                     }
                 }, doneTypingInterval);
             }
@@ -337,7 +368,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         direccionInput.addEventListener('change', function() {
             updateFullLocation();
-            if (direccionInput.value.trim() && provinciaInput.value.trim()) {
+            // Verificar si tenemos todos los datos necesarios para una geocodificación completa
+            if (direccionInput.value.trim() && ciudadInput.value.trim() && 
+                provinciaInput.value.trim() && paisInput.value.trim()) {
+                console.log("Dirección completa, realizando geocodificación precisa");
+                tryToGeocodeAddress();
+            }
+        });
+        
+        direccionInput.addEventListener('blur', function() {
+            // Al perder el foco, intentar geocodificar si tenemos datos suficientes
+            if (direccionInput.value.trim() && ciudadInput.value.trim() && 
+                provinciaInput.value.trim() && paisInput.value.trim()) {
+                console.log("Dirección completa (blur), realizando geocodificación precisa");
                 tryToGeocodeAddress();
             }
         });
@@ -347,13 +390,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para intentar geocodificar la dirección progresivamente
     function tryToGeocodeAddress() {
+        const pais = paisInput.value.trim();
         const provincia = provinciaInput.value.trim();
         const ciudad = ciudadInput.value.trim();
         const direccion = direccionInput.value.trim();
         
+        // Verificar si todos los campos necesarios están completos para colocar el pin
+        const todosLosCamposCompletos = pais && provincia && ciudad && direccion;
+        
         // Solo intentar geocodificar si tenemos al menos la provincia
         if (provincia) {
-            console.log("Iniciando geocodificación progresiva con:", { provincia, ciudad, direccion });
+            console.log("Iniciando geocodificación progresiva con:", { pais, provincia, ciudad, direccion });
             
             // Mostrar el mapa si está oculto
             const mapaDiv = document.getElementById('mapaUbicacion');
@@ -366,16 +413,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Configurar el evento de clic después de inicializar
                         setupMapClickEvent(map, updateLocationData);
                         
-                        // Usar geocodificación progresiva
+                        // Usar geocodificación progresiva para ajustar la vista del mapa
                         geocodeProgressive(
-                            { provincia, ciudad, direccion }, 
+                            { pais, provincia, ciudad, direccion }, 
                             function(lat, lng, result, zoom) {
                                 if (lat && lng) {
-                                    // Actualizar marcador y centrar mapa con el zoom apropiado
-                                    addOrUpdateMarker(map, lat, lng, zoom);
-                                    
-                                    // Actualizar datos de la ubicación
-                                    updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                    // Solo colocar el pin si todos los campos están completos
+                                    if (todosLosCamposCompletos) {
+                                        // Actualizar marcador y centrar mapa con el zoom apropiado
+                                        addOrUpdateMarker(map, lat, lng, zoom);
+                                        
+                                        // Actualizar datos de la ubicación
+                                        updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                    } else {
+                                        // Solo centrar el mapa sin colocar el pin
+                                        map.setView([lat, lng], zoom);
+                                    }
                                 }
                             }
                         );
@@ -386,14 +439,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (ecosmartMap) {
                     // Usar geocodificación progresiva
                     geocodeProgressive(
-                        { provincia, ciudad, direccion }, 
+                        { pais, provincia, ciudad, direccion }, 
                         function(lat, lng, result, zoom) {
                             if (lat && lng) {
-                                // Actualizar marcador y centrar mapa con el zoom apropiado
-                                addOrUpdateMarker(ecosmartMap, lat, lng, zoom);
-                                
-                                // Actualizar datos de la ubicación
-                                updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                // Solo colocar el pin si todos los campos están completos
+                                if (todosLosCamposCompletos) {
+                                    // Actualizar marcador y centrar mapa con el zoom apropiado
+                                    addOrUpdateMarker(ecosmartMap, lat, lng, zoom);
+                                    
+                                    // Actualizar datos de la ubicación
+                                    updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                } else {
+                                    // Solo centrar el mapa sin colocar el pin
+                                    ecosmartMap.setView([lat, lng], zoom);
+                                }
                             }
                         }
                     );

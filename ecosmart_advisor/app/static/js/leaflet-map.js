@@ -181,21 +181,45 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
     
     geocodingInProgress = true;
     
-    // Usar Nominatim para geocodificación directa
+    // Usar Nominatim para geocodificación directa con parámetros optimizados
     const encodedAddress = encodeURIComponent(address);
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`)
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&addressdetails=1&limit=3&accept-language=es`;
+    
+    console.log("Realizando petición a URL:", url);
+    
+    fetch(url)
         .then(response => response.json())
         .then(data => {
             console.log("Datos de geocodificación directa recibidos:", data);
             geocodingInProgress = false;
             
             if (data && data.length > 0) {
-                const result = data[0];
-                const lat = parseFloat(result.lat);
-                const lng = parseFloat(result.lon);
+                // Intentar encontrar el resultado más relevante
+                // Priorizar resultados que contienen "house" o "building" en su tipo
+                let bestResult = data[0]; // Por defecto, usar el primer resultado
+                
+                // Buscar si hay un resultado más específico (casa o edificio)
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].type === 'house' || 
+                        data[i].type === 'building' || 
+                        data[i].type === 'residential' ||
+                        data[i].class === 'building') {
+                        bestResult = data[i];
+                        break;
+                    }
+                }
+                
+                const lat = parseFloat(bestResult.lat);
+                const lng = parseFloat(bestResult.lon);
+                
+                // Ajustar zoom según el tipo de resultado
+                let adjustedZoom = zoomLevel;
+                if (bestResult.type === 'house' || bestResult.type === 'building') {
+                    adjustedZoom = 19; // Zoom más cercano para direcciones exactas
+                }
                 
                 if (typeof callback === 'function') {
-                    callback(lat, lng, result, zoomLevel);
+                    callback(lat, lng, bestResult, adjustedZoom);
                 }
             } else {
                 console.warn("No se encontraron resultados para la dirección:", address);
@@ -216,13 +240,14 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
 /**
  * Geocodificación progresiva que se ajusta según la precisión de la información
  * @param {Object} params - Objeto con los parámetros de geocodificación
+ * @param {string} params.pais - Nombre del país (opcional, pero recomendado)
  * @param {string} params.provincia - Nombre de la provincia/estado
  * @param {string} params.ciudad - Nombre de la ciudad/localidad (opcional)
  * @param {string} params.direccion - Dirección específica (opcional)
  * @param {Function} callback - Función a llamar con los datos obtenidos
  */
 function geocodeProgressive(params, callback) {
-    const { provincia, ciudad, direccion } = params;
+    const { pais, provincia, ciudad, direccion } = params;
     
     // Verificar si tenemos al menos la provincia
     if (!provincia || provincia.trim() === '') {
@@ -236,19 +261,47 @@ function geocodeProgressive(params, callback) {
     let query = '';
     let zoomLevel = 7; // Nivel de zoom para provincia
     
-    if (direccion && ciudad) {
+    // Formatear la consulta de manera que optimice la búsqueda basada en la estructura de direcciones
+    if (direccion && ciudad && provincia) {
+        // Detectar si la dirección ya contiene números (calle específica con número)
+        const tieneNumero = /\d+/.test(direccion);
+        
         // Tenemos dirección específica y ciudad, la consulta más precisa
-        query = `${direccion}, ${ciudad}, ${provincia}`;
-        zoomLevel = 18; // Zoom cercano para dirección específica
-    } else if (ciudad) {
+        if (pais) {
+            // Formato país, optimizado para búsqueda específica
+            if (tieneNumero) {
+                // Si tenemos número de calle, hacemos la búsqueda más específica
+                query = `${direccion}, ${ciudad}, ${provincia}, ${pais}`;
+                zoomLevel = 19; // Zoom muy cercano para dirección exacta
+            } else {
+                query = `${direccion}, ${ciudad}, ${provincia}, ${pais}`;
+                zoomLevel = 18; // Zoom cercano para dirección específica
+            }
+        } else {
+            // Sin país especificado
+            if (tieneNumero) {
+                query = `${direccion}, ${ciudad}, ${provincia}`;
+                zoomLevel = 19;
+            } else {
+                query = `${direccion}, ${ciudad}, ${provincia}`;
+                zoomLevel = 18;
+            }
+        }
+    } else if (ciudad && provincia) {
         // Tenemos ciudad pero no dirección específica
-        query = `${ciudad}, ${provincia}`;
+        query = pais 
+            ? `${ciudad}, ${provincia}, ${pais}` 
+            : `${ciudad}, ${provincia}`;
         zoomLevel = 13; // Zoom medio para la ciudad
-    } else {
+    } else if (provincia) {
         // Solo tenemos provincia
-        query = provincia;
+        query = pais 
+            ? `${provincia}, ${pais}` 
+            : provincia;
         zoomLevel = 7; // Zoom lejano para la provincia
     }
+    
+    console.log("Query formateada para geocodificación:", query, "Zoom:", zoomLevel);
     
     // Realizar la geocodificación con el nivel de zoom apropiado
     geocodeAddress(query, function(lat, lng, result, zoom) {
