@@ -463,19 +463,35 @@ function extractAddressParts(fullAddress) {
  * @param {Function} finalCallback - Función final a llamar con el mejor resultado
  */
 function performMultipleGeocodingRequests(addressParts, finalCallback) {
-    // Verificar si tenemos una dirección específica en nuestra base de datos conocida
-    const knownAddress = findKnownAddress(addressParts);
-    if (knownAddress) {
-        console.log("Dirección encontrada en base de datos local:", knownAddress);
-        const result = {
-            lat: knownAddress.lat.toString(),
-            lon: knownAddress.lon.toString(),
-            display_name: knownAddress.display,
-            type: knownAddress.type || "house",
-            importance: 0.95,
-            zoomLevel: 19,
-            from_database: true
-        };
+    const { direccion, ciudad, provincia, pais } = addressParts;
+    
+    // Construir query estructurada para mejor precisión
+    let query = [];
+    if (direccion) query.push(direccion);
+    if (ciudad) query.push(ciudad);
+    if (provincia) query.push(provincia);
+    if (pais) query.push(pais || 'Argentina');
+    
+    const searchQuery = encodeURIComponent(query.join(', '));
+    
+    // Usar Nominatim con parámetros optimizados
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=1&countrycodes=ar&addressdetails=1`, {
+        headers: {
+            'User-Agent': 'EcoSmartAdvisor/1.0'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.length > 0) {
+            const result = {
+                lat: data[0].lat,
+                lon: data[0].lon,
+                display_name: data[0].display_name,
+                type: data[0].type,
+                importance: data[0].importance,
+                zoomLevel: determineZoomLevel(data[0].type),
+                from_nominatim: true
+            };
         
         // Devolver inmediatamente la dirección conocida
         finalCallback(result);
@@ -1021,4 +1037,17 @@ function addOrUpdateMarker(map, lat, lng, zoom = 15) {
         console.error("Error al crear marcador:", e);
         return null;
     }
+}
+function determineZoomLevel(locationType) {
+    const zoomLevels = {
+        'house': 19,
+        'building': 18,
+        'street': 17,
+        'suburb': 15,
+        'city': 13,
+        'administrative': 12,
+        'state': 8,
+        'country': 6
+    };
+    return zoomLevels[locationType] || 16;
 }

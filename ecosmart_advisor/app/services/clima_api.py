@@ -30,22 +30,31 @@ def obtener_datos_clima(ubicacion):
     else:
         return obtener_datos_por_ciudad(ubicacion)
 
-def obtener_datos_por_ciudad(ciudad):
+def obtener_datos_por_ciudad(ciudad, provincia=None, pais="Argentina"):
     """
-    Obtiene coordenadas de una ciudad usando un servicio de geocodificación
+    Obtiene coordenadas de una ciudad usando Nominatim
     y luego obtiene los datos climáticos.
     
     Args:
         ciudad (str): Nombre de la ciudad
+        provincia (str, optional): Nombre de la provincia
+        pais (str, optional): Nombre del país, default "Argentina"
         
     Returns:
         dict: Datos climáticos para la ubicación
     """
-    # Geocodificación simple - en una app real se usaría un servicio más completo
     try:
-        # Usando Open-Meteo Geocoding API
-        geocoding_url = f"https://geocoding-api.open-meteo.com/v1/search?name={ciudad}&count=1"
-        resp = requests.get(geocoding_url)
+        # Construir query para Nominatim
+        query = f"{ciudad}"
+        if provincia:
+            query += f", {provincia}"
+        if pais:
+            query += f", {pais}"
+            
+        # Usando Nominatim
+        headers = {'User-Agent': 'EcoSmartAdvisor/1.0'}
+        geocoding_url = f"https://nominatim.openstreetmap.org/search?format=json&q={query}&limit=1"
+        resp = requests.get(geocoding_url, headers=headers)
         data = resp.json()
         
         if 'results' in data and len(data['results']) > 0:
