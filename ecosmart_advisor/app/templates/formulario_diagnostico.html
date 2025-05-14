@@ -216,10 +216,22 @@
 
 {% block extra_js %}
 <!-- Primero cargar la hoja de estilos de Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous"/>
 
-<!-- Luego cargar el JavaScript de Leaflet con verificación de integridad -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Luego cargar el JavaScript de Leaflet (versión simplificada) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+
+<!-- Verificar que Leaflet se haya cargado correctamente -->
+<script>
+// Verificar que la biblioteca Leaflet esté cargada
+window.addEventListener('load', function() {
+    if (typeof L === 'undefined') {
+        console.error("Error: La biblioteca Leaflet no pudo cargarse.");
+        alert("Error al cargar los mapas. Por favor recargue la página o intente con otro navegador.");
+    } else {
+        console.log("Leaflet cargado correctamente");
+    }
+});</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -253,6 +265,15 @@
             }
             
             try {
+                // Verificar que Leaflet esté correctamente cargado
+                if (typeof L === 'undefined') {
+                    console.error("Error: La biblioteca Leaflet no está cargada.");
+                    alert("Error al cargar el mapa. Por favor, actualice la página y vuelva a intentarlo.");
+                    return;
+                }
+                
+                console.log("Leaflet disponible:", typeof L);
+                
                 // Crear el mapa centrado en Argentina por defecto
                 console.log("Creando nuevo mapa");
                 mapa = L.map('mapaUbicacion').setView([-34.6037, -58.3816], 5);
@@ -266,7 +287,7 @@
                 setTimeout(() => {
                     console.log("Actualizando tamaño del mapa");
                     mapa.invalidateSize();
-                }, 300);
+                }, 500);
                 
                 // Evento para seleccionar ubicación en el mapa
                 mapa.on('click', function(e) {
@@ -309,7 +330,15 @@
                 e.preventDefault(); // Prevenir comportamiento por defecto
                 
                 console.log("Click en botón mostrar/ocultar mapa");
-                if (mapContainer.style.display === 'none' || !mapContainer.style.display) {
+                console.log("Estado actual del display:", mapContainer.style.display);
+                
+                // Forzar un estilo computado para obtener el valor real
+                const computedStyle = window.getComputedStyle(mapContainer);
+                const isHidden = computedStyle.display === 'none';
+                
+                console.log("¿Está oculto según estilo computado?", isHidden);
+                
+                if (isHidden) {
                     console.log("Mostrando mapa");
                     mapContainer.style.display = 'block';
                     // Inicializar el mapa después de hacerlo visible
