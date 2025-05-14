@@ -61,11 +61,17 @@
                             </div>
                             
                             <!-- Botón para validar y ubicar en el mapa -->
-                            <div class="text-end mb-2">
-                                <button type="button" class="btn btn-sm btn-primary" id="validarUbicacionBtn">
-                                    <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
-                                </button>
-                                <span class="ms-2 text-muted small" id="validarUbicacionInfo">Complete todos los campos para ubicar</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light">
+                                <div>
+                                    <i class="fas fa-info-circle text-primary me-1"></i>
+                                    <span class="text-muted">Complete la dirección y valide su ubicación en el mapa</span>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-primary" id="validarUbicacionBtn">
+                                        <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
+                                    </button>
+                                    <span class="ms-2 text-muted small" id="validarUbicacionInfo">Complete todos los campos para ubicar</span>
+                                </div>
                             </div>
                             
                             <!-- Campos ocultos para almacenar la ubicación y coordenadas -->

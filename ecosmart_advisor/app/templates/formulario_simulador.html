@@ -82,11 +82,17 @@
                             </div>
                             
                             <!-- Botón para validar y ubicar en el mapa -->
-                            <div class="text-end mb-2">
-                                <button type="button" class="btn btn-sm btn-primary" id="validarUbicacionBtn">
-                                    <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
-                                </button>
-                                <span class="ms-2 text-muted small" id="validarUbicacionInfo">Complete todos los campos para ubicar</span>
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light">
+                                <div>
+                                    <i class="fas fa-info-circle text-primary me-1"></i>
+                                    <span class="text-muted">Complete la dirección y valide su ubicación en el mapa</span>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-primary" id="validarUbicacionBtn">
+                                        <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
+                                    </button>
+                                    <span class="ms-2 text-muted small" id="validarUbicacionInfo">Complete todos los campos para ubicar</span>
+                                </div>
                             </div>
                             
                             <!-- Campos ocultos para almacenar la ubicación y coordenadas -->
@@ -238,6 +244,88 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Actualizar ubicación completa
                 updateFullLocation();
+            }
+        });
+    }
+    
+    // Función para manejar el botón de validación de ubicación
+    if (validarUbicacionBtn) {
+        validarUbicacionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pais = paisInput.value.trim();
+            const provincia = provinciaInput.value.trim();
+            const ciudad = ciudadInput.value.trim();
+            const direccion = direccionInput.value.trim();
+            
+            // Verificar si todos los campos necesarios están completos
+            const camposFaltantes = [];
+            if (!pais) camposFaltantes.push('país');
+            if (!provincia) camposFaltantes.push('provincia');
+            if (!ciudad) camposFaltantes.push('ciudad');
+            if (!direccion) camposFaltantes.push('dirección');
+            
+            if (camposFaltantes.length > 0) {
+                // Mostrar mensaje de error si faltan campos
+                validarUbicacionInfo.textContent = 'Complete: ' + camposFaltantes.join(', ');
+                validarUbicacionInfo.className = 'ms-2 text-danger small';
+                return;
+            }
+            
+            // Mostrar mensaje de procesamiento
+            validarUbicacionInfo.textContent = 'Ubicando en el mapa...';
+            validarUbicacionInfo.className = 'ms-2 text-primary small';
+            
+            // Mostrar el mapa si está oculto
+            const mapaDiv = document.getElementById('mapaUbicacion');
+            if (mapaDiv.style.display === 'none') {
+                toggleMap('mapaUbicacion');
+            }
+            
+            // Inicializar o referenciar el mapa
+            let map = window.ecosmartMap;
+            if (!map) {
+                map = initMap('mapaUbicacion');
+                if (map) {
+                    setupMapClickEvent(map, updateLocationData);
+                }
+            }
+            
+            if (map) {
+                // Realizar geocodificación con todos los datos
+                const queryCompleta = `${direccion}, ${ciudad}, ${provincia}, ${pais}`;
+                console.log("Validando dirección completa:", queryCompleta);
+                
+                // Usar geocodificación directa para obtener coordenadas exactas
+                geocodeAddress(queryCompleta, function(lat, lng, result, zoom) {
+                    if (lat && lng) {
+                        console.log("Ubicación encontrada:", lat, lng, "zoom:", zoom);
+                        
+                        // Asegurar que el zoom es apropiado para una dirección específica
+                        const zoomLevel = 18; // Nivel de zoom apropiado para una dirección
+                        
+                        // Forzar la creación del marcador
+                        setTimeout(function() {
+                            // Intentar crear el marcador de diferentes maneras
+                            let marker = addOrUpdateMarker(map, lat, lng, zoomLevel);
+                            
+                            if (!marker && window.debugEcosmart) {
+                                console.warn("Usando método de emergencia para marcador");
+                                window.debugEcosmart.emergencyCreateMarker(lat, lng);
+                            }
+                            
+                            // Actualizar todos los datos de ubicación
+                            updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                            
+                            // Notificar éxito
+                            validarUbicacionInfo.textContent = 'Ubicación encontrada y marcada en el mapa';
+                            validarUbicacionInfo.className = 'ms-2 text-success small';
+                        }, 200);
+                    } else {
+                        console.error("No se pudo ubicar la dirección");
+                        validarUbicacionInfo.textContent = 'No se pudo encontrar la ubicación exacta';
+                        validarUbicacionInfo.className = 'ms-2 text-danger small';
+                    }
+                }, 18); // Pasar nivel de zoom alto por defecto
             }
         });
     }
