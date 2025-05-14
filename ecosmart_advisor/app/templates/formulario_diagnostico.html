@@ -527,8 +527,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const ciudad = ciudadInput.value.trim();
         const direccion = direccionInput.value.trim();
         
+        // Log de datos ingresados
+        console.log("Datos para geocodificación:", { pais, provincia, ciudad, direccion });
+        
         // Verificar si todos los campos necesarios están completos para colocar el pin
         const todosLosCamposCompletos = pais && provincia && ciudad && direccion;
+        
+        console.log("¿Todos los campos completos?", todosLosCamposCompletos);
         
         // Solo intentar geocodificar si tenemos al menos la provincia
         if (provincia) {
@@ -550,17 +555,35 @@ document.addEventListener('DOMContentLoaded', function() {
                             { pais, provincia, ciudad, direccion }, 
                             function(lat, lng, result, zoom) {
                                 if (lat && lng) {
+                                    console.log("Geocodificación exitosa. Coordenadas:", lat, lng);
+                                    
                                     // Solo colocar el pin si todos los campos están completos
                                     if (todosLosCamposCompletos) {
-                                        // Actualizar marcador y centrar mapa con el zoom apropiado
-                                        addOrUpdateMarker(map, lat, lng, zoom);
+                                        console.log("Todos los campos completos, colocando pin...");
                                         
-                                        // Actualizar datos de la ubicación
-                                        updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                        // Forzar un tiempo de espera para asegurar que el mapa está listo
+                                        setTimeout(function() {
+                                            // Actualizar marcador y centrar mapa con el zoom apropiado
+                                            const marker = addOrUpdateMarker(map, lat, lng, zoom);
+                                            console.log("Resultado de addOrUpdateMarker:", marker ? "Pin creado" : "Fallo al crear pin");
+                                            
+                                            // Verificar si se creó el marcador
+                                            if (!marker) {
+                                                console.error("No se pudo crear el marcador. Intentando nuevamente...");
+                                                // Intentar nuevamente con coordenadas verificadas
+                                                addOrUpdateMarker(map, parseFloat(lat), parseFloat(lng), zoom);
+                                            }
+                                            
+                                            // Actualizar datos de la ubicación
+                                            updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                                        }, 200);
                                     } else {
+                                        console.log("No todos los campos están completos, solo centrando mapa sin pin");
                                         // Solo centrar el mapa sin colocar el pin
                                         map.setView([lat, lng], zoom);
                                     }
+                                } else {
+                                    console.warn("Geocodificación falló. No se obtuvieron coordenadas.");
                                 }
                             }
                         );
