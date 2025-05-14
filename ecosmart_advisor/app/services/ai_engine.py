@@ -15,12 +15,12 @@ def obtener_recomendacion_ia(datos_usuario, datos_clima, resultados_tecnicos):
     """
     Utiliza un sistema basado en reglas para generar recomendaciones personalizadas
     basadas en los datos del usuario, clima y cálculos técnicos.
-    
+
     Args:
         datos_usuario (dict): Datos proporcionados por el usuario
         datos_clima (dict): Datos climáticos de la ubicación
         resultados_tecnicos (dict): Resultados de los cálculos técnicos
-        
+
     Returns:
         dict: Recomendación personalizada y explicación
     """
@@ -31,12 +31,12 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
     """
     Sistema avanzado basado en reglas que analiza los datos y genera
     recomendaciones personalizadas sin usar APIs externas de IA.
-    
+
     Args:
         datos_usuario (dict): Datos proporcionados por el usuario
         datos_clima (dict): Datos climáticos de la ubicación
         resultados_tecnicos (dict): Resultados de los cálculos técnicos
-        
+
     Returns:
         dict: Recomendación detallada y personalizada
     """
@@ -47,40 +47,40 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
     objetivo = datos_usuario.get('objetivo', 'equilibrado')
     tipo_vivienda = datos_usuario.get('tipo_vivienda', 'casa_mediana')
     superficie = float(datos_usuario.get('superficie_disponible', 0))
-    
+
     # Mejores opciones basadas en datos climáticos
     mejores_opciones = []
-    
+
     # Verificar condiciones para energía solar
     if radiacion_solar >= 4.0:
         mejores_opciones.append('solar')
     elif radiacion_solar >= 3.0:
         mejores_opciones.append('solar_condiciones')
-    
+
     # Verificar condiciones para energía eólica
     if velocidad_viento >= 4.5:
         mejores_opciones.append('eolica')
     elif velocidad_viento >= 3.5:
         mejores_opciones.append('eolica_condiciones')
-    
+
     # Verificar condiciones para termotanque solar
     if radiacion_solar >= 3.0 and temperatura >= 15:
         mejores_opciones.append('termotanque')
-    
+
     # Si no hay opciones claras, añadir opción por defecto
     if not mejores_opciones:
         if radiacion_solar >= velocidad_viento:
             mejores_opciones.append('solar_basico')
         else:
             mejores_opciones.append('hibrido')
-    
+
     # Determinar recomendación principal basada en el objetivo del usuario
     recomendacion_principal = ""
     justificacion = ""
     ventajas = []
     desventajas = []
     consejos = []
-    
+
     if objetivo == 'ahorro':
         # Priorizar opción con mejor retorno económico
         if 'solar' in mejores_opciones:
@@ -140,7 +140,7 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
                 "Considere expandir el sistema fotovoltaico progresivamente",
                 "Implemente medidas de eficiencia energética en paralelo"
             ]
-    
+
     elif objetivo == 'ambiental':
         # Priorizar opción con mejor impacto ambiental
         if 'solar' in mejores_opciones and 'termotanque' in mejores_opciones:
@@ -200,7 +200,7 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
                 "Considere paneles bifaciales para mayor eficiencia",
                 "Implemente un sistema de monitoreo para optimizar el desempeño"
             ]
-    
+
     else:  # objetivo equilibrado
         # Buscar balance entre factores
         if 'solar' in mejores_opciones:
@@ -260,7 +260,7 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
                 "Planifique la instalación fotovoltaica en una segunda fase",
                 "Prepare la infraestructura eléctrica pensando en futuras ampliaciones"
             ]
-    
+
     # Consideraciones especiales según el tipo de vivienda
     consideraciones_especiales = ""
     if tipo_vivienda == 'apartamento':
@@ -269,7 +269,7 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
         consideraciones_especiales = "Para una casa pequeña, priorice la eficiencia del espacio. Utilice paneles de alta eficiencia y considere soluciones integradas que combinen múltiples funciones en espacios reducidos."
     elif tipo_vivienda == 'comercio':
         consideraciones_especiales = "Los locales comerciales suelen tener alto consumo durante horas diurnas, lo que los hace ideales para aprovechamiento solar directo. Analice la curva de consumo de su negocio para optimizar el dimensionamiento del sistema."
-    
+
     # Armar la respuesta final
     return {
         "recomendacion_principal": recomendacion_principal,
@@ -283,12 +283,12 @@ def generar_recomendacion_avanzada(datos_usuario, datos_clima, resultados_tecnic
 def generar_recomendacion_simple(datos_usuario, datos_clima, resultados_tecnicos):
     """
     Genera una recomendación simple basada en reglas para casos de fallback
-    
+
     Args:
         datos_usuario (dict): Datos proporcionados por el usuario
         datos_clima (dict): Datos climáticos de la ubicación
         resultados_tecnicos (dict): Resultados de los cálculos técnicos
-        
+
     Returns:
         dict: Recomendación simplificada
     """
@@ -296,7 +296,7 @@ def generar_recomendacion_simple(datos_usuario, datos_clima, resultados_tecnicos
     radiacion_solar = datos_clima.get('radiacion_solar', 0)
     velocidad_viento = datos_clima.get('velocidad_viento', 0)
     objetivo = datos_usuario.get('objetivo', 'equilibrado')
-    
+
     # Lógica simple basada en condiciones climáticas
     if radiacion_solar > 4.0 and velocidad_viento < 3.0:
         sistema = "Sistema solar fotovoltaico"
@@ -346,7 +346,7 @@ def generar_recomendacion_simple(datos_usuario, datos_clima, resultados_tecnicos
             "Considere ampliar el sistema en el futuro",
             "Evalúe complementar con otras tecnologías"
         ]
-    
+
     # Preparar consejos según el objetivo
     if objetivo == 'ahorro':
         consejos = [
@@ -366,7 +366,7 @@ def generar_recomendacion_simple(datos_usuario, datos_clima, resultados_tecnicos
             "Monitoree su generación y consumo para optimizar el uso",
             "Consulte sobre incentivos fiscales o programas de apoyo disponibles"
         ]
-    
+
     return {
         "recomendacion_principal": sistema,
         "justificacion": f"Basado en las condiciones climáticas de su ubicación (radiación solar: {radiacion_solar} kWh/m²/día, velocidad del viento: {velocidad_viento} m/s) y su objetivo principal ({objetivo}), recomendamos un {sistema.lower()} como la mejor opción para satisfacer sus necesidades energéticas de manera sostenible.",
@@ -379,19 +379,19 @@ def generar_recomendacion_simple(datos_usuario, datos_clima, resultados_tecnicos
 def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=None):
     """
     Analiza la combinación óptima de sistemas de energía renovable
-    
+
     Args:
         opciones_viables (list): Lista de opciones viables
         consumo_mensual (float): Consumo mensual en kWh
         presupuesto (float, optional): Presupuesto disponible
-        
+
     Returns:
         dict: Combinación óptima recomendada
     """
     # Si no hay opciones viables, no hay combinación posible
     if not opciones_viables:
         return None
-    
+
     # Si solo hay una opción, es la única posible
     if len(opciones_viables) == 1:
         return {
@@ -399,7 +399,7 @@ def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=N
             'cobertura_total': opciones_viables[0]['cobertura'],
             'detalles': [opciones_viables[0]]
         }
-    
+
     # Para cada opción, calcular la relación costo-beneficio
     for opcion in opciones_viables:
         if 'ahorro_anual' in opcion and opcion.get('costo_estimado', 0) > 0:
@@ -408,21 +408,21 @@ def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=N
         else:
             opcion['retorno_inversion'] = 99  # Valor alto para indicar que no se puede calcular
             opcion['costo_beneficio'] = 0
-    
+
     # Buscar combinaciones posibles
     mejores_combinaciones = []
-    
+
     # Probar combinación de solar + termotanque si ambos existen
     solar = next((op for op in opciones_viables if op['tipo'] == 'solar'), None)
     termotanque = next((op for op in opciones_viables if op['tipo'] == 'termotanque_solar'), None)
-    
+
     if solar and termotanque:
         costo_combinado = solar.get('costo_estimado', 0) + termotanque.get('costo_estimado', 0)
-        
+
         # Solo considerar si está dentro del presupuesto o no hay presupuesto especificado
         if presupuesto is None or costo_combinado <= presupuesto:
             cobertura_combinada = min(100, solar['cobertura'] + termotanque['cobertura'])
-            
+
             mejores_combinaciones.append({
                 'sistemas': ['solar', 'termotanque_solar'],
                 'cobertura_total': cobertura_combinada,
@@ -430,17 +430,17 @@ def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=N
                 'costo_beneficio': cobertura_combinada / costo_combinado * 100 if costo_combinado > 0 else 0,
                 'detalles': [solar, termotanque]
             })
-    
+
     # Probar combinación de eólica + termotanque si ambos existen
     eolica = next((op for op in opciones_viables if op['tipo'] == 'eolica'), None)
-    
+
     if eolica and termotanque:
         costo_combinado = eolica.get('costo_estimado', 0) + termotanque.get('costo_estimado', 0)
-        
+
         # Solo considerar si está dentro del presupuesto
         if presupuesto is None or costo_combinado <= presupuesto:
             cobertura_combinada = min(100, eolica['cobertura'] + termotanque['cobertura'])
-            
+
             mejores_combinaciones.append({
                 'sistemas': ['eolica', 'termotanque_solar'],
                 'cobertura_total': cobertura_combinada,
@@ -448,11 +448,11 @@ def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=N
                 'costo_beneficio': cobertura_combinada / costo_combinado * 100 if costo_combinado > 0 else 0,
                 'detalles': [eolica, termotanque]
             })
-    
+
     # También considerar sistemas individuales como opciones
     for opcion in opciones_viables:
         costo = opcion.get('costo_estimado', 0)
-        
+
         # Solo considerar si está dentro del presupuesto
         if presupuesto is None or costo <= presupuesto:
             mejores_combinaciones.append({
@@ -462,15 +462,16 @@ def analizar_combinacion_optima(opciones_viables, consumo_mensual, presupuesto=N
                 'costo_beneficio': opcion.get('costo_beneficio', 0),
                 'detalles': [opcion]
             })
-    
+
     # Si no hay combinaciones dentro del presupuesto
     if not mejores_combinaciones:
         return None
-    
+
     # Ordenar por cobertura total o por costo-beneficio si hay presupuesto
     if presupuesto:
         mejores_combinaciones.sort(key=lambda x: x['costo_beneficio'], reverse=True)
     else:
         mejores_combinaciones.sort(key=lambda x: x['cobertura_total'], reverse=True)
-    
+
     return mejores_combinaciones[0]
+```
