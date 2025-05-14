@@ -5,6 +5,7 @@
 // Variables globales
 let ecosmartMap = null;  // Instancia del mapa
 let ecosmartMarker = null;  // Marcador en el mapa
+let geocodingInProgress = false; // Evita múltiples solicitudes simultáneas
 
 /**
  * Inicializa el mapa en el contenedor especificado
@@ -133,19 +134,108 @@ function toggleMap(containerId) {
 function reverseGeocode(lat, lng, callback) {
     console.log("Realizando geocodificación inversa para:", lat, lng);
     
+    if (geocodingInProgress) {
+        console.log("Ya hay una solicitud de geocodificación en progreso");
+        return;
+    }
+    
+    geocodingInProgress = true;
+    
     // Usar Nominatim para la geocodificación inversa
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
         .then(response => response.json())
         .then(data => {
             console.log("Datos de geocodificación recibidos:", data);
+            geocodingInProgress = false;
             if (typeof callback === 'function') {
                 callback(data);
             }
         })
         .catch(error => {
             console.error("Error en geocodificación inversa:", error);
+            geocodingInProgress = false;
             if (typeof callback === 'function') {
                 callback(null, error);
             }
         });
+}
+
+/**
+ * Realiza geocodificación directa para obtener coordenadas a partir de una dirección
+ * @param {string} address - Dirección a geocodificar
+ * @param {Function} callback - Función a llamar con los datos obtenidos (lat, lng)
+ */
+function geocodeAddress(address, callback) {
+    if (!address || address.trim() === '') {
+        console.error("La dirección está vacía");
+        return;
+    }
+    
+    console.log("Realizando geocodificación para dirección:", address);
+    
+    if (geocodingInProgress) {
+        console.log("Ya hay una solicitud de geocodificación en progreso");
+        return;
+    }
+    
+    geocodingInProgress = true;
+    
+    // Usar Nominatim para geocodificación directa
+    const encodedAddress = encodeURIComponent(address);
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Datos de geocodificación directa recibidos:", data);
+            geocodingInProgress = false;
+            
+            if (data && data.length > 0) {
+                const result = data[0];
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                
+                if (typeof callback === 'function') {
+                    callback(lat, lng, result);
+                }
+            } else {
+                console.warn("No se encontraron resultados para la dirección:", address);
+                if (typeof callback === 'function') {
+                    callback(null, null, null);
+                }
+            }
+        })
+        .catch(error => {
+            console.error("Error en geocodificación directa:", error);
+            geocodingInProgress = false;
+            if (typeof callback === 'function') {
+                callback(null, null, error);
+            }
+        });
+}
+
+/**
+ * Agrega o actualiza un marcador en el mapa
+ * @param {Object} map - Instancia del mapa
+ * @param {number} lat - Latitud
+ * @param {number} lng - Longitud
+ * @returns {Object} - El marcador creado o actualizado
+ */
+function addOrUpdateMarker(map, lat, lng) {
+    if (!map) {
+        console.error("El mapa no está inicializado");
+        return null;
+    }
+    
+    console.log("Agregando/actualizando marcador en:", lat, lng);
+    
+    // Crear o actualizar el marcador
+    if (ecosmartMarker) {
+        ecosmartMarker.setLatLng([lat, lng]);
+    } else {
+        ecosmartMarker = L.marker([lat, lng]).addTo(map);
+    }
+    
+    // Centrar el mapa en la ubicación del marcador
+    map.setView([lat, lng], 15);
+    
+    return ecosmartMarker;
 }

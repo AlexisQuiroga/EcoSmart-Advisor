@@ -334,10 +334,73 @@ document.addEventListener('DOMContentLoaded', function() {
     ['provincia', 'ciudad', 'direccion'].forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('change', updateFullLocation);
+            element.addEventListener('change', function() {
+                updateFullLocation();
+                tryToGeocodeAddress();
+            });
             element.addEventListener('input', updateFullLocation);
         }
     });
+    
+    // Función para intentar geocodificar la dirección completa
+    function tryToGeocodeAddress() {
+        const provincia = provinciaInput.value.trim();
+        const ciudad = ciudadInput.value.trim();
+        const direccion = direccionInput.value.trim();
+        
+        // Solo intentar geocodificar si tenemos al menos ciudad y provincia
+        if (provincia && ciudad) {
+            // Construir dirección completa para geocodificar
+            let direccionCompleta = '';
+            
+            if (direccion) {
+                direccionCompleta += direccion + ', ';
+            }
+            
+            direccionCompleta += ciudad + ', ' + provincia;
+            
+            console.log("Intentando geocodificar:", direccionCompleta);
+            
+            // Mostrar el mapa si está oculto
+            const mapaDiv = document.getElementById('mapaUbicacion');
+            if (mapaDiv.style.display === 'none') {
+                toggleMap('mapaUbicacion');
+                // Inicializar el mapa después de hacerlo visible
+                setTimeout(function() {
+                    const map = initMap('mapaUbicacion');
+                    if (map) {
+                        // Configurar el evento de clic después de inicializar
+                        setupMapClickEvent(map, updateLocationData);
+                        
+                        // Geocodificar la dirección
+                        geocodeAddress(direccionCompleta, function(lat, lng) {
+                            if (lat && lng) {
+                                // Actualizar marcador y centrar mapa
+                                addOrUpdateMarker(map, lat, lng);
+                                
+                                // Actualizar datos de la ubicación
+                                updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                            }
+                        });
+                    }
+                }, 300);
+            } else {
+                // El mapa ya está visible, verificar si está inicializado
+                if (ecosmartMap) {
+                    // Geocodificar la dirección
+                    geocodeAddress(direccionCompleta, function(lat, lng) {
+                        if (lat && lng) {
+                            // Actualizar marcador y centrar mapa
+                            addOrUpdateMarker(ecosmartMap, lat, lng);
+                            
+                            // Actualizar datos de la ubicación
+                            updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                        }
+                    });
+                }
+            }
+        }
+    }
     
     // Validación del formulario
     const formulario = document.getElementById('diagnosticoForm');
