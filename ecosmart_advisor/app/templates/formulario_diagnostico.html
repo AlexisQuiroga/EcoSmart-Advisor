@@ -276,25 +276,69 @@ document.addEventListener('DOMContentLoaded', function() {
         // Realizar geocodificación inversa para obtener la dirección
         reverseGeocode(lat, lng, function(data) {
             if (data && data.address) {
-                // Extraer información de la dirección
-                const direccion = data.address.road || data.address.pedestrian || '';
-                const numero = data.address.house_number || '';
-                const ciudad = data.address.city || data.address.town || data.address.village || '';
-                const provincia = data.address.state || '';
-                const pais = data.address.country || '';
+                console.log("Datos de dirección recibidos:", data.address);
                 
-                // Actualizar campos si están disponibles
-                if (pais) paisInput.value = pais;
-                if (provincia) provinciaInput.value = provincia;
-                if (ciudad) ciudadInput.value = ciudad;
-                if (direccion) {
-                    let direccionCompleta = direccion;
-                    if (numero) direccionCompleta += ' ' + numero;
-                    direccionInput.value = direccionCompleta;
+                // Limpiar todos los campos primero para evitar mezcla de datos
+                let shouldUpdateFields = confirm(
+                    "¿Desea completar automáticamente los campos de ubicación con los datos obtenidos?\n" +
+                    "(Si ya ingresó sus datos manualmente, seleccione 'Cancelar')"
+                );
+                
+                if (shouldUpdateFields) {
+                    // Extraer información de la dirección con cuidado extra para evitar datos erróneos
+                    const direccion = data.address.road || data.address.pedestrian || '';
+                    const numero = data.address.house_number || '';
+                    const ciudad = data.address.city || data.address.town || data.address.village || '';
+                    const provincia = data.address.state || data.address.county || '';
+                    const pais = data.address.country || '';
+                    
+                    // Solo actualizar campos vacíos o si el usuario confirma
+                    if (pais && (!paisInput.value || confirm("¿Reemplazar país existente?"))) {
+                        paisInput.value = pais;
+                    }
+                    
+                    if (provincia && (!provinciaInput.value || confirm("¿Reemplazar provincia existente?"))) {
+                        provinciaInput.value = provincia;
+                    }
+                    
+                    if (ciudad && (!ciudadInput.value || confirm("¿Reemplazar ciudad existente?"))) {
+                        ciudadInput.value = ciudad;
+                    }
+                    
+                    if (direccion && (!direccionInput.value || confirm("¿Reemplazar dirección existente?"))) {
+                        let direccionCompleta = direccion;
+                        if (numero) direccionCompleta += ' ' + numero;
+                        direccionInput.value = direccionCompleta;
+                    }
                 }
                 
-                // Actualizar ubicación completa
+                // Actualizar siempre la ubicación completa para el campo oculto
                 updateFullLocation();
+                
+                // Actualizar el estado visual de los campos
+                setTimeout(function() {
+                    // Verificar si todos los campos están completos
+                    const todosLosCamposCompletos = 
+                        paisInput.value.trim() && 
+                        provinciaInput.value.trim() && 
+                        ciudadInput.value.trim() && 
+                        direccionInput.value.trim();
+                        
+                    // Actualizar el mensaje del botón de validación
+                    if (todosLosCamposCompletos) {
+                        validarUbicacionInfo.textContent = 'Ubicación lista para validar';
+                        validarUbicacionInfo.className = 'ms-2 text-success small';
+                    } else {
+                        const camposFaltantes = [];
+                        if (!paisInput.value.trim()) camposFaltantes.push('país');
+                        if (!provinciaInput.value.trim()) camposFaltantes.push('provincia');
+                        if (!ciudadInput.value.trim()) camposFaltantes.push('ciudad');
+                        if (!direccionInput.value.trim()) camposFaltantes.push('dirección');
+                        
+                        validarUbicacionInfo.textContent = 'Complete: ' + camposFaltantes.join(', ');
+                        validarUbicacionInfo.className = 'ms-2 text-warning small';
+                    }
+                }, 100);
             }
         });
     }
