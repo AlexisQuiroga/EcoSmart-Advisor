@@ -307,54 +307,129 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
         return;
     }
     
-    console.log("Realizando geocodificación para dirección:", address);
+    // Normalizar la dirección para evitar problemas de mayúsculas/minúsculas
+    // y caracteres especiales
+    const normalizedAddress = address.trim().toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Eliminar acentos
+    
+    console.log("Realizando geocodificación para dirección normalizada:", normalizedAddress);
+    
+    // Verificar si tenemos la dirección en caché
+    const cacheKey = `geocode_${normalizedAddress}`;
+    const cachedResult = sessionStorage.getItem(cacheKey);
+    
+    if (cachedResult) {
+        try {
+            const cachedData = JSON.parse(cachedResult);
+            console.log("Usando resultado en caché para:", normalizedAddress);
+            
+            if (typeof callback === 'function') {
+                callback(
+                    parseFloat(cachedData.lat), 
+                    parseFloat(cachedData.lon), 
+                    cachedData.result, 
+                    cachedData.zoomLevel
+                );
+            }
+            return;
+        } catch (e) {
+            console.warn("Error al usar datos en caché:", e);
+            // Continuar con la búsqueda normal si hay error con la caché
+        }
+    }
     
     if (geocodingInProgress) {
-        console.log("Ya hay una solicitud de geocodificación en progreso");
+        console.log("Ya hay una solicitud de geocodificación en progreso, intentando nuevamente en 500ms");
+        setTimeout(() => {
+            geocodeAddress(address, callback, zoomLevel);
+        }, 500);
         return;
     }
     
     geocodingInProgress = true;
     
+    // Mostrar indicador de carga si existe
+    const loadingEl = document.getElementById('map-loading-indicator');
+    if (loadingEl) loadingEl.style.display = 'block';
+    
     // Usar Nominatim para geocodificación directa con parámetros optimizados
-    const encodedAddress = encodeURIComponent(address);
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&addressdetails=1&limit=3&accept-language=es`;
+    const encodedAddress = encodeURIComponent(normalizedAddress);
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&addressdetails=1&limit=5&accept-language=es`;
     
     console.log("Realizando petición a URL:", url);
     
-    fetch(url)
-        .then(response => response.json())
+    // Crear un timeout para abortar la solicitud si tarda demasiado
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    
+    fetch(url, { signal: controller.signal })
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             console.log("Datos de geocodificación directa recibidos:", data);
             geocodingInProgress = false;
             
+            // Ocultar indicador de carga
+            if (loadingEl) loadingEl.style.display = 'none';
+            
             if (data && data.length > 0) {
-                // Intentar encontrar el resultado más relevante
-                // Priorizar resultados que contienen "house" o "building" en su tipo
-                let bestResult = data[0]; // Por defecto, usar el primer resultado
+                // Priorizar resultados por relevancia y tipo
+                const typeWeights = {
+                    'house': 10,
+                    'building': 9,
+                    'residential': 8,
+                    'address': 7,
+                    'street': 6,
+                    'quarter': 5,
+                    'suburb': 4,
+                    'village': 3,
+                    'town': 2,
+                    'city': 1
+                };
                 
-                // Buscar si hay un resultado más específico (casa o edificio)
-                for (let i = 0; i < data.length; i++) {
-                    if (data[i].type === 'house' || 
-                        data[i].type === 'building' || 
-                        data[i].type === 'residential' ||
-                        data[i].class === 'building') {
-                        bestResult = data[i];
-                        break;
-                    }
-                }
+                // Ordenar resultados por relevancia
+                data.sort((a, b) => {
+                    const weightA = typeWeights[a.type] || 0;
+                    const weightB = typeWeights[b.type] || 0;
+                    return weightB - weightA;
+                });
+                
+                let bestResult = data[0];
                 
                 const lat = parseFloat(bestResult.lat);
-                const lng = parseFloat(bestResult.lon);
+                const lon = parseFloat(bestResult.lon);
                 
-                // Ajustar zoom según el tipo de resultado
-                let adjustedZoom = zoomLevel;
+                // Determinar el nivel de zoom según el tipo de resultado
+                let autoZoom = zoomLevel;
                 if (bestResult.type === 'house' || bestResult.type === 'building') {
-                    adjustedZoom = 19; // Zoom más cercano para direcciones exactas
+                    autoZoom = 18; // Máximo zoom para casas/edificios
+                } else if (bestResult.type === 'street' || bestResult.type === 'residential') {
+                    autoZoom = 17; // Zoom alto para calles
+                } else if (bestResult.type === 'suburb' || bestResult.type === 'quarter') {
+                    autoZoom = 15; // Zoom medio para barrios
+                } else if (bestResult.type === 'city' || bestResult.type === 'town') {
+                    autoZoom = 12; // Zoom bajo para ciudades
+                }
+                
+                // Guardar en caché
+                try {
+                    sessionStorage.setItem(cacheKey, JSON.stringify({
+                        lat: lat,
+                        lon: lon,
+                        result: bestResult,
+                        zoomLevel: autoZoom
+                    }));
+                } catch (e) {
+                    console.warn("No se pudo guardar en caché:", e);
                 }
                 
                 if (typeof callback === 'function') {
-                    callback(lat, lng, bestResult, adjustedZoom);
+                    callback(lat, lon, bestResult, autoZoom);
                 }
             } else {
                 console.warn("No se encontraron resultados para la dirección:", address);
@@ -364,8 +439,13 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
             }
         })
         .catch(error => {
+            clearTimeout(timeoutId);
             console.error("Error en geocodificación directa:", error);
             geocodingInProgress = false;
+            
+            // Ocultar indicador de carga
+            if (loadingEl) loadingEl.style.display = 'none';
+            
             if (typeof callback === 'function') {
                 callback(null, null, error);
             }
