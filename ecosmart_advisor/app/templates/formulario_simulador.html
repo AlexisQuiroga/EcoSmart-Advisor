@@ -248,29 +248,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para actualizar el campo oculto de ubicación completa
     function updateFullLocation() {
+        const pais = paisInput ? paisInput.value.trim() : '';
         const provincia = provinciaInput ? provinciaInput.value.trim() : '';
         const ciudad = ciudadInput ? ciudadInput.value.trim() : '';
         const direccion = direccionInput ? direccionInput.value.trim() : '';
         const latitud = latitudInput ? latitudInput.value.trim() : '';
         const longitud = longitudInput ? longitudInput.value.trim() : '';
         
-        console.log("Actualizando ubicación completa con:", {provincia, ciudad, direccion, latitud, longitud});
+        console.log("Actualizando ubicación completa con:", {pais, provincia, ciudad, direccion, latitud, longitud});
         
         let ubicacionCompleta = '';
         
         // Primero añadir dirección textual si existe
         if (direccion) {
             ubicacionCompleta += direccion;
-            if (ciudad || provincia) ubicacionCompleta += ', ';
+            if (ciudad || provincia || pais) ubicacionCompleta += ', ';
         }
         
         if (ciudad) {
             ubicacionCompleta += ciudad;
-            if (provincia) ubicacionCompleta += ', ';
+            if (provincia || pais) ubicacionCompleta += ', ';
         }
         
         if (provincia) {
             ubicacionCompleta += provincia;
+            if (pais) ubicacionCompleta += ', ';
+        }
+        
+        if (pais) {
+            ubicacionCompleta += pais;
         }
         
         // Si hay coordenadas y no hay texto, usar las coordenadas
