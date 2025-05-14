@@ -93,21 +93,53 @@ function setupMapClickEvent(map, callback) {
     }
     
     map.on('click', function(e) {
-        const lat = e.latlng.lat.toFixed(6);
-        const lng = e.latlng.lng.toFixed(6);
-        
-        console.log("Click en el mapa en:", lat, lng);
-        
-        // Añadir o mover el marcador
-        if (ecosmartMarker) {
-            ecosmartMarker.setLatLng(e.latlng);
-        } else {
-            ecosmartMarker = L.marker(e.latlng).addTo(map);
-        }
-        
-        // Llamar al callback con las coordenadas
-        if (typeof callback === 'function') {
-            callback(lat, lng);
+        try {
+            // Capturar las coordenadas y convertirlas a número antes de formatear
+            const rawLat = e.latlng.lat;
+            const rawLng = e.latlng.lng;
+            
+            // Validar coordenadas
+            if (isNaN(rawLat) || isNaN(rawLng)) {
+                console.error("Coordenadas inválidas del clic:", rawLat, rawLng);
+                return;
+            }
+            
+            // Formatear para precisión fija
+            const lat = parseFloat(rawLat.toFixed(6));
+            const lng = parseFloat(rawLng.toFixed(6));
+            
+            console.log("Click en el mapa en:", lat, lng);
+            
+            // Limpiar marcador existente si hay uno
+            if (ecosmartMarker) {
+                try {
+                    ecosmartMarker.remove();
+                    ecosmartMarker = null;
+                } catch (err) {
+                    console.warn("Error al eliminar marcador existente:", err);
+                }
+            }
+            
+            try {
+                // Crear un nuevo marcador
+                ecosmartMarker = L.marker([lat, lng]).addTo(map);
+                ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
+                console.log("Marcador creado exitosamente en:", lat, lng);
+            } catch (err) {
+                console.error("Error al crear marcador:", err);
+            }
+            
+            // Realizar geocodificación inversa para obtener la dirección
+            reverseGeocode(lat, lng, function(addressData) {
+                console.log("Datos de geocodificación inversa:", addressData);
+                
+                // Llamar al callback con las coordenadas y datos de dirección
+                if (typeof callback === 'function') {
+                    callback(lat, lng, addressData);
+                }
+            });
+        } catch (error) {
+            console.error("Error general en el evento de clic:", error);
         }
     });
 }
