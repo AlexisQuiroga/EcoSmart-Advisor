@@ -100,31 +100,37 @@ function initMap(containerId) {
     console.log("Inicializando mapa en:", containerId);
     
     try {
-        // Verificar que Leaflet esté disponible
         if (typeof L === 'undefined') {
             console.error("Error: La biblioteca Leaflet no está disponible");
             return null;
         }
         
-        // Verificar que el contenedor exista
         const container = document.getElementById(containerId);
         if (!container) {
             console.error("Error: No se encontró el contenedor del mapa:", containerId);
             return null;
         }
         
-        // Asegurarse de que el contenedor sea visible
         container.style.display = 'block';
         
-        // Crear el mapa o usar la instancia existente
         if (!ecosmartMap) {
             console.log("Creando nueva instancia del mapa");
-            ecosmartMap = L.map(containerId).setView([-34.603722, -58.381592], 5);
+            // Centrar en Argentina por defecto
+            ecosmartMap = L.map(containerId).setView([-38.416097, -63.616672], 4);
             
-            // Añadir capa base de OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            // Usar un tile server más rápido y con caché
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+                minZoom: 3,
+                preferCanvas: true
             }).addTo(ecosmartMap);
+            
+            // Limitar vista a Argentina
+            ecosmartMap.setMaxBounds([
+                [-55.0, -75.0], // SO
+                [-20.0, -50.0]  // NE
+            ]);
         }
         
         // Actualizar tamaño después de que esté visible
@@ -331,10 +337,20 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
         return;
     }
     
-    // Normalizar la dirección para evitar problemas de mayúsculas/minúsculas
-    // y caracteres especiales
     const normalizedAddress = address.trim().toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Eliminar acentos
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+    // Usar caché local para direcciones recientes
+    const cacheKey = `geocode_${normalizedAddress}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+        const data = JSON.parse(cached);
+        if (Date.now() - data.timestamp < 3600000) { // Caché válido por 1 hora
+            console.log("Usando datos en caché");
+            callback(data.lat, data.lon, data.result, data.zoomLevel);
+            return;
+        }
+    }
     
     console.log("Realizando geocodificación para dirección normalizada:", normalizedAddress);
     

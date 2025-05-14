@@ -44,17 +44,24 @@ def obtener_datos_por_ciudad(ciudad, provincia=None, pais="Argentina"):
         dict: Datos climáticos para la ubicación
     """
     try:
-        # Construir query para Nominatim
+        # Construir query optimizada para Argentina
         query = f"{ciudad}"
         if provincia:
             query += f", {provincia}"
         if pais:
             query += f", {pais}"
             
-        # Usando Nominatim
-        headers = {'User-Agent': 'EcoSmartAdvisor/1.0'}
-        geocoding_url = f"https://nominatim.openstreetmap.org/search?format=json&q={query}&limit=1"
-        resp = requests.get(geocoding_url, headers=headers)
+        # Usando Nominatim con parámetros optimizados para Argentina
+        headers = {
+            'User-Agent': 'EcoSmartAdvisor/1.0',
+            'Accept-Language': 'es'
+        }
+        geocoding_url = (
+            "https://nominatim.openstreetmap.org/search"
+            f"?format=json&q={query}&limit=1&countrycodes=ar"
+            "&addressdetails=1&accept-language=es"
+        )
+        resp = requests.get(geocoding_url, headers=headers, timeout=5)
         data = resp.json()
         
         if 'results' in data and len(data['results']) > 0:
