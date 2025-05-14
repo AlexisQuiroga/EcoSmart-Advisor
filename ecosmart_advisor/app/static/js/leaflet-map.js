@@ -1,0 +1,151 @@
+/**
+ * Funciones para manejo del mapa con Leaflet
+ */
+
+// Variables globales
+let ecosmartMap = null;  // Instancia del mapa
+let ecosmartMarker = null;  // Marcador en el mapa
+
+/**
+ * Inicializa el mapa en el contenedor especificado
+ * @param {string} containerId - ID del contenedor del mapa
+ * @returns {Object} - Instancia del mapa o null si falla
+ */
+function initMap(containerId) {
+    console.log("Inicializando mapa en:", containerId);
+    
+    try {
+        // Verificar que Leaflet esté disponible
+        if (typeof L === 'undefined') {
+            console.error("Error: La biblioteca Leaflet no está disponible");
+            return null;
+        }
+        
+        // Verificar que el contenedor exista
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error("Error: No se encontró el contenedor del mapa:", containerId);
+            return null;
+        }
+        
+        // Asegurarse de que el contenedor sea visible
+        container.style.display = 'block';
+        
+        // Crear el mapa o usar la instancia existente
+        if (!ecosmartMap) {
+            console.log("Creando nueva instancia del mapa");
+            ecosmartMap = L.map(containerId).setView([-34.603722, -58.381592], 5);
+            
+            // Añadir capa base de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(ecosmartMap);
+        }
+        
+        // Actualizar tamaño después de que esté visible
+        setTimeout(function() {
+            ecosmartMap.invalidateSize();
+            console.log("Tamaño del mapa actualizado");
+        }, 500);
+        
+        return ecosmartMap;
+    } catch (error) {
+        console.error("Error al inicializar el mapa:", error);
+        return null;
+    }
+}
+
+/**
+ * Añade un evento de clic al mapa para seleccionar ubicación
+ * @param {Object} map - Instancia del mapa
+ * @param {Function} callback - Función a llamar cuando se hace clic (recibe lat, lng)
+ */
+function setupMapClickEvent(map, callback) {
+    if (!map) {
+        console.error("Error: No se puede configurar evento de clic, el mapa no está inicializado");
+        return;
+    }
+    
+    map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        
+        console.log("Click en el mapa en:", lat, lng);
+        
+        // Añadir o mover el marcador
+        if (ecosmartMarker) {
+            ecosmartMarker.setLatLng(e.latlng);
+        } else {
+            ecosmartMarker = L.marker(e.latlng).addTo(map);
+        }
+        
+        // Llamar al callback con las coordenadas
+        if (typeof callback === 'function') {
+            callback(lat, lng);
+        }
+    });
+}
+
+/**
+ * Muestra u oculta el mapa
+ * @param {string} containerId - ID del contenedor del mapa
+ * @returns {boolean} - true si el mapa está visible después de la operación
+ */
+function toggleMap(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error("Error: No se encontró el contenedor del mapa:", containerId);
+        return false;
+    }
+    
+    // Obtener estado actual (computado)
+    const computedStyle = window.getComputedStyle(container);
+    const isHidden = computedStyle.display === 'none';
+    
+    console.log("Toggle mapa, estado actual:", isHidden ? "oculto" : "visible");
+    
+    if (isHidden) {
+        container.style.display = 'block';
+        console.log("Mostrando mapa");
+        
+        // Si el mapa ya está inicializado, actualizar su tamaño
+        if (ecosmartMap) {
+            setTimeout(function() {
+                ecosmartMap.invalidateSize();
+                console.log("Tamaño del mapa actualizado después de mostrar");
+            }, 500);
+        }
+        
+        return true;
+    } else {
+        container.style.display = 'none';
+        console.log("Ocultando mapa");
+        return false;
+    }
+}
+
+/**
+ * Realiza geocodificación inversa para obtener dirección a partir de coordenadas
+ * @param {string} lat - Latitud
+ * @param {string} lng - Longitud
+ * @param {Function} callback - Función a llamar con los datos obtenidos
+ */
+function reverseGeocode(lat, lng, callback) {
+    console.log("Realizando geocodificación inversa para:", lat, lng);
+    
+    // Usar Nominatim para la geocodificación inversa
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Datos de geocodificación recibidos:", data);
+            if (typeof callback === 'function') {
+                callback(data);
+            }
+        })
+        .catch(error => {
+            console.error("Error en geocodificación inversa:", error);
+            if (typeof callback === 'function') {
+                callback(null, error);
+            }
+        });
+}

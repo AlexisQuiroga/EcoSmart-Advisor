@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Mapa Leaflet</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #34a853;
+        }
+        .btn {
+            padding: 10px 15px;
+            background: #34a853;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #map-container {
+            height: 400px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: none;
+        }
+        #coordinates {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prueba de Mapa Interactivo</h1>
+    <p>Verificación del funcionamiento del mapa Leaflet para EcoSmart Advisor.</p>
+    
+    <button id="toggle-map" class="btn">Mostrar/Ocultar Mapa</button>
+    
+    <div id="map-container"></div>
+    
+    <div id="coordinates">
+        Coordenadas: <span id="lat">--</span>, <span id="lng">--</span>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Variables globales
+        let map = null;
+        let marker = null;
+        const mapContainer = document.getElementById('map-container');
+        const toggleBtn = document.getElementById('toggle-map');
+        const latElement = document.getElementById('lat');
+        const lngElement = document.getElementById('lng');
+        
+        // Función para inicializar el mapa
+        function initMap() {
+            console.log('Inicializando mapa...');
+            
+            // Si el mapa ya está inicializado, solo actualizar el tamaño
+            if (map) {
+                console.log('Mapa ya inicializado, actualizando tamaño');
+                map.invalidateSize();
+                return;
+            }
+            
+            // Crear nuevo mapa
+            map = L.map('map-container').setView([-34.603722, -58.381592], 5);
+            
+            // Añadir capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Evento click para seleccionar ubicación
+            map.on('click', function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+                
+                console.log('Click en el mapa:', lat, lng);
+                
+                // Actualizar coordenadas mostradas
+                latElement.textContent = lat;
+                lngElement.textContent = lng;
+                
+                // Añadir o mover marcador
+                if (marker) {
+                    marker.setLatLng(e.latlng);
+                } else {
+                    marker = L.marker(e.latlng).addTo(map);
+                }
+            });
+            
+            // Esperar un momento y refrescar el tamaño del mapa
+            setTimeout(function() {
+                map.invalidateSize();
+                console.log('Tamaño del mapa actualizado');
+            }, 200);
+        }
+        
+        // Evento para el botón mostrar/ocultar
+        toggleBtn.addEventListener('click', function() {
+            console.log('Click en botón mostrar/ocultar');
+            
+            // Obtener estado actual
+            const isHidden = window.getComputedStyle(mapContainer).display === 'none';
+            
+            console.log('Estado actual:', isHidden ? 'oculto' : 'visible');
+            
+            if (isHidden) {
+                // Mostrar mapa
+                mapContainer.style.display = 'block';
+                console.log('Mostrando mapa');
+                
+                // Inicializar mapa si es necesario
+                setTimeout(initMap, 100);
+            } else {
+                // Ocultar mapa
+                mapContainer.style.display = 'none';
+                console.log('Ocultando mapa');
+            }
+        });
+    </script>
+</body>
+</html>
