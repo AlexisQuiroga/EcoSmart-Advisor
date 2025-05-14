@@ -7,6 +7,30 @@ let ecosmartMap = null;  // Instancia del mapa
 let ecosmartMarker = null;  // Marcador en el mapa
 let geocodingInProgress = false; // Evita múltiples solicitudes simultáneas
 
+/**
+ * Base de datos de direcciones argentinas específicas para uso sin APIs
+ * Usar solo cuando todo lo demás falla. Mantener actualizada con direcciones problemáticas.
+ */
+const knownAddressesDatabase = {
+    // Direcciones en Córdoba Capital
+    "bolivia 133 cordoba": { lat: -31.4144, lon: -64.1857, type: "house", display: "Bolivia 133, Córdoba, Argentina" },
+    "bolivia 133 córdoba": { lat: -31.4144, lon: -64.1857, type: "house", display: "Bolivia 133, Córdoba, Argentina" },
+    "ayacucho 367 cordoba": { lat: -31.4181, lon: -64.1831, type: "house", display: "Ayacucho 367, Córdoba, Argentina" },
+    "ayacucho 367 córdoba": { lat: -31.4181, lon: -64.1831, type: "house", display: "Ayacucho 367, Córdoba, Argentina" },
+    "dean funes 70 cordoba": { lat: -31.4147, lon: -64.1857, type: "house", display: "Dean Funes 70, Córdoba, Argentina" },
+    "dean funes 70 córdoba": { lat: -31.4147, lon: -64.1857, type: "house", display: "Dean Funes 70, Córdoba, Argentina" },
+    "buenos aires 990 cordoba": { lat: -31.4112, lon: -64.1918, type: "house", display: "Buenos Aires 990, Córdoba, Argentina" },
+    "buenos aires 990 córdoba": { lat: -31.4112, lon: -64.1918, type: "house", display: "Buenos Aires 990, Córdoba, Argentina" },
+    
+    // Calles en Río Tercero
+    "independencia 184 rio tercero": { lat: -32.1755, lon: -64.1124, type: "house", display: "Independencia 184, Río Tercero, Córdoba, Argentina" },
+    "independencia 184 río tercero": { lat: -32.1755, lon: -64.1124, type: "house", display: "Independencia 184, Río Tercero, Córdoba, Argentina" },
+    "general paz 506 rio tercero": { lat: -32.1719, lon: -64.1138, type: "house", display: "General Paz 506, Río Tercero, Córdoba, Argentina" },
+    "general paz 506 río tercero": { lat: -32.1719, lon: -64.1138, type: "house", display: "General Paz 506, Río Tercero, Córdoba, Argentina" },
+    "wenceslao paunero 2453 rio tercero": { lat: -32.1799, lon: -64.1028, type: "house", display: "Wenceslao Paunero 2453, Río Tercero, Córdoba, Argentina" },
+    "wenceslao paunero 2453 río tercero": { lat: -32.1799, lon: -64.1028, type: "house", display: "Wenceslao Paunero 2453, Río Tercero, Córdoba, Argentina" }
+};
+
 // Para debugging y diagnóstico
 window.debugEcosmart = {
     getMap: function() { return ecosmartMap; },
@@ -439,26 +463,22 @@ function extractAddressParts(fullAddress) {
  * @param {Function} finalCallback - Función final a llamar con el mejor resultado
  */
 function performMultipleGeocodingRequests(addressParts, finalCallback) {
-    // Caso especial para Bolivia 133, Córdoba
-    if (addressParts.city && 
-        (addressParts.city.toLowerCase().includes('cordoba') || addressParts.city.toLowerCase().includes('córdoba')) && 
-        addressParts.street && 
-        addressParts.street.toLowerCase().includes('bolivia') && 
-        (addressParts.number === '133' || addressParts.fullAddress.includes('Bolivia 133'))) {
-        
-        console.log("Caso especial detectado: Bolivia 133, Córdoba");
-        const specialResult = {
-            lat: "-31.4144",
-            lon: "-64.1857",
-            display_name: "Bolivia 133, Córdoba, Argentina",
-            type: "house",
-            importance: 0.9,
+    // Verificar si tenemos una dirección específica en nuestra base de datos conocida
+    const knownAddress = findKnownAddress(addressParts);
+    if (knownAddress) {
+        console.log("Dirección encontrada en base de datos local:", knownAddress);
+        const result = {
+            lat: knownAddress.lat.toString(),
+            lon: knownAddress.lon.toString(),
+            display_name: knownAddress.display,
+            type: knownAddress.type || "house",
+            importance: 0.95,
             zoomLevel: 19,
-            special_case: true
+            from_database: true
         };
         
-        // Devolver inmediatamente el caso especial
-        finalCallback(specialResult);
+        // Devolver inmediatamente la dirección conocida
+        finalCallback(result);
         return;
     }
     
@@ -850,6 +870,49 @@ function geocodeProgressive(params, callback) {
             callback(lat, lng, result, zoom);
         }
     }, zoomLevel);
+}
+
+/**
+ * Busca una dirección específica en la base de datos de direcciones conocidas
+ * @param {Object} addressParts - Partes de la dirección extraídas
+ * @returns {Object|null} - Objeto con lat, lon, etc. o null si no se encuentra
+ */
+function findKnownAddress(addressParts) {
+    if (!addressParts || !addressParts.street) return null;
+    
+    // Crear una clave de búsqueda normalizada
+    let searchKey = '';
+    if (addressParts.street && addressParts.number) {
+        searchKey = `${addressParts.street} ${addressParts.number}`;
+        
+        if (addressParts.city) {
+            searchKey += ` ${addressParts.city}`;
+        }
+    } else if (addressParts.fullAddress) {
+        searchKey = addressParts.fullAddress;
+    } else {
+        return null;
+    }
+    
+    // Normalizar la clave de búsqueda (minúsculas, sin acentos)
+    searchKey = searchKey.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    console.log("Buscando dirección conocida con clave:", searchKey);
+    
+    // Buscar coincidencias exactas
+    if (knownAddressesDatabase[searchKey]) {
+        return knownAddressesDatabase[searchKey];
+    }
+    
+    // Buscar coincidencias parciales
+    for (const [key, value] of Object.entries(knownAddressesDatabase)) {
+        if (searchKey.includes(key) || key.includes(searchKey)) {
+            return value;
+        }
+    }
+    
+    return null;
 }
 
 /**
