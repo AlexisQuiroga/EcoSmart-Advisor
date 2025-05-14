@@ -21,3 +21,4 @@ args = "python main.py"
 
 [deployment]
 deploymentTarget = "cloudrun"
+run = ["sh", "-c", "bash run-deployment.sh"]
