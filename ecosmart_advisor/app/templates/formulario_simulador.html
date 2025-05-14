@@ -46,7 +46,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
                                         <input type="text" class="form-control" id="pais" name="pais" 
-                                               placeholder="País" value="Argentina">
+                                               placeholder="País" value="Argentina" style="text-overflow: ellipsis;" title="Argentina">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -54,7 +54,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-map"></i></span>
                                         <input type="text" class="form-control" id="provincia" name="provincia" 
-                                               placeholder="Provincia/Estado">
+                                               placeholder="Provincia/Estado" style="text-overflow: ellipsis;" title="">
                                     </div>
                                     <div id="sugerenciasProvincia" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
@@ -63,7 +63,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-city"></i></span>
                                         <input type="text" class="form-control" id="ciudad" name="ciudad" 
-                                               placeholder="Ciudad/Localidad">
+                                               placeholder="Ciudad/Localidad" style="text-overflow: ellipsis;" title="">
                                     </div>
                                     <div id="sugerenciasCiudad" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
@@ -72,7 +72,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-home"></i></span>
                                         <input type="text" class="form-control" id="direccion" name="direccion" 
-                                               placeholder="Calle, número...">
+                                               placeholder="Calle, número..." style="text-overflow: ellipsis;" title="">
                                         <span class="input-group-text bg-transparent" id="direccion-estado">
                                             <i class="fas fa-map-marker-alt text-muted"></i>
                                         </span>
@@ -82,16 +82,16 @@
                             </div>
                             
                             <!-- Botón para validar y ubicar en el mapa -->
-                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-light">
-                                <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+                                <div class="text-muted small">
                                     <i class="fas fa-info-circle text-primary me-1"></i>
-                                    <span class="text-muted">Complete la dirección y valide su ubicación en el mapa</span>
+                                    Complete los campos y valide su ubicación
                                 </div>
-                                <div>
-                                    <button type="button" class="btn btn-primary" id="validarUbicacionBtn">
+                                <div class="d-flex align-items-center">
+                                    <button type="button" class="btn btn-sm btn-success shadow-sm" id="validarUbicacionBtn">
                                         <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
                                     </button>
-                                    <span class="ms-2 text-muted small" id="validarUbicacionInfo">Complete todos los campos para ubicar</span>
+                                    <span class="ms-2 text-muted small" id="validarUbicacionInfo" style="max-width: 200px; display: inline-block;">Complete los campos</span>
                                 </div>
                             </div>
                             
