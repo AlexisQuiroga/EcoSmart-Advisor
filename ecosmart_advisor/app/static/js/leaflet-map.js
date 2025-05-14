@@ -337,35 +337,78 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
         return;
     }
     
+    // Normalizar la dirección para búsquedas consistentes
     const normalizedAddress = address.trim().toLowerCase()
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        
-    // Usar caché local para direcciones recientes
-    const cacheKey = `geocode_${normalizedAddress}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-        const data = JSON.parse(cached);
-        if (Date.now() - data.timestamp < 3600000) { // Caché válido por 1 hora
-            console.log("Usando datos en caché");
-            callback(data.lat, data.lon, data.result, data.zoomLevel);
-            return;
-        }
-    }
-    
-    console.log("Realizando geocodificación para dirección normalizada:", normalizedAddress);
     
     // Extraer partes de la dirección original para mejor formato y búsqueda múltiple
     const addressParts = extractAddressParts(address);
     console.log("Partes extraídas de la dirección:", addressParts);
     
-    // Verificar si tenemos la dirección en caché
+    // === PASO 1: Intentar con nuestra base de datos local primero (más rápido) ===
+    const knownAddress = findKnownAddress(addressParts);
+    if (knownAddress) {
+        console.log("Dirección encontrada en base de datos local:", knownAddress);
+        const result = {
+            lat: knownAddress.lat,
+            lon: knownAddress.lon,
+            display_name: knownAddress.display,
+            type: knownAddress.type || "house",
+            importance: 0.95,
+            zoomLevel: 19
+        };
+        
+        // También guardamos en caché para futuras consultas
+        try {
+            localStorage.setItem(`geocode_${normalizedAddress}`, JSON.stringify({
+                lat: result.lat,
+                lon: result.lon,
+                result: result,
+                zoomLevel: result.zoomLevel || zoomLevel,
+                timestamp: Date.now()
+            }));
+        } catch (e) {
+            console.warn("Error guardando en caché local:", e);
+        }
+        
+        if (typeof callback === 'function') {
+            callback(result.lat, result.lon, result, result.zoomLevel);
+        }
+        return;
+    }
+    
+    // === PASO 2: Verificar caché para búsquedas recientes ===
     const cacheKey = `geocode_${normalizedAddress}`;
+    
+    // Primero verificar localStorage (persistente entre sesiones)
+    const cachedLocal = localStorage.getItem(cacheKey);
+    if (cachedLocal) {
+        try {
+            const data = JSON.parse(cachedLocal);
+            if (Date.now() - data.timestamp < 86400000) { // Caché válido por 24 horas
+                console.log("Usando datos en caché local (localStorage)");
+                if (typeof callback === 'function') {
+                    callback(
+                        parseFloat(data.lat), 
+                        parseFloat(data.lon), 
+                        data.result, 
+                        data.zoomLevel || zoomLevel
+                    );
+                }
+                return;
+            }
+        } catch (e) {
+            console.warn("Error al usar caché local:", e);
+        }
+    }
+    
+    // Luego verificar sessionStorage (solo para esta sesión)
     const cachedResult = sessionStorage.getItem(cacheKey);
     
     if (cachedResult) {
         try {
             const cachedData = JSON.parse(cachedResult);
-            console.log("Usando resultado en caché para:", normalizedAddress);
+            console.log("Usando resultado en caché (sessionStorage) para:", normalizedAddress);
             
             if (typeof callback === 'function') {
                 callback(
@@ -381,21 +424,57 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
         }
     }
     
+    // === PASO 3: Verificar si tenemos todos los elementos para buscar en ciudades conocidas ===
+    // Esto es más rápido que buscar online y sirve como respaldo
+    if (addressParts.city && !addressParts.street) {
+        const cityCoords = getKnownCoordinatesForCity(addressParts.city);
+        if (cityCoords) {
+            console.log("Usando coordenadas conocidas para ciudad:", cityCoords);
+            const result = {
+                lat: cityCoords.lat,
+                lon: cityCoords.lon,
+                display_name: addressParts.city + (addressParts.province ? ", " + addressParts.province : "") + ", Argentina",
+                type: "city",
+                importance: 0.75,
+                zoomLevel: cityCoords.zoom
+            };
+            
+            // También guardamos en caché
+            try {
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    lat: result.lat,
+                    lon: result.lon,
+                    result: result,
+                    zoomLevel: result.zoomLevel,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.warn("Error guardando en caché:", e);
+            }
+            
+            if (typeof callback === 'function') {
+                callback(result.lat, result.lon, result, result.zoomLevel);
+            }
+            return;
+        }
+    }
+    
+    // === PASO 4: Si seguimos aquí, necesitamos hacer una búsqueda online ===
     if (geocodingInProgress) {
-        console.log("Ya hay una solicitud de geocodificación en progreso, intentando nuevamente en 300ms");
+        console.log("Ya hay una solicitud de geocodificación en progreso, intentando nuevamente en 200ms");
         setTimeout(() => {
             geocodeAddress(address, callback, zoomLevel);
-        }, 300);
+        }, 200);
         return;
     }
     
     geocodingInProgress = true;
     
-    // Mostrar indicador de carga si existe
+    // Mostrar indicador de carga
     const loadingEl = document.getElementById('map-loading-indicator');
     if (loadingEl) loadingEl.style.display = 'block';
     
-    // Primero intentaremos con formatos optimizados para Argentina
+    // Hacer geocodificación optimizada para Argentina
     performMultipleGeocodingRequests(addressParts, (result) => {
         geocodingInProgress = false;
         
@@ -403,14 +482,26 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
         if (loadingEl) loadingEl.style.display = 'none';
         
         if (result && result.lat && result.lon) {
-            // Éxito - Guardar en caché
+            // Éxito - Guardar en ambas cachés para máxima eficiencia
             try {
+                // En sessionStorage para esta sesión
                 sessionStorage.setItem(cacheKey, JSON.stringify({
                     lat: result.lat,
                     lon: result.lon,
                     result: result,
                     zoomLevel: result.zoomLevel || zoomLevel
                 }));
+                
+                // En localStorage para persistencia entre sesiones (24 horas)
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    lat: result.lat,
+                    lon: result.lon,
+                    result: result,
+                    zoomLevel: result.zoomLevel || zoomLevel,
+                    timestamp: Date.now()
+                }));
+                
+                console.log("Resultado guardado en caché local y de sesión");
             } catch (e) {
                 console.warn("No se pudo guardar en caché:", e);
             }
@@ -425,6 +516,29 @@ function geocodeAddress(address, callback, zoomLevel = 15) {
             }
         } else {
             console.warn("No se encontraron resultados para ninguna variante de la dirección:", address);
+            
+            // Última oportunidad - intentar con el nombre de la ciudad si está disponible
+            if (addressParts.city) {
+                const cityCoords = getKnownCoordinatesForCity(addressParts.city);
+                if (cityCoords) {
+                    console.log("Usando coordenadas conocidas para ciudad como último recurso:", cityCoords);
+                    const fallbackResult = {
+                        lat: cityCoords.lat.toString(),
+                        lon: cityCoords.lon.toString(),
+                        display_name: addressParts.city + (addressParts.province ? ", " + addressParts.province : "") + ", Argentina",
+                        type: "city",
+                        importance: 0.7,
+                        zoomLevel: cityCoords.zoom,
+                        fallback: true
+                    };
+                    
+                    if (typeof callback === 'function') {
+                        callback(cityCoords.lat, cityCoords.lon, fallbackResult, cityCoords.zoom);
+                    }
+                    return;
+                }
+            }
+            
             if (typeof callback === 'function') {
                 callback(null, null, null);
             }
