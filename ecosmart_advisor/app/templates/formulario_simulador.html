@@ -10,36 +10,32 @@
                 <h2 class="h4 mb-0"><i class="fas fa-chart-line me-2"></i>Simulador de Energía Renovable</h2>
             </div>
             <div class="card-body p-4">
-                <p class="lead mb-4">Ajuste los parámetros para simular diferentes escenarios y evaluar el rendimiento de los sistemas de energía renovable.</p>
+                <p class="lead mb-4">En esta sección puede simular distintos escenarios de instalación de sistemas de energía renovable para evaluar rendimiento, ahorro y beneficio ambiental.</p>
                 
                 <form id="simuladorForm" method="POST" action="{{ url_for('simulador.simulador') }}">
                     <div class="mb-4">
-                        <h3 class="h5 mb-3">Tipo de instalación</h3>
+                        <h3 class="h5 mb-3">Configuración de Simulación</h3>
                         
                         <div class="mb-3">
-                            <label for="tipo_instalacion" class="form-label">Sistema a simular <span class="text-danger">*</span></label>
+                            <label for="tipo_instalacion" class="form-label">Tipo de Instalación <span class="text-danger">*</span></label>
                             <select class="form-select" id="tipo_instalacion" name="tipo_instalacion" required>
                                 <option value="" selected disabled>Seleccione una opción</option>
-                                <option value="solar">Sistema solar fotovoltaico</option>
-                                <option value="eolica">Sistema eólico</option>
-                                <option value="termotanque_solar">Termotanque solar</option>
+                                <option value="solar">Sistema Solar Fotovoltaico</option>
+                                <option value="eolica">Sistema Eólico (aerogenerador)</option>
+                                <option value="termotanque">Termotanque Solar</option>
                             </select>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="capacidad" class="form-label">Capacidad del sistema <span class="text-danger">*</span></label>
+                            <label for="capacidad" class="form-label">Capacidad <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-tachometer-alt"></i></span>
+                                <span class="input-group-text" id="unidad_prefijo"><i class="fas fa-bolt"></i></span>
                                 <input type="number" class="form-control" id="capacidad" name="capacidad" 
                                        placeholder="Capacidad del sistema" min="0.1" step="0.1" required>
-                                <span class="input-group-text unidad-capacidad">kW</span>
+                                <span class="input-group-text" id="unidad_capacidad">kW</span>
                             </div>
-                            <div class="form-text" id="texto-capacidad">Potencia nominal del sistema en kilowatts (kW)</div>
+                            <div class="form-text" id="capacidad_descripcion">Potencia total del sistema fotovoltaico</div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h3 class="h5 mb-3">Ubicación y consumo</h3>
                         
                         <div class="mb-3">
                             <label class="form-label">Ubicación <span class="text-danger">*</span></label>
@@ -50,19 +46,21 @@
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-map"></i></span>
                                         <input type="text" class="form-control" id="provincia" name="provincia" 
-                                               placeholder="Provincia">
+                                               placeholder="Provincia/Estado">
                                     </div>
+                                    <div id="sugerenciasProvincia" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="ciudad" class="form-label small">Ciudad</label>
+                                    <label for="ciudad" class="form-label small">Ciudad/Localidad</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-city"></i></span>
                                         <input type="text" class="form-control" id="ciudad" name="ciudad" 
-                                               placeholder="Ciudad">
+                                               placeholder="Ciudad/Localidad">
                                     </div>
+                                    <div id="sugerenciasCiudad" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="direccion" class="form-label small">Dirección</label>
+                                    <label for="direccion" class="form-label small">Dirección (opcional)</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-home"></i></span>
                                         <input type="text" class="form-control" id="direccion" name="direccion" 
@@ -71,8 +69,10 @@
                                 </div>
                             </div>
                             
-                            <!-- Campo oculto para almacenar la ubicación completa -->
+                            <!-- Campos ocultos para almacenar la ubicación y coordenadas -->
                             <input type="hidden" id="ubicacion" name="ubicacion" required>
+                            <input type="hidden" id="latitud" name="latitud">
+                            <input type="hidden" id="longitud" name="longitud">
                             
                             <div class="mt-3 mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -87,94 +87,74 @@
                                 <div class="form-text" id="coordenadasSeleccionadas">
                                     Coordenadas: <span id="latitudDisplay">--</span>, <span id="longitudDisplay">--</span>
                                 </div>
-                                <input type="hidden" id="latitud" name="latitud">
-                                <input type="hidden" id="longitud" name="longitud">
                             </div>
                         </div>
                         
                         <div class="mb-3">
                             <label for="consumo_mensual" class="form-label">Consumo Eléctrico Mensual <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-bolt"></i></span>
+                                <span class="input-group-text"><i class="fas fa-plug"></i></span>
                                 <input type="number" class="form-control" id="consumo_mensual" name="consumo_mensual" 
-                                       placeholder="Consumo promedio mensual" min="1" required>
-                                <span class="input-group-text">kWh</span>
+                                       placeholder="Consumo mensual en kWh" min="1" required>
+                                <span class="input-group-text">kWh/mes</span>
                             </div>
-                            <div class="form-text">Consumo mensual para calcular porcentaje de cobertura</div>
+                            <div class="form-text">Consumo promedio mensual de electricidad</div>
+                        </div>
+                        
+                        <div class="mb-3" id="factores_opcionales">
+                            <div class="card border-light mb-3">
+                                <div class="card-header bg-light">Factores opcionales (valores por defecto recomendados)</div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6" id="campo_eficiencia">
+                                            <label for="eficiencia" class="form-label">Eficiencia del sistema</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="eficiencia" name="eficiencia" 
+                                                       placeholder="Eficiencia" min="1" max="100" value="85" step="0.1">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6" id="campo_inclinacion">
+                                            <label for="inclinacion" class="form-label">Inclinación paneles</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="inclinacion" name="inclinacion" 
+                                                       placeholder="Inclinación" min="0" max="90" value="30">
+                                                <span class="input-group-text">grados</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6" id="campo_orientacion">
+                                            <label for="orientacion" class="form-label">Orientación</label>
+                                            <select class="form-select" id="orientacion" name="orientacion">
+                                                <option value="norte" selected>Norte</option>
+                                                <option value="noreste">Noreste</option>
+                                                <option value="este">Este</option>
+                                                <option value="sureste">Sureste</option>
+                                                <option value="sur">Sur</option>
+                                                <option value="suroeste">Suroeste</option>
+                                                <option value="oeste">Oeste</option>
+                                                <option value="noroeste">Noroeste</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6" id="campo_altura_torre">
+                                            <label for="altura_torre" class="form-label">Altura de la torre</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="altura_torre" name="altura_torre" 
+                                                       placeholder="Altura" min="1" value="15">
+                                                <span class="input-group-text">metros</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-play me-2"></i>Ejecutar Simulación
+                            <i class="fas fa-play-circle me-2"></i>Ejecutar Simulación
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
-        
-        <div class="card mt-4">
-            <div class="card-body">
-                <h3 class="h5 mb-3">Guía del simulador</h3>
-                <div class="accordion" id="acordeonGuia">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseSolar">
-                                <i class="fas fa-solar-panel me-2 text-warning"></i>Sistema solar fotovoltaico
-                            </button>
-                        </h2>
-                        <div id="colapseSolar" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
-                            <div class="accordion-body">
-                                <p><strong>Capacidad:</strong> La potencia nominal del sistema en kilowatts pico (kWp). Valores típicos:</p>
-                                <ul>
-                                    <li>1-3 kWp: Viviendas pequeñas o consumo bajo</li>
-                                    <li>3-6 kWp: Viviendas medianas con consumo estándar</li>
-                                    <li>6-10 kWp: Viviendas grandes o consumo elevado</li>
-                                    <li>>10 kWp: Comercios, oficinas o industrias pequeñas</li>
-                                </ul>
-                                <p>Un panel estándar tiene alrededor de 330-400Wp, por lo que un sistema de 3kWp equivale a 8-9 paneles aproximadamente.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseEolico">
-                                <i class="fas fa-wind me-2 text-primary"></i>Sistema eólico
-                            </button>
-                        </h2>
-                        <div id="colapseEolico" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
-                            <div class="accordion-body">
-                                <p><strong>Capacidad:</strong> La potencia nominal del aerogenerador en kilowatts (kW). Valores típicos:</p>
-                                <ul>
-                                    <li>0.4-1 kW: Sistemas muy pequeños para aplicaciones específicas</li>
-                                    <li>1-3 kW: Sistemas residenciales pequeños</li>
-                                    <li>3-10 kW: Sistemas residenciales grandes o rurales</li>
-                                    <li>>10 kW: Aplicaciones comerciales o agrícolas</li>
-                                </ul>
-                                <p>Los sistemas eólicos domésticos son más efectivos en zonas rurales o costeras con velocidades de viento promedio superiores a 4 m/s.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colapseTermotanque">
-                                <i class="fas fa-shower me-2 text-info"></i>Termotanque solar
-                            </button>
-                        </h2>
-                        <div id="colapseTermotanque" class="accordion-collapse collapse" data-bs-parent="#acordeonGuia">
-                            <div class="accordion-body">
-                                <p><strong>Capacidad:</strong> El volumen del tanque en litros (L). Valores típicos:</p>
-                                <ul>
-                                    <li>100-150 L: 1-2 personas</li>
-                                    <li>150-200 L: 2-3 personas</li>
-                                    <li>200-300 L: 3-5 personas</li>
-                                    <li>>300 L: Más de 5 personas o aplicaciones comerciales</li>
-                                </ul>
-                                <p>Los termotanques solares pueden cubrir entre 60-90% de las necesidades de agua caliente sanitaria durante el año, dependiendo de la radiación solar de la zona.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -182,257 +162,274 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<!-- Primero cargar la hoja de estilos de Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<!-- Luego cargar el JavaScript de Leaflet con verificación de integridad -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-    // Variables globales para el mapa
-    let mapa;
-    let marcador;
-
-    // Función para inicializar el mapa
-    function inicializarMapa() {
-        // Si el mapa ya fue inicializado, retornar
-        if (mapa) return;
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Inicializando la página del simulador...");
         
-        // Crear el mapa centrado en Argentina por defecto
-        mapa = L.map('mapaUbicacion').setView([-34.6037, -58.3816], 5);
+        // Variables globales para el mapa
+        let mapa = null;
+        let marcador = null;
+        const mapContainer = document.getElementById('mapaUbicacion');
+        const btnMostrarMapa = document.getElementById('mostrarMapa');
         
-        // Añadir la capa de OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(mapa);
+        // Referencias a elementos del formulario
+        const provinciaInput = document.getElementById('provincia');
+        const ciudadInput = document.getElementById('ciudad');
+        const direccionInput = document.getElementById('direccion');
+        const ubicacionInput = document.getElementById('ubicacion');
+        const latitudInput = document.getElementById('latitud');
+        const longitudInput = document.getElementById('longitud');
+        const latitudDisplay = document.getElementById('latitudDisplay');
+        const longitudDisplay = document.getElementById('longitudDisplay');
         
-        // Refrescar el mapa cuando se muestra (arregla problemas de renderizado)
-        setTimeout(() => {
-            mapa.invalidateSize();
-        }, 100);
-        
-        // Evento para seleccionar ubicación en el mapa
-        mapa.on('click', function(e) {
-            const lat = e.latlng.lat.toFixed(6);
-            const lng = e.latlng.lng.toFixed(6);
+        // Función para inicializar el mapa
+        function inicializarMapa() {
+            console.log("Inicializando mapa...");
             
-            // Actualizar campos ocultos
-            document.getElementById('latitud').value = lat;
-            document.getElementById('longitud').value = lng;
-            
-            // Actualizar textos de coordenadas
-            document.getElementById('latitudDisplay').textContent = lat;
-            document.getElementById('longitudDisplay').textContent = lng;
-            
-            // Actualizar el campo de ubicación completa
-            actualizarUbicacionCompleta();
-            
-            // Añadir o mover el marcador
-            if (marcador) {
-                marcador.setLatLng(e.latlng);
-            } else {
-                marcador = L.marker(e.latlng).addTo(mapa);
+            // Si el mapa ya está inicializado, sólo actualizar tamaño
+            if (mapa) {
+                console.log("El mapa ya existe, actualizando tamaño");
+                mapa.invalidateSize();
+                return;
             }
             
-            // Buscar información de la ubicación (geolocalización inversa)
-            buscarInformacionUbicacion(lat, lng);
-        });
-    }
-    
-    // Función para buscar información de ubicación por coordenadas
-    function buscarInformacionUbicacion(lat, lng) {
-        // Usar un servicio de geocodificación inversa
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.address) {
-                    // Extraer información de la dirección
-                    const direccion = data.address.road || data.address.pedestrian || '';
-                    const numero = data.address.house_number || '';
-                    const ciudad = data.address.city || data.address.town || data.address.village || '';
-                    const provincia = data.address.state || data.address.region || '';
+            try {
+                // Crear el mapa centrado en Argentina por defecto
+                console.log("Creando nuevo mapa");
+                mapa = L.map('mapaUbicacion').setView([-34.6037, -58.3816], 5);
+                
+                // Añadir la capa de OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(mapa);
+                
+                // Refrescar el mapa después de mostrarlo (arregla problemas de renderizado)
+                setTimeout(() => {
+                    console.log("Actualizando tamaño del mapa");
+                    mapa.invalidateSize();
+                }, 300);
+                
+                // Evento para seleccionar ubicación en el mapa
+                mapa.on('click', function(e) {
+                    console.log("Click en el mapa", e.latlng);
+                    const lat = e.latlng.lat.toFixed(6);
+                    const lng = e.latlng.lng.toFixed(6);
                     
-                    // Actualizar campos del formulario si están vacíos o si el usuario lo prefiere
-                    if (confirm('¿Desea actualizar los campos de ubicación con la información obtenida del mapa?')) {
-                        if (document.getElementById('direccion')) {
-                            document.getElementById('direccion').value = (direccion + ' ' + numero).trim();
-                        }
-                        if (document.getElementById('ciudad')) {
-                            document.getElementById('ciudad').value = ciudad;
-                        }
-                        if (document.getElementById('provincia')) {
-                            document.getElementById('provincia').value = provincia;
+                    // Actualizar campos ocultos
+                    latitudInput.value = lat;
+                    longitudInput.value = lng;
+                    
+                    // Actualizar textos de coordenadas
+                    latitudDisplay.textContent = lat;
+                    longitudDisplay.textContent = lng;
+                    
+                    // Añadir o mover el marcador
+                    if (marcador) {
+                        marcador.setLatLng(e.latlng);
+                    } else {
+                        marcador = L.marker(e.latlng).addTo(mapa);
+                    }
+                    
+                    // Actualizar el campo de ubicación completa
+                    actualizarUbicacionCompleta();
+                    
+                    // Buscar información de la ubicación (geolocalización inversa)
+                    buscarInformacionUbicacion(lat, lng);
+                });
+                
+                console.log("Mapa inicializado correctamente");
+            } catch (error) {
+                console.error("Error al inicializar el mapa:", error);
+            }
+        }
+        
+        // Evento para mostrar/ocultar el mapa
+        if (btnMostrarMapa) {
+            console.log("Configurando botón mostrar/ocultar mapa");
+            btnMostrarMapa.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevenir comportamiento por defecto
+                
+                console.log("Click en botón mostrar/ocultar mapa");
+                if (mapContainer.style.display === 'none' || !mapContainer.style.display) {
+                    console.log("Mostrando mapa");
+                    mapContainer.style.display = 'block';
+                    // Inicializar el mapa después de hacerlo visible
+                    setTimeout(inicializarMapa, 100);
+                } else {
+                    console.log("Ocultando mapa");
+                    mapContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        // Función para buscar información de ubicación por coordenadas
+        function buscarInformacionUbicacion(lat, lng) {
+            console.log("Buscando información para", lat, lng);
+            // Usar un servicio de geocodificación inversa
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Datos de geolocalización inversa:", data);
+                    if (data && data.address) {
+                        // Extraer información de la dirección
+                        const direccion = data.address.road || data.address.pedestrian || '';
+                        const numero = data.address.house_number || '';
+                        const ciudad = data.address.city || data.address.town || data.address.village || '';
+                        const provincia = data.address.state || '';
+                        
+                        // Actualizar campos si están disponibles
+                        if (provincia) provinciaInput.value = provincia;
+                        if (ciudad) ciudadInput.value = ciudad;
+                        if (direccion) {
+                            let direccionCompleta = direccion;
+                            if (numero) direccionCompleta += ' ' + numero;
+                            direccionInput.value = direccionCompleta;
                         }
                         
                         // Actualizar ubicación completa
                         actualizarUbicacionCompleta();
                     }
+                })
+                .catch(error => {
+                    console.error('Error al obtener información de ubicación:', error);
+                });
+        }
+        
+        // Función para actualizar el campo oculto de ubicación completa
+        function actualizarUbicacionCompleta() {
+            const provincia = provinciaInput ? provinciaInput.value.trim() : '';
+            const ciudad = ciudadInput ? ciudadInput.value.trim() : '';
+            const direccion = direccionInput ? direccionInput.value.trim() : '';
+            const latitud = latitudInput ? latitudInput.value.trim() : '';
+            const longitud = longitudInput ? longitudInput.value.trim() : '';
+            
+            console.log("Actualizando ubicación completa con:", {provincia, ciudad, direccion, latitud, longitud});
+            
+            let ubicacionCompleta = '';
+            
+            // Primero añadir dirección textual si existe
+            if (direccion) {
+                ubicacionCompleta += direccion;
+                if (ciudad || provincia) ubicacionCompleta += ', ';
+            }
+            
+            if (ciudad) {
+                ubicacionCompleta += ciudad;
+                if (provincia) ubicacionCompleta += ', ';
+            }
+            
+            if (provincia) {
+                ubicacionCompleta += provincia;
+            }
+            
+            // Si hay coordenadas y no hay texto, usar las coordenadas
+            if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitud && longitud) {
+                ubicacionCompleta = `${latitud}, ${longitud}`;
+            }
+            
+            // Asignar al campo oculto
+            if (ubicacionCompleta && ubicacionInput) {
+                console.log("Ubicación completa:", ubicacionCompleta);
+                ubicacionInput.value = ubicacionCompleta;
+            }
+        }
+        
+        // Actualizar ubicación cuando cambian los campos individuales
+        ['provincia', 'ciudad', 'direccion'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', actualizarUbicacionCompleta);
+                element.addEventListener('input', actualizarUbicacionCompleta);
+            }
+        });
+        
+        // Adaptación de la interfaz según el tipo de instalación seleccionado
+        const tipoInstalacionSelect = document.getElementById('tipo_instalacion');
+        if (tipoInstalacionSelect) {
+            tipoInstalacionSelect.addEventListener('change', function() {
+                const tipoSeleccionado = this.value;
+                const unidadCapacidad = document.getElementById('unidad_capacidad');
+                const capacidadDescripcion = document.getElementById('capacidad_descripcion');
+                const campoInclinacion = document.getElementById('campo_inclinacion');
+                const campoOrientacion = document.getElementById('campo_orientacion');
+                const campoAlturaTorre = document.getElementById('campo_altura_torre');
+                
+                // Ocultar todos los campos específicos
+                campoInclinacion.style.display = 'none';
+                campoOrientacion.style.display = 'none';
+                campoAlturaTorre.style.display = 'none';
+                
+                // Mostrar campos según el tipo seleccionado
+                if (tipoSeleccionado === 'solar') {
+                    unidadCapacidad.textContent = 'kW';
+                    capacidadDescripcion.textContent = 'Potencia total del sistema fotovoltaico';
+                    campoInclinacion.style.display = 'block';
+                    campoOrientacion.style.display = 'block';
+                } else if (tipoSeleccionado === 'eolica') {
+                    unidadCapacidad.textContent = 'kW';
+                    capacidadDescripcion.textContent = 'Potencia nominal del aerogenerador';
+                    campoAlturaTorre.style.display = 'block';
+                } else if (tipoSeleccionado === 'termotanque') {
+                    unidadCapacidad.textContent = 'litros';
+                    capacidadDescripcion.textContent = 'Capacidad del termotanque solar';
+                    campoInclinacion.style.display = 'block';
+                    campoOrientacion.style.display = 'block';
                 }
-            })
-            .catch(error => {
-                console.error('Error al obtener información de ubicación:', error);
             });
-    }
-    
-    // Función para actualizar el campo oculto de ubicación completa
-    function actualizarUbicacionCompleta() {
-        const provincia = document.getElementById('provincia') ? document.getElementById('provincia').value.trim() : '';
-        const ciudad = document.getElementById('ciudad') ? document.getElementById('ciudad').value.trim() : '';
-        const direccion = document.getElementById('direccion') ? document.getElementById('direccion').value.trim() : '';
-        const latitud = document.getElementById('latitud') ? document.getElementById('latitud').value.trim() : '';
-        const longitud = document.getElementById('longitud') ? document.getElementById('longitud').value.trim() : '';
-        
-        let ubicacionCompleta = '';
-        
-        // Primero añadir dirección textual si existe
-        if (direccion) {
-            ubicacionCompleta += direccion;
-            if (ciudad || provincia) ubicacionCompleta += ', ';
         }
         
-        if (ciudad) {
-            ubicacionCompleta += ciudad;
-            if (provincia) ubicacionCompleta += ', ';
+        // Validaciones del formulario
+        const form = document.getElementById('simuladorForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // Asegurar que la ubicación completa se actualice antes de enviar
+                actualizarUbicacionCompleta();
+                
+                let ubicacion = ubicacionInput.value;
+                let tipoInstalacion = tipoInstalacionSelect.value;
+                let capacidad = document.getElementById('capacidad').value;
+                let consumoMensual = document.getElementById('consumo_mensual').value;
+                
+                console.log("Validando formulario:", {ubicacion, tipoInstalacion, capacidad, consumoMensual});
+                
+                // Verificar que tengamos al menos provincia y ciudad o coordenadas
+                const provincia = provinciaInput.value;
+                const ciudad = ciudadInput.value;
+                const latitud = latitudInput.value;
+                const longitud = longitudInput.value;
+                
+                if ((!provincia || !ciudad) && (!latitud || !longitud)) {
+                    event.preventDefault();
+                    alert('Por favor, indique su ubicación seleccionando provincia y ciudad o usando el mapa para seleccionar coordenadas.');
+                    return false;
+                }
+                
+                // Validar capacidad
+                const capacidadNum = parseFloat(capacidad);
+                if (isNaN(capacidadNum) || capacidadNum <= 0) {
+                    event.preventDefault();
+                    alert('Por favor, ingrese un valor válido para la capacidad.');
+                    return false;
+                }
+                
+                // Validar consumo mensual
+                const consumoNum = parseFloat(consumoMensual);
+                if (isNaN(consumoNum) || consumoNum <= 0) {
+                    event.preventDefault();
+                    alert('Por favor, ingrese un valor válido para el consumo mensual.');
+                    return false;
+                }
+                
+                console.log("Formulario validado correctamente");
+                return true;
+            });
         }
-        
-        if (provincia) {
-            ubicacionCompleta += provincia;
-        }
-        
-        // Si hay coordenadas y no hay texto, usar las coordenadas
-        if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitud && longitud) {
-            ubicacionCompleta = `${latitud}, ${longitud}`;
-        }
-        
-        // Asignar al campo oculto
-        if (ubicacionCompleta) {
-            document.getElementById('ubicacion').value = ubicacionCompleta;
-        }
-    }
-    
-    // Evento para mostrar/ocultar el mapa
-    document.getElementById('mostrarMapa').addEventListener('click', function() {
-        const mapaDiv = document.getElementById('mapaUbicacion');
-        if (mapaDiv.style.display === 'none') {
-            mapaDiv.style.display = 'block';
-            inicializarMapa();
-        } else {
-            mapaDiv.style.display = 'none';
-        }
-    });
-    
-    // Actualizar ubicación cuando cambian los campos individuales
-    ['provincia', 'ciudad', 'direccion'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', actualizarUbicacionCompleta);
-            element.addEventListener('input', actualizarUbicacionCompleta);
-        }
-    });
-
-    // Cambiar unidades y texto según el tipo de instalación
-    document.getElementById('tipo_instalacion').addEventListener('change', function() {
-        const tipoSeleccionado = this.value;
-        const unidadCapacidad = document.querySelector('.unidad-capacidad');
-        const textoCapacidad = document.getElementById('texto-capacidad');
-        const inputCapacidad = document.getElementById('capacidad');
-        
-        if (tipoSeleccionado === 'solar') {
-            unidadCapacidad.textContent = 'kWp';
-            textoCapacidad.textContent = 'Potencia nominal del sistema en kilowatts pico (kWp)';
-            inputCapacidad.placeholder = 'Ej: 3.0 para una instalación residencial típica';
-            inputCapacidad.min = 0.5;
-            inputCapacidad.step = 0.1;
-        } 
-        else if (tipoSeleccionado === 'eolica') {
-            unidadCapacidad.textContent = 'kW';
-            textoCapacidad.textContent = 'Potencia nominal del aerogenerador en kilowatts (kW)';
-            inputCapacidad.placeholder = 'Ej: 1.5 para una pequeña turbina doméstica';
-            inputCapacidad.min = 0.4;
-            inputCapacidad.step = 0.1;
-        } 
-        else if (tipoSeleccionado === 'termotanque_solar') {
-            unidadCapacidad.textContent = 'L';
-            textoCapacidad.textContent = 'Capacidad del tanque en litros (L)';
-            inputCapacidad.placeholder = 'Ej: 200 para una familia de 3-4 personas';
-            inputCapacidad.min = 80;
-            inputCapacidad.step = 10;
-        }
-    });
-    
-    // Validaciones del formulario
-    document.getElementById('simuladorForm').addEventListener('submit', function(event) {
-        // Asegurar que la ubicación completa se actualice antes de enviar
-        actualizarUbicacionCompleta();
-        
-        let tipoInstalacion = document.getElementById('tipo_instalacion').value;
-        let capacidad = document.getElementById('capacidad').value;
-        let ubicacion = document.getElementById('ubicacion').value;
-        let consumo = document.getElementById('consumo_mensual').value;
-        
-        if (!tipoInstalacion || !capacidad || !ubicacion || !consumo) {
-            event.preventDefault();
-            alert('Por favor complete todos los campos obligatorios marcados con *');
-        }
-    });
-    
-    // Obtener datos de la URL si viene del diagnóstico
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // Obtener parámetros de la URL
-        const tipoParam = urlParams.get('tipo');
-        const consumoParam = urlParams.get('consumo');
-        const provinciaParam = urlParams.get('provincia');
-        const ciudadParam = urlParams.get('ciudad');
-        const direccionParam = urlParams.get('direccion');
-        const latitudParam = urlParams.get('latitud');
-        const longitudParam = urlParams.get('longitud');
-        
-        // Aplicar tipo de instalación si existe
-        if (tipoParam) {
-            const selectTipo = document.getElementById('tipo_instalacion');
-            selectTipo.value = tipoParam;
-            
-            // Disparar el evento change manualmente
-            const event = new Event('change');
-            selectTipo.dispatchEvent(event);
-        }
-        
-        // Aplicar consumo si existe
-        if (consumoParam) {
-            document.getElementById('consumo_mensual').value = consumoParam;
-        }
-        
-        // Aplicar datos de ubicación si existen
-        if (provinciaParam) {
-            document.getElementById('provincia').value = provinciaParam;
-        }
-        
-        if (ciudadParam) {
-            document.getElementById('ciudad').value = ciudadParam;
-        }
-        
-        if (direccionParam) {
-            document.getElementById('direccion').value = direccionParam;
-        }
-        
-        // Aplicar coordenadas si existen
-        if (latitudParam && longitudParam) {
-            document.getElementById('latitud').value = latitudParam;
-            document.getElementById('longitud').value = longitudParam;
-            document.getElementById('latitudDisplay').textContent = latitudParam;
-            document.getElementById('longitudDisplay').textContent = longitudParam;
-            
-            // Mostrar el mapa y colocar el marcador
-            setTimeout(() => {
-                document.getElementById('mostrarMapa').click();
-                setTimeout(() => {
-                    mapa.setView([latitudParam, longitudParam], 13);
-                    marcador = L.marker([latitudParam, longitudParam]).addTo(mapa);
-                }, 300);
-            }, 500);
-        }
-        
-        // Actualizar ubicación completa con todos los datos
-        actualizarUbicacionCompleta();
     });
 </script>
 {% endblock %}

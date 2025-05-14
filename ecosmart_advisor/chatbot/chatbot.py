@@ -445,6 +445,18 @@ def verificar_casos_especiales(pregunta):
     Returns:
         str: Respuesta específica o None si no aplica
     """
+    # Detectar saludos y despedidas
+    saludos = ["hola", "buenos dias", "buenas tardes", "buenas noches", "saludos"]
+    despedidas = ["adios", "chau", "hasta luego", "nos vemos", "bye", "gracias", "thank", "muchas gracias"]
+    
+    # Manejar saludos
+    if any(saludo == pregunta for saludo in saludos) or any(saludo in pregunta and len(pregunta.split()) <= 3 for saludo in saludos):
+        return "¡Hola! Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus dudas sobre energías renovables. ¿En qué puedo ayudarte hoy?"
+    
+    # Manejar despedidas y agradecimientos
+    if any(despedida == pregunta for despedida in despedidas) or any(despedida in pregunta and len(pregunta.split()) <= 3 for despedida in despedidas):
+        return "¡Ha sido un placer ayudarte! Si tienes más preguntas sobre energías renovables o sobre cómo usar nuestra plataforma, no dudes en consultarme. ¡Hasta pronto!"
+    
     # Preguntas sobre comparación y recomendaciones
     if any(palabra in pregunta for palabra in ["mejor", "recomendable", "recomiendas", "conviene"]) and "sistema" in pregunta:
         return ("La mejor opción depende de varios factores específicos de tu ubicación y necesidades. "

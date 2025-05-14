@@ -119,9 +119,17 @@ def chatbot():
 @chatbot_bp.route('/consulta', methods=['POST'])
 def consulta_chatbot():
     """Procesa consultas al chatbot"""
-    if not request.json:
-        return jsonify({'respuesta': 'No se recibió ninguna pregunta. ¿En qué puedo ayudarte con las energías renovables?'})
-    
-    pregunta = request.json.get('pregunta', '')
-    respuesta = generar_respuesta_chatbot(pregunta)
-    return jsonify({'respuesta': respuesta})
+    try:
+        if not request.json:
+            return jsonify({'respuesta': 'No se recibió ninguna pregunta. ¿En qué puedo ayudarte con las energías renovables?'})
+        
+        pregunta = request.json.get('pregunta', '')
+        if not pregunta or pregunta.strip() == "":
+            return jsonify({'respuesta': '¿En qué puedo ayudarte con las energías renovables?'})
+            
+        respuesta = generar_respuesta_chatbot(pregunta)
+        return jsonify({'respuesta': respuesta})
+    except Exception as e:
+        import logging
+        logging.error(f"Error al procesar consulta del chatbot: {str(e)}")
+        return jsonify({'respuesta': 'Lo siento, pero estoy especializado en temas de energías renovables y en el uso de la plataforma EcoSmart Advisor. Por favor, reformula tu pregunta para que esté relacionada con estos temas. Puedo ayudarte con información sobre paneles solares, energía eólica, termotanques solares, o cómo utilizar las diferentes herramientas de nuestra plataforma como el diagnóstico y el simulador.'})
