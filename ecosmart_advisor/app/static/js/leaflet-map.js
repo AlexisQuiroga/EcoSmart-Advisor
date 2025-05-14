@@ -164,8 +164,9 @@ function reverseGeocode(lat, lng, callback) {
  * Realiza geocodificación directa para obtener coordenadas a partir de una dirección
  * @param {string} address - Dirección a geocodificar
  * @param {Function} callback - Función a llamar con los datos obtenidos (lat, lng)
+ * @param {number} zoomLevel - Nivel de zoom a aplicar (opcional, por defecto 15)
  */
-function geocodeAddress(address, callback) {
+function geocodeAddress(address, callback, zoomLevel = 15) {
     if (!address || address.trim() === '') {
         console.error("La dirección está vacía");
         return;
@@ -194,7 +195,7 @@ function geocodeAddress(address, callback) {
                 const lng = parseFloat(result.lon);
                 
                 if (typeof callback === 'function') {
-                    callback(lat, lng, result);
+                    callback(lat, lng, result, zoomLevel);
                 }
             } else {
                 console.warn("No se encontraron resultados para la dirección:", address);
@@ -213,19 +214,66 @@ function geocodeAddress(address, callback) {
 }
 
 /**
+ * Geocodificación progresiva que se ajusta según la precisión de la información
+ * @param {Object} params - Objeto con los parámetros de geocodificación
+ * @param {string} params.provincia - Nombre de la provincia/estado
+ * @param {string} params.ciudad - Nombre de la ciudad/localidad (opcional)
+ * @param {string} params.direccion - Dirección específica (opcional)
+ * @param {Function} callback - Función a llamar con los datos obtenidos
+ */
+function geocodeProgressive(params, callback) {
+    const { provincia, ciudad, direccion } = params;
+    
+    // Verificar si tenemos al menos la provincia
+    if (!provincia || provincia.trim() === '') {
+        console.error("Se requiere al menos la provincia para la geocodificación progresiva");
+        return;
+    }
+    
+    console.log("Iniciando geocodificación progresiva con:", params);
+    
+    // Determinar qué nivel de precisión tenemos y qué geocodificar
+    let query = '';
+    let zoomLevel = 7; // Nivel de zoom para provincia
+    
+    if (direccion && ciudad) {
+        // Tenemos dirección específica y ciudad, la consulta más precisa
+        query = `${direccion}, ${ciudad}, ${provincia}`;
+        zoomLevel = 18; // Zoom cercano para dirección específica
+    } else if (ciudad) {
+        // Tenemos ciudad pero no dirección específica
+        query = `${ciudad}, ${provincia}`;
+        zoomLevel = 13; // Zoom medio para la ciudad
+    } else {
+        // Solo tenemos provincia
+        query = provincia;
+        zoomLevel = 7; // Zoom lejano para la provincia
+    }
+    
+    // Realizar la geocodificación con el nivel de zoom apropiado
+    geocodeAddress(query, function(lat, lng, result, zoom) {
+        // Pasar el resultado al callback, con el nivel de zoom apropiado
+        if (typeof callback === 'function') {
+            callback(lat, lng, result, zoom);
+        }
+    }, zoomLevel);
+}
+
+/**
  * Agrega o actualiza un marcador en el mapa
  * @param {Object} map - Instancia del mapa
  * @param {number} lat - Latitud
  * @param {number} lng - Longitud
+ * @param {number} zoom - Nivel de zoom (opcional)
  * @returns {Object} - El marcador creado o actualizado
  */
-function addOrUpdateMarker(map, lat, lng) {
+function addOrUpdateMarker(map, lat, lng, zoom = 15) {
     if (!map) {
         console.error("El mapa no está inicializado");
         return null;
     }
     
-    console.log("Agregando/actualizando marcador en:", lat, lng);
+    console.log("Agregando/actualizando marcador en:", lat, lng, "con zoom:", zoom);
     
     // Crear o actualizar el marcador
     if (ecosmartMarker) {
@@ -234,8 +282,8 @@ function addOrUpdateMarker(map, lat, lng) {
         ecosmartMarker = L.marker([lat, lng]).addTo(map);
     }
     
-    // Centrar el mapa en la ubicación del marcador
-    map.setView([lat, lng], 15);
+    // Centrar el mapa en la ubicación del marcador con el zoom especificado
+    map.setView([lat, lng], zoom);
     
     return ecosmartMarker;
 }
