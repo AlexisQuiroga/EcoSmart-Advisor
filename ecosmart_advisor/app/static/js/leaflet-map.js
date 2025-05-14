@@ -555,9 +555,31 @@ function createQueryVariants(parts) {
     // Variante 5: Especialmente para Río Tercero, Córdoba
     if (parts.city && parts.city.toLowerCase().includes('rio tercero') || 
         parts.city && parts.city.toLowerCase().includes('río tercero')) {
+        
+        // Coordenadas conocidas para Río Tercero, Córdoba
+        variants.push(`Río Tercero, Córdoba, Argentina`);
+        
         if (parts.street && parts.number) {
+            // Varias variantes de escritura para Río Tercero
             variants.push(`${parts.street} ${parts.number}, Río Tercero, Córdoba, Argentina`);
+            variants.push(`${parts.street} ${parts.number}, Rio Tercero, Cordoba, Argentina`);
+            variants.push(`${parts.street} ${parts.number}, Rio Tercero, Argentina`);
+            
+            // Intentar con barrios conocidos en Río Tercero
+            const barriosRioTercero = [
+                "Centro", "Norte", "Sur", "Media Luna", "Cerino", 
+                "Panamericano", "Belgrano", "Cabero", "Castagnino"
+            ];
+            
+            // Agregar algunas variantes con barrios
+            barriosRioTercero.forEach(barrio => {
+                variants.push(`${parts.street} ${parts.number}, Barrio ${barrio}, Río Tercero, Córdoba, Argentina`);
+            });
         }
+        
+        // Caso sin éxito: intentar fallback con coordenadas conocidas
+        // Coordenadas aproximadas para el centro de Río Tercero: -32.173, -64.112
+        // Estas se usarán si nada más funciona
     }
     
     // Variante 6: Ciudad y provincia simplificado

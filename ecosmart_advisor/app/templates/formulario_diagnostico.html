@@ -105,6 +105,13 @@
                                 <div class="form-text" id="coordenadasInfo">
                                     Coordenadas: <span id="latitudDisplay">--</span>, <span id="longitudDisplay">--</span>
                                 </div>
+                                <div id="location-error-message" class="alert alert-danger mt-2" style="display: none; font-size: 0.9rem;">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span id="error-text">No se pudo encontrar la ubicación exacta.</span>
+                                    <div class="mt-1 small">
+                                        Pruebe escribiendo la dirección con otro formato o haga clic directamente en el mapa.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -432,6 +439,45 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.error("No se pudo ubicar la dirección");
                         validarUbicacionInfo.textContent = 'No se pudo encontrar la ubicación exacta';
                         validarUbicacionInfo.className = 'ms-2 text-danger small';
+                        
+                        // Mostrar mensaje de error más detallado
+                        const errorMsgEl = document.getElementById('location-error-message');
+                        const errorTextEl = document.getElementById('error-text');
+                        
+                        if (errorMsgEl && errorTextEl) {
+                            // Personalizar mensaje según la dirección
+                            let sugerencia = '';
+                            
+                            // Verificar si es una dirección de Argentina
+                            if (pais.toLowerCase().includes('argent')) {
+                                // Crear sugerencias específicas para Argentina
+                                if (ciudad.toLowerCase().includes('rio tercero') || ciudad.toLowerCase().includes('río tercero')) {
+                                    sugerencia = `Intente con: "${direccion}, Río Tercero, Córdoba, Argentina"`;
+                                } else {
+                                    sugerencia = `Intente con el formato: "Calle Número, ${ciudad}, ${provincia}, Argentina"`;
+                                }
+                                
+                                errorTextEl.textContent = `No se pudo encontrar: "${direccion}, ${ciudad}, ${provincia}".`;
+                                errorMsgEl.innerHTML = `
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span>${errorTextEl.textContent}</span>
+                                    <div class="mt-1 small">
+                                        ${sugerencia} o haga clic directamente en el mapa para seleccionar la ubicación manualmente.
+                                    </div>
+                                `;
+                            } else {
+                                errorTextEl.textContent = `No se pudo encontrar la ubicación exacta.`;
+                                errorMsgEl.innerHTML = `
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span>${errorTextEl.textContent}</span>
+                                    <div class="mt-1 small">
+                                        Intente con otro formato de dirección o haga clic directamente en el mapa.
+                                    </div>
+                                `;
+                            }
+                            
+                            errorMsgEl.style.display = 'block';
+                        }
                     }
                 }, 18); // Pasar nivel de zoom alto por defecto
             }
