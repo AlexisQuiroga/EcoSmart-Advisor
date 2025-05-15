@@ -53,6 +53,9 @@ def simular_instalacion(datos):
     else:
         resultados['retorno_inversion_anos'] = None
     
+    # Agregar descripción de ubicación a los resultados
+    resultados['descripcion_ubicacion'] = descripcion_ubicacion
+    
     return resultados
 
 def simular_solar(capacidad_kw, clima, consumo_mensual):
