@@ -233,12 +233,18 @@
 {% endblock %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- Cargar Leaflet directamente (como en el simulador) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Cargar nuestro script para el mapa -->
+<script src="{{ url_for('static', filename='js/mapa-simple.js') }}"></script>
+<!-- Cargar el script específico para diagnóstico -->
+<script src="{{ url_for('static', filename='js/diagnostico-map.js') }}"></script>
 
+<!-- Script auxiliar para otros elementos -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Inicializando formulario de diagnóstico...");
