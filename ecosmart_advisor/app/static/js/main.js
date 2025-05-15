@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sugerenciasCiudadDiv = document.getElementById('sugerenciasCiudad');
     
     // Referencias a elementos del mapa
-    const mostrarMapaBtn = document.getElementById('mostrarMapa');
+    const mostrarMapaBtn = document.getElementById('toggleMapBtn'); // Corregido - ID real es toggleMapBtn
     const mapaUbicacionDiv = document.getElementById('mapaUbicacion');
     const coordenadasDiv = document.getElementById('coordenadasSeleccionadas');
     const latitudSpan = document.getElementById('latitudSeleccionada');
@@ -334,6 +334,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actualizar ubicación completa cuando se modifique cualquier campo
     if (direccionInput) {
         direccionInput.addEventListener('input', actualizarUbicacionCompleta);
+        
+        // Configurar autocompletado para el campo de dirección
+        const sugerenciasDireccionDiv = document.getElementById('sugerenciasDireccion');
+        if (sugerenciasDireccionDiv) {
+            direccionInput.addEventListener('input', function() {
+                manejarAutocompletado(direccionInput, sugerenciasDireccionDiv, 'direccion');
+            });
+            
+            // Ocultar sugerencias al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (e.target !== direccionInput && e.target !== sugerenciasDireccionDiv) {
+                    sugerenciasDireccionDiv.style.display = 'none';
+                }
+            });
+        }
     }
     
     // Inicializar mapa interactivo

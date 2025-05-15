@@ -115,10 +115,24 @@ api_bp = Blueprint('api', __name__, url_prefix='/api')
 def geocode():
     """API proxy para OpenCage Geocoder"""
     try:
-        # Obtener la API key
+        # Obtener la API key desde .env
         api_key = os.environ.get('OPENCAGE_API_KEY')
+        
+        # Si la API key no está disponible, intentamos cargarla explícitamente
         if not api_key:
-            return jsonify({'error': 'API key no configurada'}), 500
+            from dotenv import load_dotenv
+            load_dotenv()
+            api_key = os.environ.get('OPENCAGE_API_KEY')
+            
+            if not api_key:
+                return jsonify({
+                    'error': 'API key no configurada',
+                    'message': 'La API key de OpenCage no está disponible en el entorno'
+                }), 500
+        
+        # Log para verificar la API key
+        import logging
+        logging.info(f"Usando API key de OpenCage: {api_key[:4]}...{api_key[-4:]}")
         
         # Obtener parámetros de búsqueda
         q = request.args.get('q', '')
@@ -130,6 +144,8 @@ def geocode():
         # Preprocesar la consulta para optimizar resultados para Argentina
         if 'argentina' not in q.lower() and len(q.split(',')) > 1:
             q = f"{q}, Argentina"
+        
+        logging.info(f"Consulta a OpenCage: {q}")
             
         # Construir URL de la API
         url = 'https://api.opencagedata.com/geocode/v1/json'
@@ -145,6 +161,17 @@ def geocode():
         # Realizar la solicitud a OpenCage
         response = requests.get(url, params=params)
         data = response.json()
+        
+        # Verificar si hay errores
+        if 'error' in data:
+            logging.error(f"Error de OpenCage: {data['error']}")
+            return jsonify({
+                'error': 'Error en API de OpenCage',
+                'message': data.get('error', {}).get('message', 'Error desconocido')
+            }), 500
+        
+        # Log para ver la respuesta completa 
+        logging.info(f"Respuesta de OpenCage: {len(data.get('results', []))} resultados")
         
         # Simplificar la respuesta para mejorar rendimiento
         results = []
@@ -173,7 +200,16 @@ def geocode():
     except Exception as e:
         import logging
         logging.error(f"Error al procesar geocodificación con OpenCage: {str(e)}")
-        return jsonify({'error': 'Error al procesar la solicitud', 'message': str(e)}), 500
+        # Incluir detalles del error para debugging
+        import traceback
+        error_details = traceback.format_exc()
+        logging.error(f"Detalles: {error_details}")
+        
+        return jsonify({
+            'error': 'Error al procesar la solicitud', 
+            'message': str(e),
+            'type': type(e).__name__
+        }), 500
 
 # Blueprint para el chatbot
 chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
