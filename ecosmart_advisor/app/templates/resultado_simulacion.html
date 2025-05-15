@@ -269,6 +269,15 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-light border mb-3 small">
+                            <i class="fas fa-chart-line me-2"></i>
+                            <strong>Cómo interpretar esta gráfica:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><span class="text-danger">Línea roja:</span> Inversión acumulada (costo inicial + mantenimiento)</li>
+                                <li><span class="text-success">Línea verde:</span> Ahorro acumulado (dinero que deja de gastarse en electricidad)</li>
+                                <li><span class="text-primary">Línea azul punteada:</span> Balance neto (cuando cruza hacia arriba es el punto de retorno de inversión)</li>
+                            </ul>
+                        </div>
                         <div class="chart-container">
                             <canvas id="financialChart"></canvas>
                         </div>
@@ -277,6 +286,36 @@
 
                 <div class="row mb-4">
                     <div class="col-12">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">Explicación de cálculos económicos y ambientales</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4 class="h6">Cálculos económicos</h4>
+                                        <ul class="small">
+                                            <li><strong>Ahorro anual en USD:</strong> Calculado usando una tarifa promedio de electricidad de 0.15 USD/kWh.</li>
+                                            <li><strong>Retorno de inversión:</strong> Tiempo estimado para recuperar la inversión inicial basado en el ahorro anual.</li>
+                                            <li><strong>Costo estimado:</strong> Aproximación basada en precios promedio del mercado para la tecnología seleccionada.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4 class="h6">Cálculos ambientales</h4>
+                                        <ul class="small">
+                                            <li><strong>Reducción CO2:</strong> Estimado usando factor de conversión de 0.4 kg CO2/kWh de electricidad generada de fuentes convencionales.</li>
+                                            <li><strong>Cobertura:</strong> Porcentaje del consumo mensual que puede ser cubierto por el sistema renovable.</li>
+                                            <li><strong>Generación mensual:</strong> Producción total de energía del sistema, calculada según factores climáticos locales.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info small mt-3 mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Los resultados son estimaciones basadas en datos climáticos y modelos estadísticos. Los valores reales pueden variar según condiciones específicas, calidad de los equipos, instalación y mantenimiento.
+                                </div>
+                            </div>
+                        </div>
+                        
                         <h3 class="h5 mb-3">Ajustar simulación</h3>
                         <form id="ajusteForm" method="POST" action="{{ url_for('simulador.simulador') }}">
                             <input type="hidden" name="ubicacion" value="{{ datos.ubicacion }}">
@@ -314,6 +353,48 @@
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+
+                <div class="card mb-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="h5 mb-0"><i class="fas fa-leaf me-2"></i>Impacto ambiental</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center mb-3 mb-md-0">
+                                <div class="display-4 text-success">{{ (resultados.reduccion_co2_anual / 1000)|round(1) }}</div>
+                                <div class="h5">Toneladas de CO₂</div>
+                                <div class="small text-muted">evitadas anualmente</div>
+                            </div>
+                            <div class="col-md-8">
+                                <h4 class="h6 mb-3">Equivale aproximadamente a:</h4>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-car text-success me-2 fa-2x"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ (resultados.reduccion_co2_anual / 120)|round|int }}</div>
+                                                <div class="small">Vueltas al mundo en auto</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-tree text-success me-2 fa-2x"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ (resultados.reduccion_co2_anual / 25)|round|int }}</div>
+                                                <div class="small">Árboles plantados</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-light border mt-3 mb-0 small">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Estimaciones basadas en factores de conversión estándar: 0.4 kg CO₂/kWh para electricidad convencional, 25 kg CO₂/año absorbidos por árbol, y 120 g CO₂/km para un vehículo promedio.
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
