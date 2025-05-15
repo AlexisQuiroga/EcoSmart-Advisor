@@ -93,6 +93,7 @@
                             <input type="hidden" id="provincia" name="provincia" value="">
                             <input type="hidden" id="ciudad" name="ciudad" value="">
                             <input type="hidden" id="direccion" name="direccion" value="">
+                            <input type="hidden" id="ubicacionVisible" name="ubicacionVisible" value="">
                             
                             <div class="position-relative mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -116,23 +117,12 @@
                             </div>
 
                             <div class="mb-3">
-                                <div class="row mb-3">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="pais" class="form-label">País</label>
-                                        <input type="text" class="form-control" id="paisVisible" placeholder="Se detecta automáticamente" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="provincia" class="form-label">Provincia</label>
-                                        <input type="text" class="form-control" id="provinciaVisible" placeholder="Se detecta automáticamente" readonly>
-                                    </div>
-                                </div>
-                                
                                 <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="ciudad" class="form-label">Ciudad</label>
-                                        <input type="text" class="form-control" id="ciudadVisible" placeholder="Se detecta automáticamente" readonly>
+                                    <div class="col-lg-6 mb-3">
+                                        <label for="ubicacionVisible" class="form-label">Ubicación Seleccionada</label>
+                                        <input type="text" class="form-control" id="ubicacionVisible" placeholder="Se mostrará automáticamente al seleccionar en el mapa" readonly>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-lg-6">
                                         <label for="latitudDisplay" class="form-label">Coordenadas</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="latitudDisplay" placeholder="Latitud" readonly>
@@ -145,7 +135,29 @@
                     </div>
                     
                     <div class="mb-4">
-                        <h3 class="h5 mb-3">Información Adicional</h3>
+                        <h3 class="h5 mb-3">Consumo Energético</h3>
+                        
+                        <div class="mb-3">
+                            <label for="consumo_mensual" class="form-label">Consumo Eléctrico Mensual (kWh)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-bolt"></i></span>
+                                <input type="number" class="form-control" id="consumo_mensual" name="consumo_mensual" 
+                                       placeholder="Consumo promedio mensual" min="0">
+                                <span class="input-group-text">kWh</span>
+                            </div>
+                            <div class="form-text">Este dato lo puede encontrar en su factura de electricidad</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="precio_kwh" class="form-label">Precio por kWh (USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                <input type="number" class="form-control" id="precio_kwh" name="precio_kwh" 
+                                       placeholder="Precio por kWh" min="0" step="0.01" value="0.15">
+                                <span class="input-group-text">USD/kWh</span>
+                            </div>
+                            <div class="form-text">Puede consultar el precio en su factura de electricidad</div>
+                        </div>
                         
                         <div class="mb-3">
                             <label for="presupuesto" class="form-label">Presupuesto disponible (USD)</label>
@@ -217,9 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const ciudadInput = document.getElementById('ciudad');
     const direccionInput = document.getElementById('direccion');
     const ubicacionInput = document.getElementById('ubicacion');
-    const paisVisible = document.getElementById('paisVisible');
-    const provinciaVisible = document.getElementById('provinciaVisible');
-    const ciudadVisible = document.getElementById('ciudadVisible');
+    const ubicacionVisible = document.getElementById('ubicacionVisible');
     const centrarEnArgentinaBtn = document.getElementById('centrarEnArgentina');
     
     // Función para actualizar datos de ubicación
@@ -238,10 +248,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Función para actualizar campos visibles con datos de la ubicación
     function updateVisibleFields() {
-        // Actualizar campos visibles desde campos ocultos
-        if (paisVisible && paisInput) paisVisible.value = paisInput.value;
-        if (provinciaVisible && provinciaInput) provinciaVisible.value = provinciaInput.value;
-        if (ciudadVisible && ciudadInput) ciudadVisible.value = ciudadInput.value;
+        // Crear descripción de ubicación para mostrar
+        const ubicacionVisible = document.getElementById('ubicacionVisible');
+        if (ubicacionVisible) {
+            let descripcion = '';
+            
+            if (ciudadInput && ciudadInput.value) {
+                descripcion += ciudadInput.value;
+            }
+            
+            if (provinciaInput && provinciaInput.value) {
+                if (descripcion) descripcion += ', ';
+                descripcion += provinciaInput.value;
+            }
+            
+            if (paisInput && paisInput.value) {
+                if (descripcion) descripcion += ', ';
+                descripcion += paisInput.value;
+            }
+            
+            ubicacionVisible.value = descripcion || 'Ubicación seleccionada en el mapa';
+        }
     }
     
     // Inicializar el mapa
