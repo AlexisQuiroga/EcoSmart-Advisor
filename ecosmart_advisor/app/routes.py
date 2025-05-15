@@ -177,10 +177,20 @@ def simulador():
             logger.info("=== INICIO PROCESAMIENTO DE SIMULACIÓN ===")
             logger.info(f"Request method: {request.method}, Form data: {request.form}")
             
-            # Añadir debug info
+            # Añadir debug info y token de envío
             form_debug = request.form.get('form_debug', '')
+            token_submit = request.form.get('token_submit', '')
+            
             if form_debug:
                 logger.info(f"Formulario verificado: {form_debug}")
+            
+            if token_submit:
+                logger.info(f"Token de envío recibido: {token_submit}")
+                
+            # Registrar todos los campos del formulario para diagnóstico
+            logger.info("Campos del formulario recibidos:")
+            for key in request.form:
+                logger.info(f"  {key}: {request.form.get(key)}")
             
             # Obtener los datos del formulario
             tipo_instalacion = request.form.get('tipo_instalacion')

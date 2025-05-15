@@ -427,19 +427,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const longitudInput = document.getElementById('longitud');
         const capacidadInput = document.getElementById('capacidad');
         const tipoInstalacionSelect = document.getElementById('tipo_instalacion');
+        let esValido = true;
         
         // Validar que se haya seleccionado un tipo de instalación
         if (!tipoInstalacionSelect.value) {
-            event.preventDefault();
             alert('Por favor, seleccione un tipo de instalación');
             tipoInstalacionSelect.focus();
+            esValido = false;
             return;
         }
         
         // Validar que se haya seleccionado una ubicación
         if (!latitudInput.value || !longitudInput.value) {
-            event.preventDefault();
-            
             // Mostrar mensaje de error
             const errorMsg = document.getElementById('location-error-message');
             if (errorMsg) {
@@ -457,6 +456,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mapaUbicacion) {
                 mapaUbicacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            esValido = false;
+            return;
+        }
+        
+        // Validar el campo de capacidad
+        if (!capacidadInput.value || parseFloat(capacidadInput.value) <= 0) {
+            alert('Por favor, ingrese una capacidad válida para el sistema (mayor a 0)');
+            capacidadInput.focus();
+            esValido = false;
+            return;
+        }
+        
+        // Si hay errores, no continuamos
+        if (!esValido) {
+            console.log("Formulario con errores, no se enviará");
             return;
         }
         
@@ -465,16 +479,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ubicacionInput && latitudInput.value && longitudInput.value) {
             ubicacionInput.value = `${latitudInput.value},${longitudInput.value}`;
             console.log("Coordenadas establecidas en campo ubicación:", ubicacionInput.value);
-        }
-        
-        console.log("Formulario validado correctamente, enviando...");
-        
-        // Validar el campo de capacidad
-        if (!capacidadInput.value || parseFloat(capacidadInput.value) <= 0) {
-            event.preventDefault();
-            alert('Por favor, ingrese una capacidad válida para el sistema (mayor a 0)');
-            capacidadInput.focus();
-            return;
         }
         
         // Llenar la descripción de ubicación si está vacía
@@ -496,8 +500,24 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
         }
         
-        // Enviar el formulario
-        simuladorForm.submit();
+        console.log("Enviando formulario ahora:", new Date().toISOString());
+        
+        // Enviar el formulario de forma programática
+        setTimeout(function() {
+            // Establecer un token para rastrear el envío
+            const tokenSubmit = 'submit_' + Math.random().toString(36).substring(2, 15);
+            console.log("Token de envío:", tokenSubmit);
+            
+            // Crear un campo oculto para el token
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = 'token_submit';
+            tokenInput.value = tokenSubmit;
+            simuladorForm.appendChild(tokenInput);
+            
+            // Enviar el formulario de forma nativa
+            simuladorForm.submit();
+        }, 100);
     });
 });
 </script>

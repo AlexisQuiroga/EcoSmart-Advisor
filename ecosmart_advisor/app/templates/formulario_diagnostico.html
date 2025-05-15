@@ -616,6 +616,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Inicializar el mapa directamente al cargar la página
+    const map = initMap('mapaUbicacion');
+    
+    if (map) {
+        // Configurar evento de clic en el mapa
+        map.on('click', function(e) {
+            // Obtener coordenadas del clic
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            console.log("Clic en mapa:", lat, lng);
+            
+            // Actualizar el marcador
+            updateMarker(map, lat, lng);
+            
+            // Actualizar inputs de coordenadas
+            updateLocationData(lat.toFixed(6), lng.toFixed(6));
+            
+            // Realizar geocodificación inversa
+            reverseGeocode(lat, lng, function(data) {
+                if (data && data.address) {
+                    console.log("Datos de geocodificación inversa:", data);
+                    updateAddressFields(data.address);
+                }
+            });
+        });
+    } else {
+        console.error("No se pudo inicializar el mapa");
+    }
+    
     // Configurar eventos para los campos de ubicación
     // País: actualizar al cambiar
     if (paisInput) {
@@ -808,66 +838,38 @@ document.addEventListener('DOMContentLoaded', function() {
             const mapaDiv = document.getElementById('mapaUbicacion');
             if (mapaDiv.style.display === 'none') {
                 toggleMap('mapaUbicacion');
-                // Inicializar el mapa después de hacerlo visible
-                setTimeout(function() {
-                    const map = initMap('mapaUbicacion');
-                    if (map) {
-                        // Configurar el evento de clic después de inicializar
-                        setupMapClickEvent(map, updateLocationData);
-                        
-                        // Usar geocodificación progresiva para ajustar la vista del mapa
-                        geocodeProgressive(
-                            { pais, provincia, ciudad, direccion }, 
-                            function(lat, lng, result, zoom) {
-                                if (lat && lng) {
-                                    console.log("Geocodificación exitosa. Coordenadas:", lat, lng);
-                                    
-                                    // Solo colocar el pin si todos los campos están completos
-                                    if (todosLosCamposCompletos) {
-                                        console.log("Todos los campos completos, colocando pin...");
-                                        
-                                        // Forzar un tiempo de espera para asegurar que el mapa está listo
-                                        setTimeout(function() {
-                                            // Actualizar marcador y centrar mapa con el zoom apropiado
-                                            const marker = addOrUpdateMarker(map, lat, lng, zoom);
-                                            console.log("Resultado de addOrUpdateMarker:", marker ? "Pin creado" : "Fallo al crear pin");
-                                            
-                                            // Verificar si se creó el marcador
-                                            if (!marker) {
-                                                console.error("No se pudo crear el marcador. Intentando nuevamente...");
-                                                // Intentar nuevamente con coordenadas verificadas
-                                                marker = addOrUpdateMarker(map, parseFloat(lat), parseFloat(lng), zoom);
-                                                
-                                                // Si aún falla, usar método de emergencia
-                                                if (!marker && window.debugEcosmart) {
-                                                    console.warn("Intentando método de emergencia para crear marcador");
-                                                    window.debugEcosmart.emergencyCreateMarker(lat, lng);
-                                                }
-                                            }
-                                            
-                                            // Verificar después de un momento que el marcador sigue visible
-                                            setTimeout(function() {
-                                                if (window.debugEcosmart) {
-                                                    window.debugEcosmart.verifyMarker();
-                                                    window.debugEcosmart.logState();
-                                                }
-                                            }, 500);
-                                            
-                                            // Actualizar datos de la ubicación
-                                            updateLocationData(lat.toFixed(6), lng.toFixed(6));
-                                        }, 200);
-                                    } else {
-                                        console.log("No todos los campos están completos, solo centrando mapa sin pin");
-                                        // Solo centrar el mapa sin colocar el pin
-                                        map.setView([lat, lng], zoom);
-                                    }
-                                } else {
-                                    console.warn("Geocodificación falló. No se obtuvieron coordenadas.");
-                                }
+            }
+            
+            // Usar el mapa ya inicializado
+            if (map) {
+                // Usar geocodificación progresiva para ajustar la vista del mapa
+                geocodeProgressive(
+                    { pais, provincia, ciudad, direccion }, 
+                    function(lat, lng, result, zoom) {
+                        if (lat && lng) {
+                            console.log("Geocodificación exitosa. Coordenadas:", lat, lng);
+                            
+                            // Solo colocar el pin si todos los campos están completos
+                            if (todosLosCamposCompletos) {
+                                console.log("Todos los campos completos, colocando pin...");
+                                
+                                // Actualizar marcador y centrar mapa con el zoom apropiado
+                                const marker = updateMarker(map, lat, lng, zoom);
+                                console.log("Resultado de updateMarker:", marker ? "Pin creado" : "Fallo al crear pin");
+                                
+                                // Actualizar datos de la ubicación
+                                updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                            } else {
+                                console.log("No todos los campos están completos, solo centrando mapa sin pin");
+                                // Solo centrar el mapa sin colocar el pin
+                                map.setView([lat, lng], zoom);
                             }
-                        );
-                    }
-                }, 300);
+                        } else {
+                            console.warn("Geocodificación falló. No se obtuvieron coordenadas.");
+                        }
+                    );
+                }
+            }, 300);
             } else {
                 // El mapa ya está visible, verificar si está inicializado
                 if (ecosmartMap) {
