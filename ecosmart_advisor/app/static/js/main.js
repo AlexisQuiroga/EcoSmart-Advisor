@@ -52,91 +52,254 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Función genérica para manejar autocompletado de un campo
+    // Función genérica para manejar autocompletado de un campo usando OpenCage
     async function manejarAutocompletado(inputElement, sugerenciasDiv, tipo) {
         const texto = inputElement.value;
-        if (texto.length < 3) {
+        if (texto.length < 2) { // Reducido a 2 caracteres para mejor experiencia
             sugerenciasDiv.style.display = 'none';
             return;
         }
 
         try {
-            // Construir la consulta dependiendo del tipo (provincia o ciudad)
-            let url = `https://nominatim.openstreetmap.org/search?format=json&q=${texto}`;
+            // Construir consulta para OpenCage a través de nuestro proxy
+            let consulta = texto;
+            
+            // Agregar contexto adicional según el tipo de campo
             if (tipo === 'provincia') {
-                url += '&featureType=state';
+                consulta = `${texto}, Argentina`;
             } else if (tipo === 'ciudad') {
-                url += '&featureType=city';
-                // Si hay provincia seleccionada, filtrar por ella
+                // Si hay provincia seleccionada, agregar contexto
                 if (provinciaInput.value) {
-                    url += `&state=${encodeURIComponent(provinciaInput.value)}`;
+                    consulta = `${texto}, ${provinciaInput.value}, Argentina`;
+                } else {
+                    consulta = `${texto}, Argentina`;
+                }
+            } else if (tipo === 'direccion') {
+                // Para direcciones, combinar con ciudad y provincia si están disponibles
+                let contextoDireccion = '';
+                if (ciudadInput.value) {
+                    contextoDireccion += ciudadInput.value;
+                    
+                    if (provinciaInput.value) {
+                        contextoDireccion += `, ${provinciaInput.value}`;
+                    }
+                } else if (provinciaInput.value) {
+                    contextoDireccion = provinciaInput.value;
+                }
+                
+                if (contextoDireccion) {
+                    consulta = `${texto}, ${contextoDireccion}, Argentina`;
+                } else {
+                    consulta = `${texto}, Argentina`;
                 }
             }
             
-            const response = await fetch(url);
+            console.log(`Buscando '${consulta}' usando OpenCage`);
+            
+            // Usar nuestro endpoint API proxy para OpenCage
+            const response = await fetch(`/api/geocode?q=${encodeURIComponent(consulta)}&limit=5`);
             const data = await response.json();
             
+            // Limpiar resultados anteriores
             sugerenciasDiv.innerHTML = '';
-            data.slice(0, 5).forEach(lugar => {
-                const div = document.createElement('div');
-                div.className = 'list-group-item list-group-item-action';
-                
-                // Mostrar solo el nombre relevante, no la dirección completa
-                let nombreMostrado = '';
-                if (tipo === 'provincia') {
-                    // Extraer solo el nombre de la provincia/estado
-                    nombreMostrado = lugar.address?.state || lugar.display_name.split(',')[0];
-                } else if (tipo === 'ciudad') {
-                    // Extraer solo el nombre de la ciudad/localidad
-                    nombreMostrado = lugar.address?.city || lugar.address?.town || lugar.address?.village || lugar.display_name.split(',')[0];
-                }
-                
-                div.textContent = nombreMostrado;
-                div.dataset.lat = lugar.lat;
-                div.dataset.lon = lugar.lon;
-                
-                div.addEventListener('click', () => {
-                    inputElement.value = nombreMostrado;
-                    sugerenciasDiv.style.display = 'none';
-                    
-                    // Almacenar coordenadas para posible uso en el mapa
-                    inputElement.dataset.lat = lugar.lat;
-                    inputElement.dataset.lon = lugar.lon;
-                    
-                    // Si seleccionamos una provincia, limpiar la ciudad
+            
+            if (data.results && data.results.length > 0) {
+                // Filtrar y procesar resultados según el tipo de campo
+                const resultadosFiltrados = data.results.filter(result => {
+                    // Para provincias, solo mostrar estados/provincias
                     if (tipo === 'provincia') {
-                        ciudadInput.value = '';
+                        return result.components && 
+                              (result.components.state && !result.components.city && !result.components.street);
                     }
-                    
-                    // Actualizar ubicación completa
-                    actualizarUbicacionCompleta();
-                    
-                    // Si hay mapa inicializado, actualizar su posición
-                    if (map && marker) {
-                        const latLng = [parseFloat(lugar.lat), parseFloat(lugar.lon)];
-                        map.setView(latLng, 10);
-                        marker.setLatLng(latLng);
-                        
-                        // Actualizar valores mostrados
-                        latitudSpan.textContent = lugar.lat;
-                        longitudSpan.textContent = lugar.lon;
-                        selectedLat = lugar.lat;
-                        selectedLng = lugar.lon;
-                        coordenadasDiv.style.display = 'flex';
+                    // Para ciudades, solo mostrar ciudades
+                    else if (tipo === 'ciudad') {
+                        return result.components && 
+                              (result.components.city || result.components.town || result.components.village) &&
+                              !result.components.street;
                     }
+                    // Para direcciones, privilegiar resultados con calle
+                    else if (tipo === 'direccion') {
+                        // Mayor prioridad a resultados con calle y número
+                        return result.components && result.components.street;
+                    }
+                    return true;
                 });
                 
-                sugerenciasDiv.appendChild(div);
-            });
-            
-            if (data.length > 0) {
+                // Si no hay resultados filtrados, usar todos los resultados
+                const resultadosAMostrar = resultadosFiltrados.length > 0 ? resultadosFiltrados : data.results;
+                
+                // Mostrar resultados en el div de sugerencias
+                resultadosAMostrar.slice(0, 5).forEach(result => {
+                    const div = document.createElement('div');
+                    div.className = 'list-group-item list-group-item-action';
+                    
+                    // Formatear el texto mostrado según el tipo
+                    let nombreMostrado = '';
+                    if (tipo === 'provincia') {
+                        nombreMostrado = result.components?.state || result.formatted.split(',')[0];
+                    } else if (tipo === 'ciudad') {
+                        nombreMostrado = result.components?.city || 
+                                        result.components?.town || 
+                                        result.components?.village || 
+                                        result.formatted.split(',')[0];
+                    } else if (tipo === 'direccion') {
+                        // Para direcciones, mostrar calle y número
+                        if (result.components?.street) {
+                            nombreMostrado = `${result.components.street}`;
+                            if (result.components?.number) {
+                                nombreMostrado += ` ${result.components.number}`;
+                            }
+                        } else {
+                            // Si no hay calle, usar primera parte del formatted
+                            nombreMostrado = result.formatted.split(',')[0];
+                        }
+                    }
+                    
+                    div.textContent = nombreMostrado;
+                    div.dataset.lat = result.lat;
+                    div.dataset.lng = result.lng;
+                    div.dataset.formatted = result.formatted;
+                    
+                    // Almacenar más datos para uso posterior
+                    if (result.components) {
+                        if (result.components.street) div.dataset.street = result.components.street;
+                        if (result.components.number) div.dataset.number = result.components.number;
+                        if (result.components.city) div.dataset.city = result.components.city;
+                        if (result.components.state) div.dataset.state = result.components.state;
+                    }
+                    
+                    div.addEventListener('click', () => {
+                        inputElement.value = nombreMostrado;
+                        sugerenciasDiv.style.display = 'none';
+                        
+                        // Actualizar datos según el tipo seleccionado
+                        if (tipo === 'provincia') {
+                            provinciaInput.value = nombreMostrado;
+                            
+                            // Si cambia la provincia, limpiar ciudad y dirección
+                            ciudadInput.value = '';
+                            direccionInput.value = '';
+                        } 
+                        else if (tipo === 'ciudad') {
+                            ciudadInput.value = nombreMostrado;
+                            
+                            // Si está la provincia en el resultado y no coincide, actualizar
+                            if (div.dataset.state && 
+                                provinciaInput.value.trim() !== div.dataset.state && 
+                                div.dataset.state.trim() !== '') {
+                                provinciaInput.value = div.dataset.state;
+                            }
+                            
+                            // Limpiar dirección si cambia la ciudad
+                            direccionInput.value = '';
+                        }
+                        else if (tipo === 'direccion') {
+                            direccionInput.value = nombreMostrado;
+                            
+                            // Actualizar ciudad y provincia si están en el resultado
+                            if (div.dataset.city && ciudadInput.value.trim() === '') {
+                                ciudadInput.value = div.dataset.city;
+                            }
+                            if (div.dataset.state && provinciaInput.value.trim() === '') {
+                                provinciaInput.value = div.dataset.state;
+                            }
+                        }
+                        
+                        // Guardar coordenadas para el mapa
+                        inputElement.dataset.lat = div.dataset.lat;
+                        inputElement.dataset.lon = div.dataset.lng;
+                        selectedLat = div.dataset.lat;
+                        selectedLng = div.dataset.lng;
+                        
+                        // Actualizar campos ocultos de latitud y longitud
+                        if (document.getElementById('latitud')) {
+                            document.getElementById('latitud').value = selectedLat;
+                        }
+                        if (document.getElementById('longitud')) {
+                            document.getElementById('longitud').value = selectedLng;
+                        }
+                        
+                        // Actualizar ubicación completa
+                        actualizarUbicacionCompleta();
+                        
+                        // Evento para desencadenar validación del formulario
+                        const event = new Event('change', { bubbles: true });
+                        inputElement.dispatchEvent(event);
+                    });
+                    
+                    sugerenciasDiv.appendChild(div);
+                });
+                
                 sugerenciasDiv.style.display = 'block';
             } else {
                 sugerenciasDiv.style.display = 'none';
             }
-            
         } catch (error) {
-            console.error(`Error en autocompletado de ${tipo}:`, error);
+            console.error('Error en autocompletado:', error);
+            sugerenciasDiv.style.display = 'none';
+            
+            // Intentar con el método antiguo como fallback
+            try {
+                // Construir la consulta dependiendo del tipo (provincia o ciudad)
+                let url = `https://nominatim.openstreetmap.org/search?format=json&q=${texto}`;
+                if (tipo === 'provincia') {
+                    url += '&featureType=state';
+                } else if (tipo === 'ciudad') {
+                    url += '&featureType=city';
+                    // Si hay provincia seleccionada, filtrar por ella
+                    if (provinciaInput.value) {
+                        url += `&state=${encodeURIComponent(provinciaInput.value)}`;
+                    }
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                sugerenciasDiv.innerHTML = '';
+                data.slice(0, 5).forEach(lugar => {
+                    const div = document.createElement('div');
+                    div.className = 'list-group-item list-group-item-action';
+                    
+                    // Mostrar solo el nombre relevante, no la dirección completa
+                    let nombreMostrado = '';
+                    if (tipo === 'provincia') {
+                        // Extraer solo el nombre de la provincia/estado
+                        nombreMostrado = lugar.address?.state || lugar.display_name.split(',')[0];
+                    } else if (tipo === 'ciudad') {
+                        // Extraer solo el nombre de la ciudad/localidad
+                        nombreMostrado = lugar.address?.city || lugar.address?.town || lugar.address?.village || lugar.display_name.split(',')[0];
+                    }
+                    
+                    div.textContent = nombreMostrado;
+                    div.dataset.lat = lugar.lat;
+                    div.dataset.lon = lugar.lon;
+                    
+                    div.addEventListener('click', () => {
+                        inputElement.value = nombreMostrado;
+                        sugerenciasDiv.style.display = 'none';
+                        
+                        // Almacenar coordenadas para posible uso en el mapa
+                        inputElement.dataset.lat = lugar.lat;
+                        inputElement.dataset.lon = lugar.lon;
+                        
+                        // Si seleccionamos una provincia, limpiar la ciudad
+                        if (tipo === 'provincia') {
+                            ciudadInput.value = '';
+                        }
+                        
+                        // Actualizar ubicación completa
+                        actualizarUbicacionCompleta();
+                    });
+                    
+                    sugerenciasDiv.appendChild(div);
+                });
+                
+                if (data.length > 0) {
+                    sugerenciasDiv.style.display = 'block';
+                }
+            } catch (fallbackError) {
+                console.error('Error en método de fallback:', fallbackError);
+            }
         }
     }
     
@@ -175,70 +338,102 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar mapa interactivo
     if (mostrarMapaBtn && mapaUbicacionDiv) {
-        mostrarMapaBtn.addEventListener('click', function() {
-            const estaMostrado = mapaUbicacionDiv.style.display !== 'none';
+        mostrarMapaBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Click en botón mostrar/ocultar mapa");
             
-            if (estaMostrado) {
-                // Ocultar mapa
-                mapaUbicacionDiv.style.display = 'none';
-                coordenadasDiv.style.display = 'none';
-            } else {
-                // Mostrar mapa
-                mapaUbicacionDiv.style.display = 'block';
+            // Usar la función de toggleMap de leaflet-map.js
+            const isVisible = toggleMap('mapaUbicacion');
+            
+            // Si el mapa está visible ahora, inicializarlo y configurar eventos
+            if (isVisible) {
+                // Inicializar el mapa usando la función de leaflet-map.js
+                const map = initMap('mapaUbicacion');
                 
-                // Si el mapa no está inicializado, crearlo
-                if (!map) {
-                    // Posición inicial (centrar en una ubicación por defecto o usar la seleccionada)
-                    let initialLat = -34.603722;  // Buenos Aires por defecto
-                    let initialLng = -58.381592;
+                if (map) {
+                    // Configurar evento de click usando la función de leaflet-map.js
+                    setupMapClickEvent(map, function(lat, lng, addressData) {
+                        console.log("Click en el mapa detectado:", lat, lng);
+                        
+                        // Actualizar coordenadas mostradas
+                        selectedLat = lat;
+                        selectedLng = lng;
+                        
+                        if (latitudSpan && longitudSpan) {
+                            latitudSpan.textContent = lat;
+                            longitudSpan.textContent = lng;
+                            
+                            // Mostrar el panel de coordenadas
+                            if (coordenadasDiv) {
+                                coordenadasDiv.style.display = 'flex';
+                            }
+                        }
+                        
+                        // Actualizar campos ocultos de coordenadas si existen
+                        const latitudInput = document.getElementById('latitud');
+                        const longitudInput = document.getElementById('longitud');
+                        
+                        if (latitudInput) latitudInput.value = lat;
+                        if (longitudInput) longitudInput.value = lng;
+                        
+                        // Si tenemos datos de dirección de la geocodificación inversa
+                        if (addressData && addressData.address) {
+                            console.log("Datos de dirección:", addressData.address);
+                            
+                            // Actualizar campos de dirección si corresponde
+                            if (direccionInput && addressData.address.road) {
+                                let direccionTexto = addressData.address.road;
+                                if (addressData.address.house_number) {
+                                    direccionTexto += " " + addressData.address.house_number;
+                                }
+                                direccionInput.value = direccionTexto;
+                            }
+                            
+                            // Actualizar ciudad si corresponde
+                            if (ciudadInput && 
+                                (addressData.address.city || 
+                                 addressData.address.town || 
+                                 addressData.address.village)) {
+                                ciudadInput.value = addressData.address.city || 
+                                                    addressData.address.town || 
+                                                    addressData.address.village;
+                            }
+                            
+                            // Actualizar provincia si corresponde
+                            if (provinciaInput && addressData.address.state) {
+                                provinciaInput.value = addressData.address.state;
+                            }
+                            
+                            // Actualizar ubicación completa
+                            actualizarUbicacionCompleta();
+                        }
+                    });
                     
-                    // Si hay una provincia o ciudad seleccionada con coordenadas, usarlas
-                    if (ciudadInput.dataset.lat && ciudadInput.dataset.lon) {
-                        initialLat = parseFloat(ciudadInput.dataset.lat);
-                        initialLng = parseFloat(ciudadInput.dataset.lon);
-                    } else if (provinciaInput.dataset.lat && provinciaInput.dataset.lon) {
-                        initialLat = parseFloat(provinciaInput.dataset.lat);
-                        initialLng = parseFloat(provinciaInput.dataset.lon);
+                    // Centrar en lugar específico si hay datos
+                    if (selectedLat && selectedLng) {
+                        // Usar el marcador existente en ecosmartMarker
+                        addOrUpdateMarker(map, selectedLat, selectedLng, 15);
+                    } 
+                    // Si hay coordenadas en los campos de ciudad o provincia, usarlas
+                    else if (ciudadInput && ciudadInput.dataset.lat && ciudadInput.dataset.lon) {
+                        addOrUpdateMarker(map, 
+                                        parseFloat(ciudadInput.dataset.lat), 
+                                        parseFloat(ciudadInput.dataset.lon), 12);
+                    } 
+                    else if (provinciaInput && provinciaInput.dataset.lat && provinciaInput.dataset.lon) {
+                        addOrUpdateMarker(map, 
+                                        parseFloat(provinciaInput.dataset.lat), 
+                                        parseFloat(provinciaInput.dataset.lon), 8);
                     }
-                    
-                    // Crear el mapa
-                    map = L.map('mapaUbicacion').setView([initialLat, initialLng], 10);
-                    
-                    // Añadir capa de OpenStreetMap
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-                    
-                    // Añadir marcador arrastrable
-                    marker = L.marker([initialLat, initialLng], {
-                        draggable: true
-                    }).addTo(map);
-                    
-                    // Actualizar coordenadas al arrastrar el marcador
-                    marker.on('dragend', function(e) {
-                        const position = marker.getLatLng();
-                        latitudSpan.textContent = position.lat.toFixed(6);
-                        longitudSpan.textContent = position.lng.toFixed(6);
-                        selectedLat = position.lat;
-                        selectedLng = position.lng;
-                        coordenadasDiv.style.display = 'flex';
-                    });
-                    
-                    // Permitir hacer clic en el mapa para mover el marcador
-                    map.on('click', function(e) {
-                        marker.setLatLng(e.latlng);
-                        latitudSpan.textContent = e.latlng.lat.toFixed(6);
-                        longitudSpan.textContent = e.latlng.lng.toFixed(6);
-                        selectedLat = e.latlng.lat;
-                        selectedLng = e.latlng.lng;
-                        coordenadasDiv.style.display = 'flex';
-                    });
-                    
-                    // Ajustar tamaño del mapa (necesario a veces)
-                    setTimeout(function() {
-                        map.invalidateSize();
-                    }, 100);
+                    // Si hay Argentina seleccionada, mostrarla por defecto
+                    else if (provinciaInput && provinciaInput.value.toLowerCase().includes('argent')) {
+                        map.setView([-38.416097, -63.616672], 4);
+                    }
+                }
+            } else {
+                // Si se oculta el mapa, ocultar también las coordenadas
+                if (coordenadasDiv) {
+                    coordenadasDiv.style.display = 'none';
                 }
             }
         });
