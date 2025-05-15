@@ -2,6 +2,8 @@
 Módulo para realizar cálculos relacionados con energía renovable,
 recomendaciones y estimaciones.
 """
+import os
+from .ai_recommender import evaluar_factores_energia_renovable
 
 def calcular_recomendacion(datos_usuario, clima):
     """
