@@ -2,11 +2,20 @@
 Módulo de rutas para la aplicación EcoSmart Advisor
 """
 import os
+import json
 import requests
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify, current_app, session
 from ecosmart_advisor.app.services.clima_api import obtener_datos_clima
 from ecosmart_advisor.app.services.energia_calculo import calcular_recomendacion, calcular_estimacion_sin_kwh
 from ecosmart_advisor.app.services.simulador import simular_instalacion
+
+# Importar el nuevo chatbot mejorado con IA y el chatbot original como fallback
+try:
+    from ecosmart_advisor.chatbot.ai_chatbot import generar_respuesta_ia
+    USAR_IA_CHATBOT = True
+except ImportError:
+    USAR_IA_CHATBOT = False
+    
 from ecosmart_advisor.chatbot.chatbot import generar_respuesta_chatbot
 
 # Blueprint principal
@@ -233,15 +242,73 @@ def consulta_chatbot():
     """Procesa consultas al chatbot"""
     try:
         if not request.json:
-            return jsonify({'respuesta': 'No se recibió ninguna pregunta. ¿En qué puedo ayudarte con las energías renovables?'})
+            return jsonify({
+                'respuesta': 'No se recibió ninguna pregunta. ¿En qué puedo ayudarte con las energías renovables?',
+                'sugerencias': []
+            })
         
         pregunta = request.json.get('pregunta', '')
         if not pregunta or pregunta.strip() == "":
-            return jsonify({'respuesta': '¿En qué puedo ayudarte con las energías renovables?'})
-            
-        respuesta = generar_respuesta_chatbot(pregunta)
-        return jsonify({'respuesta': respuesta})
+            return jsonify({
+                'respuesta': '¿En qué puedo ayudarte con las energías renovables?',
+                'sugerencias': []
+            })
+        
+        # Obtener historial de conversación de la sesión (si está disponible)
+        historial = []
+        if 'historial_chatbot' in session:
+            historial = session['historial_chatbot']
+        
+        # Usar el chatbot con IA si está disponible
+        if USAR_IA_CHATBOT:
+            try:
+                resultado = generar_respuesta_ia(pregunta, historial)
+                
+                # Actualizar historial de conversación
+                historial.append({"rol": "usuario", "contenido": pregunta})
+                historial.append({"rol": "asistente", "contenido": resultado['respuesta']})
+                
+                # Limitar el historial a las últimas 10 interacciones (5 intercambios)
+                historial = historial[-10:] if len(historial) > 10 else historial
+                
+                # Guardar historial en sesión
+                session['historial_chatbot'] = historial
+                
+                return jsonify(resultado)
+            except Exception as e:
+                import logging
+                logging.error(f"Error al usar chatbot IA, recurriendo a fallback: {str(e)}")
+                # Continuar al fallback si hay un error
+        
+        # Usar el chatbot basado en reglas como fallback
+        respuesta_texto = generar_respuesta_chatbot(pregunta)
+        
+        # Actualizar historial incluso con respuesta de fallback
+        historial.append({"rol": "usuario", "contenido": pregunta})
+        historial.append({"rol": "asistente", "contenido": respuesta_texto})
+        historial = historial[-10:] if len(historial) > 10 else historial
+        session['historial_chatbot'] = historial
+        
+        # Sugerencias por defecto para el fallback
+        sugerencias_default = [
+            "¿Qué sistema de energía renovable me conviene?",
+            "¿Cuánto cuesta instalar paneles solares?",
+            "¿Qué es un termotanque solar?"
+        ]
+        
+        return jsonify({
+            'respuesta': respuesta_texto,
+            'sugerencias': sugerencias_default
+        })
+        
     except Exception as e:
         import logging
         logging.error(f"Error al procesar consulta del chatbot: {str(e)}")
-        return jsonify({'respuesta': 'Lo siento, pero estoy especializado en temas de energías renovables y en el uso de la plataforma EcoSmart Advisor. Por favor, reformula tu pregunta para que esté relacionada con estos temas. Puedo ayudarte con información sobre paneles solares, energía eólica, termotanques solares, o cómo utilizar las diferentes herramientas de nuestra plataforma como el diagnóstico y el simulador.'})
+        return jsonify({
+            'respuesta': 'Lo siento, pero estoy especializado en temas de energías renovables y en el uso de la plataforma EcoSmart Advisor. Por favor, reformula tu pregunta para que esté relacionada con estos temas.',
+            'sugerencias': [
+                "¿Qué sistema de energía renovable me conviene?",
+                "¿Cuánto cuesta instalar paneles solares?",
+                "¿Qué es un termotanque solar?"
+            ]
+        })
