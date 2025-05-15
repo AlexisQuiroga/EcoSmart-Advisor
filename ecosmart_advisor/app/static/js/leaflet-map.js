@@ -93,122 +93,99 @@ window.debugEcosmart = {
 
 /**
  * Inicializa el mapa en el contenedor especificado
- * @param {string} containerId - ID del contenedor del mapa
- * @returns {Object} - Instancia del mapa o null si falla
  */
 window.initMap = function(containerId) {
     console.log("Inicializando mapa en:", containerId);
-    
+
     try {
-        if (typeof L === 'undefined') {
-            console.error("Error: La biblioteca Leaflet no está disponible");
-            return null;
-        }
-        
         const container = document.getElementById(containerId);
         if (!container) {
             console.error("Error: No se encontró el contenedor del mapa:", containerId);
             return null;
         }
-        
-        // Asegurar que el contenedor tenga una altura
+
+        // Establecer dimensiones explícitas
         container.style.display = 'block';
         container.style.height = '400px';
         container.style.width = '100%';
-        
+        container.style.minHeight = '400px'; // Asegurar altura mínima
+
+        // Forzar reflow
+        container.offsetHeight;
+
         if (!ecosmartMap) {
-            console.log("Creando nueva instancia del mapa");
             // Centrar en Argentina por defecto
             ecosmartMap = L.map(containerId).setView([-38.416097, -63.616672], 4);
-            
-            // Usar un tile server más rápido y con caché
-            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+
+            // Usar OpenStreetMap como proveedor de mapas
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
                 maxZoom: 19,
-                minZoom: 3,
-                preferCanvas: true
+                minZoom: 3
             }).addTo(ecosmartMap);
-            
+
             // Limitar vista a Argentina
             ecosmartMap.setMaxBounds([
                 [-55.0, -75.0], // SO
                 [-20.0, -50.0]  // NE
             ]);
+
+            // Invalidar tamaño después de la inicialización
+            setTimeout(() => {
+                ecosmartMap.invalidateSize();
+                console.log("Tamaño del mapa actualizado");
+            }, 100);
         }
-        
-        // Actualizar tamaño después de que esté visible
-        setTimeout(function() {
-            ecosmartMap.invalidateSize();
-            console.log("Tamaño del mapa actualizado");
-        }, 500);
-        
+
         return ecosmartMap;
     } catch (error) {
-        console.error("Error al inicializar el mapa:", error);
+        console.error("Error al inicializar mapa:", error);
         return null;
     }
 }
 
 /**
- * Añade un evento de clic al mapa para seleccionar ubicación
- * @param {Object} map - Instancia del mapa
- * @param {Function} callback - Función a llamar cuando se hace clic (recibe lat, lng)
+ * Añade un evento de clic al mapa
  */
 window.setupMapClickEvent = function(map, callback) {
     if (!map) {
-        console.error("Error: No se puede configurar evento de clic, el mapa no está inicializado");
+        console.error("Error: Mapa no inicializado");
         return;
     }
-    
+
     map.on('click', function(e) {
-        try {
-            // Capturar las coordenadas y convertirlas a número antes de formatear
-            const rawLat = e.latlng.lat;
-            const rawLng = e.latlng.lng;
-            
-            // Validar coordenadas
-            if (isNaN(rawLat) || isNaN(rawLng)) {
-                console.error("Coordenadas inválidas del clic:", rawLat, rawLng);
-                return;
-            }
-            
-            // Formatear para precisión fija
-            const lat = parseFloat(rawLat.toFixed(6));
-            const lng = parseFloat(rawLng.toFixed(6));
-            
-            console.log("Click en el mapa en:", lat, lng);
-            
-            // Limpiar marcador existente si hay uno
-            if (ecosmartMarker) {
-                try {
-                    ecosmartMarker.remove();
-                    ecosmartMarker = null;
-                } catch (err) {
-                    console.warn("Error al eliminar marcador existente:", err);
-                }
-            }
-            
-            try {
-                // Crear un nuevo marcador
-                ecosmartMarker = L.marker([lat, lng]).addTo(map);
-                ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
-                console.log("Marcador creado exitosamente en:", lat, lng);
-            } catch (err) {
-                console.error("Error al crear marcador:", err);
-            }
-            
-            // Realizar geocodificación inversa para obtener la dirección
-            reverseGeocode(lat, lng, function(addressData) {
-                console.log("Datos de geocodificación inversa:", addressData);
-                
-                // Llamar al callback con las coordenadas y datos de dirección
-                if (typeof callback === 'function') {
-                    callback(lat, lng, addressData);
-                }
-            });
-        } catch (error) {
-            console.error("Error general en el evento de clic:", error);
+        const lat = parseFloat(e.latlng.lat.toFixed(6));
+        const lng = parseFloat(e.latlng.lng.toFixed(6));
+
+        // Actualizar marcador
+        if (ecosmartMarker) {
+            ecosmartMarker.remove();
         }
+
+        ecosmartMarker = L.marker([lat, lng]).addTo(map);
+        ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
+
+        if (typeof callback === 'function') {
+            callback(lat, lng);
+        }
+    });
+}
+
+// Función auxiliar para verificar el estado del mapa
+window.checkMapStatus = function(containerId) {
+    const container = document.getElementById(containerId);
+    console.log("Estado del contenedor:", {
+        exists: !!container,
+        display: container?.style.display,
+        height: container?.style.height,
+        width: container?.style.width,
+        offsetHeight: container?.offsetHeight,
+        offsetWidth: container?.offsetWidth
+    });
+
+    console.log("Estado del mapa:", {
+        exists: !!ecosmartMap,
+        isValid: ecosmartMap?._container != null
     });
 }
 
@@ -285,7 +262,7 @@ function reverseGeocode(lat, lng, callback) {
         if (typeof callback === 'function') {
             callback(null, new Error("Timeout en geocodificación"));
         }
-    }, 5000);
+        }, 5000);
     
     // Usar Nominatim para la geocodificación inversa con parámetros optimizados
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`)
@@ -1290,7 +1267,17 @@ window.addOrUpdateMarker = function(map, lat, lng, zoom = 15) {
         ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
         
         // Centrar el mapa en la ubicación del marcador con el zoom especificado
-        map.setView([lat, lfunction initMap(containerId) {
+        map.setView([lat, lng], zoom);
+        console.log("Mapa centrado en:", lat, lng, "con zoom:", zoom);
+        
+        return ecosmartMarker;
+    } catch (e) {
+        console.error("Error al agregar/actualizar marcador:", e);
+        return null;
+    }
+}
+
+function initMap(containerId) {
     try {
         const map = L.map(containerId).setView([-34.603722, -58.381592], 4);
         

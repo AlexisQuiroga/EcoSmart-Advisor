@@ -386,12 +386,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     map.on('click', function(e) {
                         const lat = e.latlng.lat;
                         const lng = e.latlng.lng;
-                        
+
                         console.log("Clic en mapa de diagnóstico:", lat, lng);
-                        
+
                         // Actualizar el marcador usando el módulo centralizado
                         EcoSmart.Map.setMarker(map, lat, lng);
-                        
+
                         // Actualizar las coordenadas visibles
                         updateLocationData(lat.toFixed(6), lng.toFixed(6));
                     });
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     zoom: 5,
                     zoomControl: true
                 };
-                
+
                 const map = EcoSmart.Map.init('mapaUbicacion', mapOptions);
 
                 if (map) {
@@ -512,15 +512,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     map.on('click', function(e) {
                         const lat = e.latlng.lat;
                         const lng = e.latlng.lng;
-                        
+
                         console.log("Clic en mapa de diagnóstico:", lat, lng);
-                        
+
                         // Actualizar el marcador usando el módulo centralizado
                         EcoSmart.Map.setMarker(map, lat, lng);
-                        
+
                         // Actualizar las coordenadas visibles
                         updateLocationData(lat.toFixed(6), lng.toFixed(6));
-                        
+
                         // Geocodificar para obtener la dirección
                         EcoSmart.Map.reverseGeocode(lat, lng, function(addressData) {
                             console.log("Datos de dirección recibidos del clic:", addressData);
@@ -650,107 +650,107 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     console.log("Inicializando mapa de diagnóstico usando EcoSmart.Map...");
-    
+
     // Inicializar el mapa con el módulo centralizado
     const mapOptions = {
         center: [-34.603722, -58.381592], // Buenos Aires
         zoom: 5,
         zoomControl: true
     };
-    
+
     // Usar el nuevo módulo EcoSmart.Map
     const map = EcoSmart.Map.init('mapaUbicacion', mapOptions);
-    
+
     if (map) {
         console.log("✅ Mapa inicializado correctamente en diagnóstico");
-        
+
         // Exportar para acceso global en la página (facilita depuración)
         window.diagnosticoMap = map;
-        
+
         // Configurar evento de clic en el mapa
         map.on('click', function(e) {
             // Obtener coordenadas del clic
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
-            
+
             console.log("Clic en mapa de diagnóstico:", lat, lng);
-            
+
             // Actualizar el marcador usando el módulo centralizado
             EcoSmart.Map.setMarker(map, lat, lng);
-            
+
             // Actualizar los campos ocultos
             if (latitudInput) latitudInput.value = lat;
             if (longitudInput) longitudInput.value = lng;
-            
+
             // Actualizar la visualización de coordenadas
             if (latitudSeleccionada) latitudSeleccionada.textContent = lat.toFixed(6);
             if (longitudSeleccionada) longitudSeleccionada.textContent = lng.toFixed(6);
-            
+
             // Mostrar el panel de coordenadas
             if (coordenadasSeleccionadas) {
                 coordenadasSeleccionadas.classList.remove('d-none');
             }
-            
+
             // Realizar geocodificación inversa
             if (ubicacionDescripcion) {
                 ubicacionDescripcion.textContent = 'Obteniendo dirección...';
-                
+
                 EcoSmart.Map.reverseGeocode(lat, lng, function(data) {
                     if (data && data.display_name) {
                         console.log("Datos de geocodificación:", data);
                         const addressText = data.display_name;
-                        
+
                         // Actualizar la descripción visible
                         if (ubicacionDescripcion) {
                             ubicacionDescripcion.textContent = addressText;
                         }
-                        
+
                         // Guardar la descripción en el campo oculto
                         if (descripcionUbicacionInput) {
                             descripcionUbicacionInput.value = addressText;
                         }
-                        
+
                         // Actualizar campos individuales de dirección
                         if (data.address) {
                             const addr = data.address;
-                            
+
                             // Actualizar país
                             if (paisInput && addr.country) {
                                 paisInput.value = addr.country;
                             }
-                            
+
                             // Actualizar provincia
                             if (provinciaInput) {
                                 let provincia = addr.state || addr.province || addr.region || '';
                                 if (provincia) provinciaInput.value = provincia;
                             }
-                            
+
                             // Actualizar ciudad
                             if (ciudadInput) {
                                 let ciudad = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || '';
                                 if (ciudad) ciudadInput.value = ciudad;
                             }
-                            
+
                             // Actualizar dirección
                             if (direccionInput) {
                                 let direccionCompleta = '';
-                                
+
                                 if (addr.road) {
                                     direccionCompleta += addr.road;
                                     if (addr.house_number) {
                                         direccionCompleta += ' ' + addr.house_number;
                                     }
                                 }
-                                
+
                                 if (addr.suburb && !direccionCompleta.includes(addr.suburb)) {
                                     direccionCompleta += (direccionCompleta ? ', ' : '') + addr.suburb;
                                 }
-                                
+
                                 if (direccionCompleta) {
                                     direccionInput.value = direccionCompleta;
                                 }
                             }
-                            
+
                             // Actualizar ubicación completa
                             updateFullLocation();
                         }
@@ -776,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Configurar eventos para los campos de ubicación
     // País: actualizar al cambiar
     if (paisInput) {
