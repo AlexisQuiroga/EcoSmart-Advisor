@@ -592,7 +592,7 @@ function extractAddressParts(fullAddress) {
  * @param {Object} addressParts - Partes de la dirección extraídas
  * @param {Function} finalCallback - Función final a llamar con el mejor resultado
  */
-function performMultipleGeocodingRequests(addressParts, finalCallback) {
+window.performMultipleGeocodingRequests = function(addressParts, finalCallback) {
     const { direccion, ciudad, provincia, pais } = addressParts;
     
     // Construir query estructurada para mejor precisión
@@ -602,39 +602,91 @@ function performMultipleGeocodingRequests(addressParts, finalCallback) {
     if (provincia) query.push(provincia);
     if (pais) query.push(pais || 'Argentina');
     
-    const searchQuery = encodeURIComponent(query.join(', '));
+    const searchString = query.join(', ');
     
-    // Usar Nominatim con parámetros optimizados
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${searchQuery}&limit=1&countrycodes=ar&addressdetails=1`, {
-        headers: {
-            'User-Agent': 'EcoSmartAdvisor/1.0'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data && data.length > 0) {
-            const result = {
-                lat: data[0].lat,
-                lon: data[0].lon,
-                display_name: data[0].display_name,
-                type: data[0].type,
-                importance: data[0].importance,
-                zoomLevel: determineZoomLevel(data[0].type),
-                from_nominatim: true
-            };
-        
-        // Devolver inmediatamente la dirección conocida
-        finalCallback(result);
-        return;
-    }
+    // PASO 1: Intentar con nuestra API interna de OpenCage primero
+    const queryParams = new URLSearchParams({
+        q: searchString,
+        limit: 5
+    }).toString();
     
-    // Crear diferentes variantes de consulta para aumentar probabilidad de éxito
-    const queryVariants = createQueryVariants(addressParts);
-    console.log("Variantes de consulta generadas:", queryVariants);
+    console.log("Consultando API de OpenCage a través de nuestro proxy:", searchString);
     
-    // Formatos adicionales específicos para Argentina
-    // 1. Usar el formato argentino de dirección: "Calle Número, Ciudad, Provincia, Argentina"
-    // 2. Buscar sólo con nombre de calle y ciudad si el número no se encuentra
+    // Usar nuestra API interna que maneja la API key en el servidor
+    fetch(`/api/geocode?${queryParams}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error de respuesta: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.error("Error en API de OpenCage:", data.error);
+                throw new Error(data.error);
+            }
+            
+            if (data.results && data.results.length > 0) {
+                // Encontramos resultados con OpenCage
+                const result = data.results[0]; // Tomar el primer resultado
+                console.log("Geocodificación exitosa con OpenCage:", result);
+                
+                // Preparar objeto de resultado en formato estándar
+                const standardResult = {
+                    lat: result.lat.toString(),
+                    lon: result.lng.toString(),
+                    display_name: result.formatted,
+                    type: "address",
+                    importance: 0.9,
+                    zoomLevel: 18, // Zoom alto para direcciones exactas
+                    source: 'opencage'
+                };
+                
+                // Devolver inmediatamente el resultado
+                finalCallback(standardResult);
+                return;
+            } else {
+                // OpenCage no encontró resultados, probamos con Nominatim
+                throw new Error("No se encontraron resultados con OpenCage");
+            }
+        })
+        .catch(error => {
+            console.warn("Error o sin resultados con OpenCage, intentando con Nominatim:", error.message);
+            
+            // PASO 2: Si falla OpenCage, intentar con Nominatim como respaldo
+            const encodedQuery = encodeURIComponent(searchString);
+            
+            // Usar Nominatim con parámetros optimizados
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1&countrycodes=ar&addressdetails=1`, {
+                headers: {
+                    'User-Agent': 'EcoSmartAdvisor/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const result = {
+                        lat: data[0].lat,
+                        lon: data[0].lon,
+                        display_name: data[0].display_name,
+                        type: data[0].type,
+                        importance: data[0].importance,
+                        zoomLevel: determineZoomLevel(data[0].type),
+                        from_nominatim: true
+                    };
+                    
+                    // Devolver la dirección encontrada con Nominatim
+                    finalCallback(result);
+                    return;
+                }
+                
+                // Crear diferentes variantes de consulta para aumentar probabilidad de éxito
+                const queryVariants = createQueryVariants(addressParts);
+                console.log("Variantes de consulta generadas:", queryVariants);
+    
+                // Formatos adicionales específicos para Argentina
+                // 1. Usar el formato argentino de dirección: "Calle Número, Ciudad, Provincia, Argentina"
+                // 2. Buscar sólo con nombre de calle y ciudad si el número no se encuentra
     
     let bestResult = null;
     let requestsCompleted = 0;
