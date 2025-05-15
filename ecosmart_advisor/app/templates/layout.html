@@ -230,7 +230,12 @@
                     
                     // Mostrar nuevas preguntas sugeridas
                     setTimeout(function() {
-                        mostrarNuevasSugerencias();
+                        // Usar las sugerencias que vienen de la API si existen
+                        if (data.sugerencias && Array.isArray(data.sugerencias) && data.sugerencias.length > 0) {
+                            mostrarNuevasSugerencias(data.sugerencias);
+                        } else {
+                            mostrarNuevasSugerencias();
+                        }
                     }, 500);
                 }
             })
@@ -257,7 +262,7 @@
         }
         
         // Función para mostrar nuevas sugerencias
-        function mostrarNuevasSugerencias() {
+        function mostrarNuevasSugerencias(sugerenciasCustom = null) {
             const floatingChatBody = document.getElementById('floatingChatBody');
             
             // Eliminar sugerencias anteriores si existen
@@ -265,13 +270,18 @@
                 el.remove();
             });
             
-            // Preguntas sugeridas
-            const sugerencias = [
+            // Si tenemos sugerencias personalizadas, usarlas, sino usar las predeterminadas
+            const sugerencias = sugerenciasCustom || [
                 "¿Qué sistema de energía renovable es más económico?",
                 "¿Cuánto puedo ahorrar con energía renovable?",
                 "¿Para qué sirve el simulador?",
                 "¿Qué es un termotanque solar?"
             ];
+            
+            // Si no hay sugerencias, no mostrar nada
+            if (!sugerencias || sugerencias.length === 0) {
+                return;
+            }
             
             // Crear HTML para sugerencias
             const sugerenciasHTML = `
@@ -481,7 +491,12 @@
                     
                     // Mostrar nuevas sugerencias después de un breve retraso
                     setTimeout(function() {
-                        mostrarNuevasSugerencias();
+                        // Usar las sugerencias que vienen de la API si existen
+                        if (data.sugerencias && Array.isArray(data.sugerencias) && data.sugerencias.length > 0) {
+                            mostrarNuevasSugerencias(data.sugerencias);
+                        } else {
+                            mostrarNuevasSugerencias();
+                        }
                     }, 500);
                 })
                 .catch(error => {
