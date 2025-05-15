@@ -56,6 +56,9 @@ def diagnostico():
         # Obtener datos climáticos
         clima = obtener_datos_clima(datos['ubicacion'])
         
+        # Agregar la descripción de la ubicación a los datos climáticos
+        clima['descripcion_ubicacion'] = datos.get('descripcion_ubicacion', '')
+        
         # Calcular recomendación
         recomendacion = calcular_recomendacion(datos, clima)
         
@@ -92,7 +95,8 @@ def simulador():
             'tipo_instalacion': request.form.get('tipo_instalacion'),
             'capacidad': request.form.get('capacidad'),
             'ubicacion': request.form.get('ubicacion'),
-            'consumo_mensual': request.form.get('consumo_mensual')
+            'consumo_mensual': request.form.get('consumo_mensual'),
+            'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
         }
         
         resultados = simular_instalacion(datos_simulacion)

@@ -176,6 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Guardar la descripción para usarla en el formulario
                     if (ubicacionInput) {
                         ubicacionInput.dataset.descripcion = descripcion;
+                        
+                        // También guardar en el campo oculto
+                        const descripcionInput = document.getElementById('descripcion_ubicacion');
+                        if (descripcionInput) {
+                            descripcionInput.value = descripcion;
+                        }
                     }
                 } else {
                     descripcionElement.textContent = "Ubicación seleccionada";
@@ -219,9 +225,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const descripcion = ubicacionInput.dataset.descripcion || '';
                     ubicacionInput.value = `${selectedLat},${selectedLng}`;
                     
-                    // Si tenemos descripción, guardarla en otro atributo para usar en el backend
+                    // Si tenemos descripción, guardarla en el campo oculto para usar en el backend
                     if (descripcion) {
-                        ubicacionInput.dataset.descripcionTexto = descripcion;
+                        const descripcionInput = document.getElementById('descripcion_ubicacion');
+                        if (descripcionInput) {
+                            descripcionInput.value = descripcion;
+                        }
                     }
                 }
                 

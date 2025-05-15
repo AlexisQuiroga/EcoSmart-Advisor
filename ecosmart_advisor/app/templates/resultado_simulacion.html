@@ -106,13 +106,18 @@
                             <tr>
                                 <th>Ubicación:</th>
                                 <td>
-                                    {% if resultados.tipo == 'solar' %}
-                                    {{ resultados.detalle_clima.ubicacion }}
-                                    {% elif resultados.tipo == 'eolica' %}
-                                    {{ resultados.detalle_viento.ubicacion }}
-                                    {% elif resultados.tipo == 'termotanque_solar' %}
-                                    {{ resultados.detalle_clima.ubicacion }}
+                                    {% if datos.descripcion_ubicacion %}
+                                    <div class="mb-1">{{ datos.descripcion_ubicacion }}</div>
                                     {% endif %}
+                                    <div class="text-muted small">
+                                        {% if resultados.tipo == 'solar' %}
+                                        {{ resultados.detalle_clima.ubicacion }}
+                                        {% elif resultados.tipo == 'eolica' %}
+                                        {{ resultados.detalle_viento.ubicacion }}
+                                        {% elif resultados.tipo == 'termotanque_solar' %}
+                                        {{ resultados.detalle_clima.ubicacion }}
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -277,6 +282,7 @@
                             <input type="hidden" name="ubicacion" value="{{ datos.ubicacion }}">
                             <input type="hidden" name="consumo_mensual" value="{{ datos.consumo_mensual }}">
                             <input type="hidden" name="tipo_instalacion" value="{{ datos.tipo_instalacion }}">
+                            <input type="hidden" name="descripcion_ubicacion" value="{{ datos.descripcion_ubicacion }}">
 
                             <div class="row align-items-end">
                                 <div class="col-md-5">

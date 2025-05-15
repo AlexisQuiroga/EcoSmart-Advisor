@@ -20,6 +20,7 @@ def simular_instalacion(datos):
     capacidad = float(datos['capacidad'])
     ubicacion = datos['ubicacion']
     consumo_mensual = float(datos['consumo_mensual'])
+    descripcion_ubicacion = datos.get('descripcion_ubicacion', '')
     
     # Obtener datos climáticos
     clima = obtener_datos_clima(ubicacion)
