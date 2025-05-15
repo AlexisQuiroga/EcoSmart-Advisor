@@ -11,6 +11,22 @@ from ecosmart_advisor.app import create_app
 if __name__ == "__main__":
     app = create_app()
     # Using 0.0.0.0 to make it accessible outside localhost
-    # Use PORT environment variable if available (for Replit deployment)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    # Try several ports, starting with 8080 which is often available in Replit
+    ports_to_try = [8080, 8000, 5001, 5002, 5003, 5004, 5005]
+    
+    # No nos preocupamos por PORT en este caso, usamos los puertos en la lista
+    
+    # Try to run with each port
+    server_started = False
+    for port in ports_to_try:
+        try:
+            print(f"Intentando iniciar en puerto {port}...")
+            app.run(host="0.0.0.0", port=port, debug=False)
+            server_started = True
+            break  # Exit the loop if successful
+        except OSError as e:
+            print(f"No se pudo iniciar en puerto {port}: {e}")
+            continue  # Try the next port
+    
+    if not server_started:
+        print("No se pudo iniciar el servidor en ningún puerto disponible.")
