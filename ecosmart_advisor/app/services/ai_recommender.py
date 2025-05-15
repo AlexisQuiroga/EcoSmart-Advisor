@@ -5,15 +5,15 @@ más precisas y personalizadas sobre sistemas de energía renovable.
 """
 import os
 import json
+import requests
 from dotenv import load_dotenv
-from deepseek import DeepseekAI
 
 # Cargar variables de entorno
 load_dotenv()
 
-# Configurar el cliente de Deepseek
-deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
-client = DeepseekAI(api_key=deepseek_api_key)
+# Configurar la API de Deepseek
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 def evaluar_factores_energia_renovable(datos_usuario, clima):
     """
@@ -31,32 +31,45 @@ def evaluar_factores_energia_renovable(datos_usuario, clima):
         # Preparar información para la consulta
         prompt = construir_prompt_evaluacion(datos_usuario, clima)
         
-        # Realizar la consulta a Deepseek
-        response = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[
+        # Preparar payload para la API de Deepseek
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
+        
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
                 {"role": "system", "content": "Eres un experto en energía renovable y climatolología. Tu tarea es analizar los datos proporcionados y generar recomendaciones precisas sobre sistemas de energía renovable basadas en ubicación, clima y condiciones específicas. Debes responder en formato JSON."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,
-            top_p=0.95,
-            max_tokens=2000
-        )
+            "temperature": 0.3,
+            "top_p": 0.95,
+            "max_tokens": 2000
+        }
         
-        # Extraer la respuesta y convertirla a formato JSON
-        content = response.choices[0].message.content
+        # Realizar la petición a la API
+        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers)
         
-        # Buscar la sección de JSON en la respuesta (en caso de que venga con formato adicional)
-        start_index = content.find('{')
-        end_index = content.rfind('}') + 1
-        
-        if start_index >= 0 and end_index > start_index:
-            json_content = content[start_index:end_index]
-            resultado = json.loads(json_content)
-            return resultado
+        # Verificar la respuesta
+        if response.status_code == 200:
+            data = response.json()
+            content = data['choices'][0]['message']['content']
+            
+            # Buscar la sección de JSON en la respuesta (en caso de que venga con formato adicional)
+            start_index = content.find('{')
+            end_index = content.rfind('}') + 1
+            
+            if start_index >= 0 and end_index > start_index:
+                json_content = content[start_index:end_index]
+                resultado = json.loads(json_content)
+                return resultado
+            else:
+                # Si no podemos encontrar JSON válido, devolver un mensaje de error
+                print(f"Error al procesar la respuesta de Deepseek: No se encontró JSON válido")
+                return generar_respuesta_fallback()
         else:
-            # Si no podemos encontrar JSON válido, devolver un mensaje de error
-            print(f"Error al procesar la respuesta de Deepseek: No se encontró JSON válido")
+            print(f"Error en la petición a Deepseek: {response.status_code} - {response.text}")
             return generar_respuesta_fallback()
         
     except Exception as e:
