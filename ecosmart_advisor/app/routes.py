@@ -31,9 +31,6 @@ def diagnostico():
         # Obtener datos del formulario
         datos = {
             'ubicacion': request.form.get('ubicacion'),
-            'provincia': request.form.get('provincia'),
-            'ciudad': request.form.get('ciudad'),
-            'direccion': request.form.get('direccion'),
             'latitud': request.form.get('latitud'),
             'longitud': request.form.get('longitud'),
             'tipo_vivienda': request.form.get('tipo_vivienda'),
@@ -42,6 +39,11 @@ def diagnostico():
             'objetivo': request.form.get('objetivo'),
             'equipos': request.form.getlist('equipos')
         }
+        
+        # Valor por defecto para los campos que ya no están en el formulario
+        datos['provincia'] = 'No especificada'
+        datos['ciudad'] = 'No especificada'
+        datos['direccion'] = 'Seleccionada en mapa'
         
         # Si no proporcionó consumo en kWh, estimarlo
         if not datos['consumo_mensual'] or datos['consumo_mensual'] == '0':
