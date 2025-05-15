@@ -1,0 +1,15 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Una aplicación inteligente que asesora a los usuarios sobre qué sistema de energía renovable (solar, eólico o termotanque solar) les conviene instalar, según su ubicación, consumo y condiciones climáticas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "openai": "^4.98.0"
+  }
+}
