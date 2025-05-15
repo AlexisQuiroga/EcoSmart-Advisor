@@ -733,37 +733,37 @@ window.performMultipleGeocodingRequests = function(addressParts, finalCallback) 
                     }
                 };
     
-    // Realizar peticiones para cada variante
-    queryVariants.forEach((query, index) => {
-        setTimeout(() => {
-            // Usar Nominatim para geocodificación
-            const encodedQuery = encodeURIComponent(query);
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&addressdetails=1&limit=5&accept-language=es`;
-            
-            console.log(`Realizando petición ${index+1}/${totalRequests} a:`, url);
-            
-            // Crear un timeout para abortar la solicitud si tarda demasiado
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-            
-            fetch(url, { signal: controller.signal })
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(`Datos recibidos para consulta ${index+1}:`, data);
-                    processResults(data, query);
-                })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    console.error(`Error en consulta ${index+1}:`, error);
-                    requestsCompleted++;
-                    
-                    // Si todas las peticiones fallaron, devolver el callback con error
+                // Realizar peticiones para cada variante
+                queryVariants.forEach((query, index) => {
+                    setTimeout(() => {
+                        // Usar Nominatim para geocodificación
+                        const encodedQuery = encodeURIComponent(query);
+                        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&addressdetails=1&limit=5&accept-language=es`;
+                        
+                        console.log(`Realizando petición ${index+1}/${totalRequests} a:`, url);
+                        
+                        // Crear un timeout para abortar la solicitud si tarda demasiado
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+                        
+                        fetch(url, { signal: controller.signal })
+                            .then(response => {
+                                clearTimeout(timeoutId);
+                                if (!response.ok) {
+                                    throw new Error(`Error HTTP: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log(`Datos recibidos para consulta ${index+1}:`, data);
+                                processResults(data, query);
+                            })
+                            .catch(error => {
+                                clearTimeout(timeoutId);
+                                console.error(`Error en consulta ${index+1}:`, error);
+                                requestsCompleted++;
+                                
+                                // Si todas las peticiones fallaron, devolver el callback con error
                     if (requestsCompleted >= totalRequests) {
                         // Si no tenemos resultado pero tenemos ciudad, intentar usar coordenadas conocidas
                         if (!bestResult && addressParts.city) {
