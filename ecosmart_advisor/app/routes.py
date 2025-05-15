@@ -42,7 +42,13 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def index():
     """Ruta principal de la aplicación"""
-    return render_template('index.html')
+    # Importar el módulo de contenido del carrusel
+    from ecosmart_advisor.app.services.carousel_content import generar_datos_carrusel
+    
+    # Generar datos actualizados para el carrusel
+    carousel_data = generar_datos_carrusel()
+    
+    return render_template('index.html', carousel_data=carousel_data)
 
 # Blueprint para el diagnóstico
 diagnostico_bp = Blueprint('diagnostico', __name__, url_prefix='/diagnostico')
