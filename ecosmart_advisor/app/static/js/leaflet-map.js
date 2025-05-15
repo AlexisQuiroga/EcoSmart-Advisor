@@ -688,50 +688,50 @@ window.performMultipleGeocodingRequests = function(addressParts, finalCallback) 
                 // 1. Usar el formato argentino de dirección: "Calle Número, Ciudad, Provincia, Argentina"
                 // 2. Buscar sólo con nombre de calle y ciudad si el número no se encuentra
     
-    let bestResult = null;
-    let requestsCompleted = 0;
-    const totalRequests = queryVariants.length;
+                let bestResult = null;
+                let requestsCompleted = 0;
+                const totalRequests = queryVariants.length;
     
-    // Función para procesar resultados de cada petición
-    const processResults = (results, queryVariant) => {
-        requestsCompleted++;
-        
-        if (results && results.length > 0) {
-            // Filtrar y priorizar resultados por país y relevancia
-            const filteredResults = filterResultsByCountry(results, 'Argentina');
-            if (filteredResults.length > 0) {
-                const prioritizedResult = prioritizeResults(filteredResults, addressParts);
-                
-                // Si este es el primer resultado o mejor que el anterior, actualizarlo
-                if (!bestResult || (prioritizedResult.score > bestResult.score)) {
-                    bestResult = prioritizedResult;
-                    console.log("Nuevo mejor resultado encontrado:", bestResult);
-                }
-            }
-        }
-        
-        // Verificar si hemos completado todas las peticiones
-        if (requestsCompleted >= totalRequests) {
-            // Si no tenemos resultado pero tenemos ciudad, intentar usar coordenadas conocidas
-            if (!bestResult && addressParts.city) {
-                const knownCoords = getKnownCoordinatesForCity(addressParts.city);
-                if (knownCoords) {
-                    console.log("Usando coordenadas conocidas para ciudad como último recurso:", knownCoords);
-                    bestResult = {
-                        lat: knownCoords.lat.toString(),
-                        lon: knownCoords.lon.toString(),
-                        display_name: addressParts.city + (addressParts.province ? ", " + addressParts.province : "") + ", Argentina",
-                        type: "city",
-                        importance: 0.75,
-                        zoomLevel: knownCoords.zoom,
-                        fallback: true
-                    };
-                }
-            }
-            
-            finalCallback(bestResult);
-        }
-    };
+                // Función para procesar resultados de cada petición
+                const processResults = (results, queryVariant) => {
+                    requestsCompleted++;
+                    
+                    if (results && results.length > 0) {
+                        // Filtrar y priorizar resultados por país y relevancia
+                        const filteredResults = filterResultsByCountry(results, 'Argentina');
+                        if (filteredResults.length > 0) {
+                            const prioritizedResult = prioritizeResults(filteredResults, addressParts);
+                            
+                            // Si este es el primer resultado o mejor que el anterior, actualizarlo
+                            if (!bestResult || (prioritizedResult.score > bestResult.score)) {
+                                bestResult = prioritizedResult;
+                                console.log("Nuevo mejor resultado encontrado:", bestResult);
+                            }
+                        }
+                    }
+                    
+                    // Verificar si hemos completado todas las peticiones
+                    if (requestsCompleted >= totalRequests) {
+                        // Si no tenemos resultado pero tenemos ciudad, intentar usar coordenadas conocidas
+                        if (!bestResult && addressParts.city) {
+                            const knownCoords = getKnownCoordinatesForCity(addressParts.city);
+                            if (knownCoords) {
+                                console.log("Usando coordenadas conocidas para ciudad como último recurso:", knownCoords);
+                                bestResult = {
+                                    lat: knownCoords.lat.toString(),
+                                    lon: knownCoords.lon.toString(),
+                                    display_name: addressParts.city + (addressParts.province ? ", " + addressParts.province : "") + ", Argentina",
+                                    type: "city",
+                                    importance: 0.75,
+                                    zoomLevel: knownCoords.zoom,
+                                    fallback: true
+                                };
+                            }
+                        }
+                        
+                        finalCallback(bestResult);
+                    }
+                };
     
     // Realizar peticiones para cada variante
     queryVariants.forEach((query, index) => {
