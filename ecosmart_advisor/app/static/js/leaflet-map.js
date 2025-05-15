@@ -1114,7 +1114,8 @@ function getKnownCoordinatesForCity(cityName) {
  * @param {number} zoom - Nivel de zoom (opcional)
  * @returns {Object} - El marcador creado o actualizado
  */
-function addOrUpdateMarker(map, lat, lng, zoom = 15) {
+// Exponer la función globalmente
+window.addOrUpdateMarker = function(map, lat, lng, zoom = 15) {
     if (!map) {
         console.error("El mapa no está inicializado");
         return null;
