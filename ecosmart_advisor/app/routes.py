@@ -8,6 +8,18 @@ from flask import Blueprint, render_template, request, jsonify, current_app, ses
 from ecosmart_advisor.app.services.clima_api import obtener_datos_clima
 from ecosmart_advisor.app.services.energia_calculo import calcular_recomendacion, calcular_estimacion_sin_kwh
 from ecosmart_advisor.app.services.simulador import simular_instalacion
+from ecosmart_advisor.app.services.carousel_simple import generar_datos_carrusel as generar_datos_carrusel_simple
+from ecosmart_advisor.app.services.carousel_content import generar_datos_carrusel as generar_datos_carrusel_content
+
+import os
+import logging
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='ecosmart.log'
+)
 
 # Importar el chatbot original como fallback
 from ecosmart_advisor.chatbot.chatbot import generar_respuesta_chatbot
@@ -42,11 +54,42 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def index():
     """Ruta principal de la aplicación"""
-    # Importar el módulo de contenido del carrusel
-    from ecosmart_advisor.app.services.carousel_content import generar_datos_carrusel
+    logger = logging.getLogger('index')
     
-    # Generar datos actualizados para el carrusel
-    carousel_data = generar_datos_carrusel()
+    # Generar datos actualizados para el carrusel utilizando carousel_content
+    logger.info("Generando datos del carrusel para la página principal")
+    
+    # Verificar si tenemos la clave API de Unsplash configurada
+    unsplash_key = os.environ.get("UNSPLASH_API_KEY")
+    if unsplash_key:
+        logger.info(f"UNSPLASH_API_KEY configurada (longitud: {len(unsplash_key)})")
+    else:
+        logger.warning("UNSPLASH_API_KEY no está configurada o está vacía")
+    
+    try:
+        # Intentamos usar la versión de carousel_content que obtiene imágenes filtradas
+        logger.info("Intentando generar datos con carousel_content...")
+        carousel_data = generar_datos_carrusel_content()
+        carousel_categories = list(carousel_data.keys())
+        logger.info(f"Carrusel data obtenida correctamente: {carousel_categories}")
+        
+        # Verificar si tenemos alguna imagen de Unsplash o solo imágenes locales
+        imagen_ejemplo = carousel_data[carousel_categories[0]].get('imagen_url', '')
+        es_local = imagen_ejemplo.startswith('/static/')
+        
+        if es_local:
+            logger.info("Usando imágenes locales (las imágenes remotas fallaron o no están disponibles)")
+        else:
+            logger.info("Usando imágenes filtradas de Unsplash sobre energías renovables")
+            
+    except Exception as e:
+        logger.error(f"Error al generar datos con carousel_content: {str(e)}")
+        
+        # En caso de error, usamos la versión simple como fallback
+        logger.info("Usando sistema de carrusel simple como fallback")
+        carousel_data = generar_datos_carrusel_simple()
+        carousel_categories = list(carousel_data.keys())
+        logger.info(f"Carrusel simple data obtenida: {carousel_categories}")
     
     return render_template('index.html', carousel_data=carousel_data)
 

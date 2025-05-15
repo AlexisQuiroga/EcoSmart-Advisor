@@ -21,9 +21,9 @@
     
     <div class="col-lg-6 mt-4 mt-lg-0 p-0">
         <!-- Carrusel con todas las imágenes y el video (reconstruido completamente) -->
-        <div id="carouselEnergiasRenovables" class="carousel slide" data-bs-ride="true">
-            <!-- Indicadores -->
-            <div class="carousel-indicators">
+        <div id="carouselEnergiasRenovables" class="carousel slide rounded overflow-hidden shadow-sm" data-bs-ride="true">
+            <!-- Indicadores (más transparentes) -->
+            <div class="carousel-indicators" style="opacity: 0.3;">
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true"></button>
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1"></button>
                 <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2"></button>
@@ -35,31 +35,79 @@
             
             <!-- Items del carrusel -->
             <div class="carousel-inner">
-                <!-- Diapositiva 1: Energía Eólica con datos dinámicos e imagen dinámica-->
+                <!-- Diapositiva 1: Energía Eólica -->
                 <div class="carousel-item active">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/energia_eolica.jpg') }}" class="d-block w-100" alt="Energía Eólica">
+                        <img src="{{ carousel_data.get('energia_eolica', {}).get('imagen_url', url_for('static', filename='images/carousel/energia_eolica.jpg')) }}" class="d-block w-100" alt="Energía Eólica">
                         <div class="position-absolute bottom-0 start-0 bg-{{ carousel_data.get('energia_eolica', {}).get('color', 'success') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
-                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_eolica', {}).get('titulo', 'Energía Eólica - El Futuro') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('energia_eolica', {}).get('texto_principal', 'La energía eólica es 100% renovable y no produce emisiones de gases de efecto invernadero.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_eolica', {}).get('dato_destacado', 'España está entre los 5 países con mayor potencia eólica instalada a nivel mundial.') }}</p>
+                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_eolica', {}).get('titulo', 'Energía Eólica') }}</h5>
+                            <p class="mb-0 small">{{ carousel_data.get('energia_eolica', {}).get('texto_principal', 'La energía eólica aprovecha la fuerza del viento para generar electricidad limpia y renovable.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_eolica', {}).get('dato_destacado', 'Un solo aerogenerador puede generar electricidad para cientos de hogares.') }}</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Diapositiva 2: Eficiencia Energética con datos dinámicos e imagen dinámica -->
+                <!-- Diapositiva 2: Eficiencia Energética -->
                 <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/eficiencia_energetica.jpg') }}" class="d-block w-100" alt="Eficiencia Energética">
+                        <img src="{{ carousel_data.get('eficiencia_energetica', {}).get('imagen_url', url_for('static', filename='images/carousel/eficiencia_energetica.jpg')) }}" class="d-block w-100" alt="Eficiencia Energética">
                         <div class="position-absolute bottom-0 end-0 bg-{{ carousel_data.get('eficiencia_energetica', {}).get('color', 'warning') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('eficiencia_energetica', {}).get('titulo', 'Eficiencia Energética') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('eficiencia_energetica', {}).get('texto_principal', 'Complementa tus sistemas renovables con prácticas eficientes para maximizar el ahorro.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('eficiencia_energetica', {}).get('dato_destacado', 'Combinar energías renovables con eficiencia puede reducir hasta un 90% tu factura.') }}</p>
+                            <p class="mb-0 small">{{ carousel_data.get('eficiencia_energetica', {}).get('texto_principal', 'Mejora la eficiencia energética de tu hogar para reducir el consumo y maximizar el rendimiento de las energías renovables.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('eficiencia_energetica', {}).get('dato_destacado', 'La eficiencia energética puede reducir el consumo de energía hasta en un 30%.') }}</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Diapositiva 3: Video de Generador Eólico con overlay central -->
+                <!-- Diapositiva 3: Energía Térmica -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="{{ carousel_data.get('energia_termica', {}).get('imagen_url', url_for('static', filename='images/carousel/energia_termica.jpg')) }}" class="d-block w-100" alt="Energía Térmica">
+                        <div class="position-absolute top-50 start-50 translate-middle bg-{{ carousel_data.get('energia_termica', {}).get('color', 'primary') }} bg-opacity-75 text-white p-3 rounded" style="max-width: 350px;">
+                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_termica', {}).get('titulo', 'Energía Solar Térmica') }}</h5>
+                            <p class="mb-0 small">{{ carousel_data.get('energia_termica', {}).get('texto_principal', 'Los sistemas de energía solar térmica aprovechan el calor del sol para generar agua caliente o calefacción.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_termica', {}).get('dato_destacado', 'Un sistema solar térmico puede cubrir hasta el 70% de las necesidades de agua caliente de un hogar.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 4: Energía Solar -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="{{ carousel_data.get('energia_solar', {}).get('imagen_url', url_for('static', filename='images/carousel/energia_solar.jpg')) }}" class="d-block w-100" alt="Energía Solar Fotovoltaica">
+                        <div class="position-absolute top-0 end-0 bg-{{ carousel_data.get('energia_solar', {}).get('color', 'primary') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_solar', {}).get('titulo', 'Energía Solar Fotovoltaica') }}</h5>
+                            <p class="mb-0 small">{{ carousel_data.get('energia_solar', {}).get('texto_principal', 'Los paneles solares generan electricidad limpia y renovable directamente a partir de la luz solar.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_solar', {}).get('dato_destacado', 'La energía solar es la fuente de energía renovable de mayor crecimiento a nivel mundial.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 5: Termotanque Solar -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="{{ carousel_data.get('termotanque_solar', {}).get('imagen_url', url_for('static', filename='images/carousel/termotanque_solar.jpg')) }}" class="d-block w-100" alt="Termotanque Solar">
+                        <div class="position-absolute bottom-0 start-0 bg-{{ carousel_data.get('termotanque_solar', {}).get('color', 'info') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('termotanque_solar', {}).get('titulo', 'Termotanque Solar') }}</h5>
+                            <p class="mb-0 small">{{ carousel_data.get('termotanque_solar', {}).get('texto_principal', 'Los termotanques solares utilizan la energía del sol para calentar agua de manera eficiente y sostenible.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('termotanque_solar', {}).get('dato_destacado', 'Un termotanque solar puede calentar agua incluso en días parcialmente nublados.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 6: Futuro Renovable -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="{{ carousel_data.get('futuro_renovables', {}).get('imagen_url', url_for('static', filename='images/carousel/futuro_renovable.jpg')) }}" class="d-block w-100" alt="Futuro Renovable">
+                        <div class="position-absolute top-0 start-0 bg-{{ carousel_data.get('futuro_renovables', {}).get('color', 'danger') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('futuro_renovables', {}).get('titulo', 'Futuro de las Renovables') }}</h5>
+                            <p class="mb-0 small">{{ carousel_data.get('futuro_renovables', {}).get('texto_principal', 'Las energías renovables son el pilar fundamental de un futuro energético sostenible y libre de emisiones.') }}</p>
+                            <p class="mb-0 small mt-2">{{ carousel_data.get('futuro_renovables', {}).get('dato_destacado', 'Según proyecciones, más del 85% de la electricidad mundial será renovable para 2050.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 7: Video de Aerogenerador -->
                 <div class="carousel-item">
                     <div class="position-relative">
                         <video autoplay loop muted playsinline class="d-block w-100">
@@ -68,67 +116,19 @@
                         </video>
                         <div class="position-absolute top-50 start-50 translate-middle bg-success bg-opacity-75 text-white p-3 rounded" style="max-width: 350px;">
                             <h5 class="fs-6 fw-bold mb-1">Funcionamiento del Aerogenerador</h5>
-                            <p class="mb-0 small">Los aerogeneradores modernos generan electricidad cuando el viento mueve las palas a velocidades de 3-25 m/s.</p>
-                            <p class="mb-0 small mt-2">Una sola turbina puede reducir hasta 1.500 toneladas de CO2 al año.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Diapositiva 4: Energía Solar con datos dinámicos e imagen dinámica -->
-                <div class="carousel-item">
-                    <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/energia_solar.jpg') }}" class="d-block w-100" alt="Energía Solar Fotovoltaica">
-                        <div class="position-absolute top-0 end-0 bg-{{ carousel_data.get('energia_solar', {}).get('color', 'primary') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
-                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_solar', {}).get('titulo', 'Energía Solar Fotovoltaica') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('energia_solar', {}).get('texto_principal', 'Los paneles solares convierten la luz solar en electricidad limpia y renovable.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_solar', {}).get('dato_destacado', 'Cada MW instalado evita la emisión de aproximadamente 665 toneladas de CO2 al año.') }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Diapositiva 5: Termotanque Solar con datos dinámicos e imagen dinámica -->
-                <div class="carousel-item">
-                    <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/termotanque_solar.jpg') }}" class="d-block w-100" alt="Termotanque Solar">
-                        <div class="position-absolute bottom-0 start-0 bg-{{ carousel_data.get('termotanque_solar', {}).get('color', 'info') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
-                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('termotanque_solar', {}).get('titulo', 'Termotanque Solar') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('termotanque_solar', {}).get('texto_principal', 'Los termotanques solares calientan agua usando la radiación solar, sin consumir electricidad.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('termotanque_solar', {}).get('dato_destacado', 'Puede reducir hasta un 70% del consumo energético para calentar agua.') }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Diapositiva 6: Energía Solar Térmica con datos dinámicos -->
-                <div class="carousel-item">
-                    <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/energia_termica.jpg') }}" class="d-block w-100" alt="Energía Solar Térmica">
-                        <div class="position-absolute top-0 start-0 bg-primary bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
-                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_termica', {}).get('titulo', 'Energía Solar Térmica') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('energia_termica', {}).get('texto_principal', 'Los sistemas solares térmicos pueden cubrir hasta el 70% de la necesidad anual de agua caliente en un hogar.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('energia_termica', {}).get('dato_destacado', 'Por cada m² de captador solar térmico se evita la emisión de una tonelada de CO2 al año.') }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Diapositiva 7: Futuro Renovable con datos dinámicos e imagen dinámica -->
-                <div class="carousel-item">
-                    <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/futuro_renovable.jpg') }}" class="d-block w-100" alt="Futuro Renovable">
-                        <div class="position-absolute bottom-0 end-0 bg-{{ carousel_data.get('futuro_renovables', {}).get('color', 'danger') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
-                            <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('futuro_renovables', {}).get('titulo', 'El Futuro Renovable') }}</h5>
-                            <p class="mb-0 small">{{ carousel_data.get('futuro_renovables', {}).get('texto_principal', 'Las energías renovables son la clave para un futuro sostenible y libre de emisiones.') }}</p>
-                            <p class="mb-0 small mt-2">{{ carousel_data.get('futuro_renovables', {}).get('dato_destacado', 'Se espera que para 2050, más del 85% de la electricidad mundial sea renovable.') }}</p>
+                            <p class="mb-0 small">Los aerogeneradores modernos producen electricidad limpia cuando el viento mueve sus palas a velocidades entre 3-25 m/s.</p>
+                            <p class="mb-0 small mt-2">Una sola turbina puede evitar la emisión de hasta 1.500 toneladas de CO2 anualmente.</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Controles del carrusel -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="prev">
+            <!-- Controles del carrusel (ocultos por solicitud del usuario) -->
+            <button class="carousel-control-prev d-none" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Anterior</span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="next">
+            <button class="carousel-control-next d-none" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="next">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Siguiente</span>
             </button>

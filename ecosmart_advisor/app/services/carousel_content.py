@@ -22,33 +22,8 @@ DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_API_KEY")  # Usar la clave de API de las variables de entorno
 UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
 
-# URL de imágenes predefinidas por tema (como alternativa si la API falla)
-IMAGENES_PREDEFINIDAS = {
-    "energia_solar": [
-        "https://images.unsplash.com/photo-1559302995-f54c122559b9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ],
-    "energia_eolica": [
-        "https://images.unsplash.com/photo-1548337138-e87d889cc369?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1467533003447-e295ff1b0435?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ],
-    "termotanque_solar": [
-        "https://images.unsplash.com/photo-1525558134239-d9d9e7a59a75?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1584276433291-76b422994066?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ],
-    "eficiencia_energetica": [
-        "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1515269048104-99a0a0a82652?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ],
-    "futuro_renovables": [
-        "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ],
-    "energia_termica": [
-        "https://images.unsplash.com/photo-1553434006-dc322885d7d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
-        "https://images.unsplash.com/photo-1469048071019-6ac1aa26c008?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-    ]
-}
+# Nota: Ya no usamos URLs predefinidas de Unsplash porque dependen de la API.
+# En su lugar, usamos imágenes locales como fallback que están siempre disponibles.
 
 # Caché para evitar generar el mismo contenido en cada solicitud
 # Usaremos un tiempo de expiración para refrescar el contenido periódicamente
@@ -75,209 +50,187 @@ CAROUSEL_CATEGORIES = [
     "energia_termica"
 ]
 
-# Datos predeterminados para cada slide del carrusel
+# Datos predeterminados para cada slide del carrusel con énfasis en los beneficios económicos y ambientales
 DEFAULT_CAROUSEL_DATA = {
     "energia_solar": {
-        "titulo": "Energía Solar Fotovoltaica",
-        "texto_principal": "Los paneles solares convierten la luz solar en electricidad limpia y renovable.",
-        "dato_destacado": "Los paneles modernos tienen una vida útil de más de 25 años con mínimo mantenimiento.",
+        "titulo": "Ahorro con Energía Solar",
+        "texto_principal": "La inversión en paneles solares se recupera en un promedio de 4-6 años según la zona geográfica.",
+        "dato_destacado": "Reduce hasta un 95% de tu factura eléctrica mensual generando tu propia energía limpia.",
         "color": "primary"
     },
     "energia_eolica": {
-        "titulo": "Energía Eólica",
-        "texto_principal": "La energía eólica aprovecha la fuerza del viento para generar electricidad sin emisiones.",
-        "dato_destacado": "Un solo aerogenerador puede abastecer a cientos de hogares con energía limpia.",
+        "titulo": "Rentabilidad Eólica",
+        "texto_principal": "La energía eólica tiene el menor costo de generación entre todas las renovables y continúa bajando.",
+        "dato_destacado": "Un hogar con turbina pequeña puede ahorrar entre $200-600 USD mensuales en áreas con buen recurso.",
         "color": "success"
     },
     "termotanque_solar": {
-        "titulo": "Termotanque Solar",
-        "texto_principal": "Los termotanques solares calientan agua usando la radiación solar, sin consumir electricidad.",
-        "dato_destacado": "Puede reducir hasta un 70% del consumo energético para calentar agua.",
+        "titulo": "Beneficio Económico Inmediato",
+        "texto_principal": "Los termotanques solares ofrecen el retorno de inversión más rápido entre todas las tecnologías renovables.",
+        "dato_destacado": "Reduce hasta 85% el gasto en calentamiento de agua, con amortización en solo 2-3 años.",
         "color": "info"
     },
     "eficiencia_energetica": {
-        "titulo": "Eficiencia Energética",
-        "texto_principal": "Complementa tus sistemas renovables con prácticas eficientes para maximizar el ahorro.",
-        "dato_destacado": "Combinar energías renovables con eficiencia puede reducir hasta un 90% tu factura.",
+        "titulo": "Maximiza tu Inversión Verde",
+        "texto_principal": "Cada peso invertido en eficiencia energética genera un retorno de hasta 3 veces la inversión inicial.",
+        "dato_destacado": "Combinando renovables y eficiencia se puede lograr hasta 50% más ahorro que con renovables solas.",
         "color": "warning"
     },
     "futuro_renovables": {
-        "titulo": "El Futuro Renovable",
-        "texto_principal": "Las energías renovables son la clave para un futuro sostenible y libre de emisiones.",
-        "dato_destacado": "Se espera que para 2050, más del 85% de la electricidad mundial sea renovable.",
+        "titulo": "Independencia Energética",
+        "texto_principal": "Las renovables ofrecen soberanía energética a hogares y empresas, protegiéndolos de aumentos de tarifas.",
+        "dato_destacado": "Se prevé que para 2025 las renovables serán hasta 60% más baratas que los combustibles fósiles.",
         "color": "danger"
     },
     "energia_termica": {
-        "titulo": "Energía Solar Térmica",
-        "texto_principal": "Los sistemas solares térmicos aprovechan el calor del sol para distintas aplicaciones energéticas.",
-        "dato_destacado": "Por cada m² de captador solar térmico se evita la emisión de una tonelada de CO2 al año.",
+        "titulo": "Valorización Inmobiliaria",
+        "texto_principal": "Las propiedades con sistemas de energía renovable aumentan su valor de mercado entre un 4% y 8%.",
+        "dato_destacado": "Los edificios con certificación energética se venden un 35% más rápido que propiedades similares.",
         "color": "primary"
     }
 }
 
 def buscar_imagen_unsplash(tema, categoria=None):
     """
-    Busca una imagen relacionada con el tema en Unsplash o devuelve una predefinida.
+    Busca imágenes en Unsplash relacionadas con energías renovables.
+    Aplica un filtro específico para garantizar que sean sobre energías renovables.
     
     Args:
-        tema (str): Tema de búsqueda (ej: 'solar panels')
-        categoria (str, optional): Categoría del tema para usar imágenes predefinidas
+        tema (str): Tema de búsqueda específico para Unsplash
+        categoria (str, optional): Categoría del tema (usado para fallback)
         
     Returns:
         str: URL de la imagen
     """
-    print(f"Buscando imagen para tema: {tema}, categoría: {categoria}")
+    # Mapeo de fallback con imágenes locales por si falla la API
+    imagenes_fallback = {
+        "energia_solar": "/static/images/carousel/energia_solar.jpg",
+        "energia_eolica": "/static/images/carousel/energia_eolica.jpg",
+        "termotanque_solar": "/static/images/carousel/termotanque_solar.jpg",
+        "eficiencia_energetica": "/static/images/carousel/eficiencia_energetica.jpg",
+        "futuro_renovables": "/static/images/carousel/futuro_renovable.jpg",
+        "energia_termica": "/static/images/carousel/energia_termica.jpg"
+    }
     
-    # Para pruebas, usamos directamente los archivos locales
-    if categoria == "energia_solar":
-        print(f"Usando imagen local para {categoria}")
-        return "/static/images/carousel/energia_solar.jpg"
-    elif categoria == "energia_eolica":
-        print(f"Usando imagen local para {categoria}")
+    # Filtros para asegurar que solo se muestren imágenes de energías renovables
+    filtros_renovables = [
+        "renewable energy",
+        "clean energy",
+        "green energy",
+        "sustainable energy"
+    ]
+    
+    # Si no hay API key o no hay tema, usar fallback
+    if not UNSPLASH_ACCESS_KEY:
+        print(f"No se encontró UNSPLASH_API_KEY en las variables de entorno")
+        if categoria and categoria in imagenes_fallback:
+            print(f"Sin API key - Usando imagen local para {categoria}")
+            return imagenes_fallback[categoria]
         return "/static/images/carousel/energia_eolica.jpg"
-    elif categoria == "termotanque_solar":
-        print(f"Usando imagen local para {categoria}")
-        return "/static/images/carousel/termotanque_solar.jpg"
-    elif categoria == "eficiencia_energetica":
-        print(f"Usando imagen local para {categoria}")
-        return "/static/images/carousel/eficiencia_energetica.jpg"
-    elif categoria == "futuro_renovables":
-        print(f"Usando imagen local para {categoria}")
-        return "/static/images/carousel/futuro_renovable.jpg"
-    elif categoria == "energia_termica":
-        print(f"Usando imagen local para {categoria}")
-        return "/static/images/carousel/energia_termica.jpg"
+    
+    if not tema:
+        print(f"No se proporcionó tema de búsqueda")
+        if categoria and categoria in imagenes_fallback:
+            print(f"Sin tema - Usando imagen local para {categoria}")
+            return imagenes_fallback[categoria]
+        return "/static/images/carousel/energia_eolica.jpg"
+    
+    # Verificar el formato de la API key (mostrar solo los primeros 5 caracteres por seguridad)
+    if UNSPLASH_ACCESS_KEY:
+        print(f"API key encontrada: {UNSPLASH_ACCESS_KEY[:5]}..." + "*" * 10)
     
     try:
-        # Crear un hash del tema + timestamp redondeado (para cambiar cada cierto tiempo)
-        # Esto permite obtener diferentes imágenes en cada carga, pero no en cada solicitud
-        seed = f"{tema}_{int(time.time() / (60 * 10))}"  # Cambia cada 10 minutos
-        hash_obj = hashlib.md5(seed.encode())
-        seed_hash = int(hash_obj.hexdigest(), 16) % 100  # Valor entre 0-99
+        # Agregar un filtro aleatorio relacionado con energías renovables
+        filtro = random.choice(filtros_renovables)
+        tema_filtrado = f"{tema} {filtro}"
         
-        # Verificar si tenemos la API key para Unsplash
-        if UNSPLASH_ACCESS_KEY:
-            print(f"API key de Unsplash disponible, intentando consulta para {tema}")
-            # Intentar usar la API de Unsplash
-            # Parámetros de búsqueda
-            params = {
-                'query': tema,
-                'orientation': 'landscape',
-                'per_page': 30,        # Traer varias opciones para seleccionar aleatoriamente
-                'content_filter': 'high',
-                'client_id': UNSPLASH_ACCESS_KEY
-            }
-            
-            try:
-                response = requests.get(UNSPLASH_API_URL, params=params, timeout=5)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    results = data.get('results', [])
-                    
-                    if results:
-                        # Usar el hash para seleccionar una imagen específica para este periodo de tiempo
-                        # Así obtenemos variedad pero estabilidad durante un periodo
-                        index = seed_hash % len(results)
-                        selected_image = results[index]
-                        
-                        # Obtener URL de la imagen en resolución media (mejor para carrusel)
-                        image_url = selected_image['urls']['regular']
-                        print(f"Imagen encontrada en Unsplash: {image_url[:50]}...")
-                        return image_url
-                else:
-                    print(f"Error en la API de Unsplash. Código: {response.status_code}, Respuesta: {response.text[:100]}")
-            except Exception as api_error:
-                print(f"Error en la API de Unsplash: {str(api_error)}")
+        print(f"Buscando imágenes de: {tema_filtrado}")
+        
+        # Parámetros para la API de Unsplash
+        params = {
+            "query": tema_filtrado,
+            "per_page": 1,
+            "orientation": "landscape",
+            "content_filter": "high", 
+            "client_id": UNSPLASH_ACCESS_KEY
+        }
+        
+        # Realizar la petición a la API
+        response = requests.get(UNSPLASH_API_URL, params=params, timeout=5)
+        
+        # Verificar si la solicitud fue exitosa
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("results") and len(data["results"]) > 0:
+                # Tomar la primera imagen del resultado
+                imagen_url = data["results"][0]["urls"]["regular"]
+                print(f"Imagen encontrada: {imagen_url}")
+                return imagen_url
+            else:
+                print("No se encontraron imágenes en Unsplash")
         else:
-            print("No se encontró API key de Unsplash, usando imágenes predefinidas")
-        
-        # Si falla la API o no hay clave, usar imágenes predefinidas si tenemos la categoría
-        if categoria and categoria in IMAGENES_PREDEFINIDAS:
-            # Seleccionar imagen predefinida usando el mismo hash para consistencia
-            imagenes = IMAGENES_PREDEFINIDAS[categoria]
-            if imagenes:
-                index = seed_hash % len(imagenes)
-                imagen_seleccionada = imagenes[index]
-                print(f"Usando imagen predefinida para {categoria}: {imagen_seleccionada[:50]}...")
-                return imagen_seleccionada
-        
-        # Si no tenemos imágenes predefinidas para esta categoría, intentar buscar en otros temas
-        print(f"No se encontraron imágenes para categoría {categoria}, usando imágenes de otra categoría")
-        for cat, urls in IMAGENES_PREDEFINIDAS.items():
-            if urls:
-                index = seed_hash % len(urls)
-                imagen_seleccionada = urls[index]
-                print(f"Usando imagen de categoría alternativa {cat}: {imagen_seleccionada[:50]}...")
-                return imagen_seleccionada
-                
-        # Si todo falla, devolver la ruta a una imagen local estática
-        print("No se pudo obtener ninguna imagen, usando imagen local")
-        return "/static/images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg"
+            print(f"Error en la API de Unsplash: {response.status_code}")
     
     except Exception as e:
         print(f"Error al buscar imagen en Unsplash: {str(e)}")
-        return "/static/images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg"
+    
+    # En caso de error, usar imagen local como fallback
+    if categoria and categoria in imagenes_fallback:
+        print(f"Fallback - Usando imagen local para {categoria}")
+        return imagenes_fallback[categoria]
+    
+    print("Usando imagen genérica de fallback")
+    return "/static/images/carousel/energia_eolica.jpg"
 
 def generar_datos_carrusel():
     """
-    Genera datos aleatorios y actualizados para el carrusel utilizando Deepseek AI
-    y busca imágenes relevantes para cada tema.
+    Genera datos para el carrusel con imágenes dinámicas de Unsplash filtradas 
+    para asegurar que sean relacionadas con energías renovables.
     
     Returns:
-        dict: Datos actualizados para el carrusel con URLs de imágenes
+        dict: Datos para el carrusel con URLs de imágenes
     """
-    print("---- Generando nuevos datos para el carrusel ----")
-    # Comprobar si la API key está disponible
-    import os
-    api_key = os.environ.get("UNSPLASH_API_KEY")
-    if api_key and len(api_key) > 5:
-        print(f"API KEY de Unsplash configurada: {api_key[:5]}...")
-    else:
-        print("ADVERTENCIA: No se encontró la API KEY de Unsplash en las variables de entorno")
+    print("---- Generando datos para el carrusel con imágenes filtradas de energías renovables ----")
+    
     try:
-        # Crear un identificador único basado en la hora (actualizado cada 10 segundos para pruebas)
-        cache_key = int(time.time() / CACHE_EXPIRY)
+        # Crear datos dinámicos para cada categoría
+        carousel_data = {}
         
-        # Si tenemos datos en caché y no han expirado, usarlos
-        if cache_key in CONTENT_CACHE:
-            return CONTENT_CACHE[cache_key]
-        
-        # Seleccionar categorías aleatorias para actualizar (al menos 3)
-        num_categorias = random.randint(3, 5)
-        categorias_seleccionadas = random.sample(CAROUSEL_CATEGORIES, num_categorias)
-        
-        # Generar datos actualizados para el carrusel
-        carousel_data = DEFAULT_CAROUSEL_DATA.copy()
-        
-        # Añadir campo de imagen a todos los elementos
+        # Procesar cada categoría
         for categoria in CAROUSEL_CATEGORIES:
-            carousel_data[categoria]['imagen_url'] = ""  # String vacío en lugar de None
-        
-        # Actualizar solo las categorías seleccionadas con contenido nuevo
-        for categoria in categorias_seleccionadas:
-            # No actualizar si Deepseek no está disponible
-            if not DEEPSEEK_API_KEY and categoria != categorias_seleccionadas[0]:
-                continue
-                
-            # Generar datos actualizados para esta categoría
+            # Intentar generar datos dinámicos de texto para esta categoría
             datos_categoria = generar_datos_categoria(categoria)
+            
+            # Si no se pudieron generar datos, usar los predeterminados
+            if not datos_categoria:
+                datos_categoria = DEFAULT_CAROUSEL_DATA[categoria].copy()
+            
+            # Obtener el tema específico para la búsqueda de imágenes
+            tema_imagen = IMAGE_TOPICS.get(categoria)
+            
+            # Buscar una imagen con el filtro de energías renovables aplicado
+            imagen_url = buscar_imagen_unsplash(tema_imagen, categoria)
+            
+            # Añadir la URL de la imagen
+            datos_categoria["imagen_url"] = imagen_url
+            
+            # Asegurar que tenga color
+            if "color" not in datos_categoria:
+                colores = ["primary", "success", "info", "warning", "danger"]
+                datos_categoria["color"] = random.choice(colores)
+            
+            # Agregar los datos a la colección principal
             carousel_data[categoria] = datos_categoria
             
-            # Buscar una imagen relevante para la categoría
-            tema_imagen = IMAGE_TOPICS.get(categoria)
-            if tema_imagen:
-                imagen_url = buscar_imagen_unsplash(tema_imagen, categoria)
-                carousel_data[categoria]['imagen_url'] = imagen_url
-        
-        # Guardar en caché
-        CONTENT_CACHE[cache_key] = carousel_data
-        
         return carousel_data
     
     except Exception as e:
         print(f"Error al generar datos del carrusel: {str(e)}")
-        return DEFAULT_CAROUSEL_DATA
+        # En caso de error, devolver datos mínimos con imágenes locales
+        datos_minimos = DEFAULT_CAROUSEL_DATA.copy()
+        for categoria in CAROUSEL_CATEGORIES:
+            datos_minimos[categoria]['imagen_url'] = f"/static/images/carousel/{categoria}.jpg" if categoria != "futuro_renovables" else "/static/images/carousel/futuro_renovable.jpg"
+        return datos_minimos
 
 def generar_datos_categoria(categoria):
     """
