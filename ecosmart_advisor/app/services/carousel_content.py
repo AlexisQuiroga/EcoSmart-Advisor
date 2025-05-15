@@ -19,7 +19,7 @@ DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 # Configurar API de imágenes (Unsplash)
-UNSPLASH_ACCESS_KEY = "qPLQJ_PnZYDNjrKzQl49uJxWIhTwR0WczNHSvs55U-4"  # Clave demo para desarrollo
+UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_API_KEY")  # Usar la clave de API de las variables de entorno
 UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
 
 # URL de imágenes predefinidas por tema (como alternativa si la API falla)
@@ -127,6 +127,27 @@ def buscar_imagen_unsplash(tema, categoria=None):
         str: URL de la imagen
     """
     print(f"Buscando imagen para tema: {tema}, categoría: {categoria}")
+    
+    # Para pruebas, usamos directamente los archivos locales
+    if categoria == "energia_solar":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/energia_solar.jpg"
+    elif categoria == "energia_eolica":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/energia_eolica.jpg"
+    elif categoria == "termotanque_solar":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/termotanque_solar.jpg"
+    elif categoria == "eficiencia_energetica":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/eficiencia_energetica.jpg"
+    elif categoria == "futuro_renovables":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/futuro_renovable.jpg"
+    elif categoria == "energia_termica":
+        print(f"Usando imagen local para {categoria}")
+        return "/static/images/carousel/energia_termica.jpg"
+    
     try:
         # Crear un hash del tema + timestamp redondeado (para cambiar cada cierto tiempo)
         # Esto permite obtener diferentes imágenes en cada carga, pero no en cada solicitud
@@ -134,42 +155,51 @@ def buscar_imagen_unsplash(tema, categoria=None):
         hash_obj = hashlib.md5(seed.encode())
         seed_hash = int(hash_obj.hexdigest(), 16) % 100  # Valor entre 0-99
         
-        # Intentar usar la API de Unsplash
-        # Parámetros de búsqueda
-        params = {
-            'query': tema,
-            'orientation': 'landscape',
-            'per_page': 30,        # Traer varias opciones para seleccionar aleatoriamente
-            'content_filter': 'high',
-            'client_id': UNSPLASH_ACCESS_KEY
-        }
-        
-        try:
-            response = requests.get(UNSPLASH_API_URL, params=params, timeout=5)
+        # Verificar si tenemos la API key para Unsplash
+        if UNSPLASH_ACCESS_KEY:
+            print(f"API key de Unsplash disponible, intentando consulta para {tema}")
+            # Intentar usar la API de Unsplash
+            # Parámetros de búsqueda
+            params = {
+                'query': tema,
+                'orientation': 'landscape',
+                'per_page': 30,        # Traer varias opciones para seleccionar aleatoriamente
+                'content_filter': 'high',
+                'client_id': UNSPLASH_ACCESS_KEY
+            }
             
-            if response.status_code == 200:
-                data = response.json()
-                results = data.get('results', [])
+            try:
+                response = requests.get(UNSPLASH_API_URL, params=params, timeout=5)
                 
-                if results:
-                    # Usar el hash para seleccionar una imagen específica para este periodo de tiempo
-                    # Así obtenemos variedad pero estabilidad durante un periodo
-                    index = seed_hash % len(results)
-                    selected_image = results[index]
+                if response.status_code == 200:
+                    data = response.json()
+                    results = data.get('results', [])
                     
-                    # Obtener URL de la imagen en resolución media (mejor para carrusel)
-                    return selected_image['urls']['regular']
-        except Exception as api_error:
-            print(f"Error en la API de Unsplash: {str(api_error)}")
+                    if results:
+                        # Usar el hash para seleccionar una imagen específica para este periodo de tiempo
+                        # Así obtenemos variedad pero estabilidad durante un periodo
+                        index = seed_hash % len(results)
+                        selected_image = results[index]
+                        
+                        # Obtener URL de la imagen en resolución media (mejor para carrusel)
+                        image_url = selected_image['urls']['regular']
+                        print(f"Imagen encontrada en Unsplash: {image_url[:50]}...")
+                        return image_url
+                else:
+                    print(f"Error en la API de Unsplash. Código: {response.status_code}, Respuesta: {response.text[:100]}")
+            except Exception as api_error:
+                print(f"Error en la API de Unsplash: {str(api_error)}")
+        else:
+            print("No se encontró API key de Unsplash, usando imágenes predefinidas")
         
-        # Si falla la API, usar imágenes predefinidas si tenemos la categoría
+        # Si falla la API o no hay clave, usar imágenes predefinidas si tenemos la categoría
         if categoria and categoria in IMAGENES_PREDEFINIDAS:
             # Seleccionar imagen predefinida usando el mismo hash para consistencia
             imagenes = IMAGENES_PREDEFINIDAS[categoria]
             if imagenes:
                 index = seed_hash % len(imagenes)
                 imagen_seleccionada = imagenes[index]
-                print(f"Usando imagen predefinida para {categoria}: {imagen_seleccionada[:30]}...")
+                print(f"Usando imagen predefinida para {categoria}: {imagen_seleccionada[:50]}...")
                 return imagen_seleccionada
         
         # Si no tenemos imágenes predefinidas para esta categoría, intentar buscar en otros temas
@@ -178,15 +208,16 @@ def buscar_imagen_unsplash(tema, categoria=None):
             if urls:
                 index = seed_hash % len(urls)
                 imagen_seleccionada = urls[index]
-                print(f"Usando imagen de categoría alternativa {cat}: {imagen_seleccionada[:30]}...")
+                print(f"Usando imagen de categoría alternativa {cat}: {imagen_seleccionada[:50]}...")
                 return imagen_seleccionada
                 
-        # Si todo falla, devolver string vacío (no None para evitar problemas de tipo)
-        return ""
+        # Si todo falla, devolver la ruta a una imagen local estática
+        print("No se pudo obtener ninguna imagen, usando imagen local")
+        return "/static/images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg"
     
     except Exception as e:
         print(f"Error al buscar imagen en Unsplash: {str(e)}")
-        return ""
+        return "/static/images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg"
 
 def generar_datos_carrusel():
     """
@@ -197,6 +228,13 @@ def generar_datos_carrusel():
         dict: Datos actualizados para el carrusel con URLs de imágenes
     """
     print("---- Generando nuevos datos para el carrusel ----")
+    # Comprobar si la API key está disponible
+    import os
+    api_key = os.environ.get("UNSPLASH_API_KEY")
+    if api_key and len(api_key) > 5:
+        print(f"API KEY de Unsplash configurada: {api_key[:5]}...")
+    else:
+        print("ADVERTENCIA: No se encontró la API KEY de Unsplash en las variables de entorno")
     try:
         # Crear un identificador único basado en la hora (actualizado cada 10 segundos para pruebas)
         cache_key = int(time.time() / CACHE_EXPIRY)

@@ -4,9 +4,29 @@ Una aplicación inteligente que asesora a los usuarios sobre qué sistema
 de energía renovable les conviene instalar según su ubicación y condiciones.
 """
 import os
+import logging
 from flask import Flask, render_template
 
 from ecosmart_advisor.app import create_app
+
+# Configurar logging para ver los mensajes relacionados con Unsplash API
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('ecosmart.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+logger.info("Iniciando EcoSmart Advisor")
+
+# Verificar que las variables de entorno estén disponibles
+if "UNSPLASH_API_KEY" in os.environ:
+    logger.info("UNSPLASH_API_KEY está configurada correctamente")
+else:
+    logger.warning("UNSPLASH_API_KEY no está configurada")
 
 if __name__ == "__main__":
     app = create_app()
