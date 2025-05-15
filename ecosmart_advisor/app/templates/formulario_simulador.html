@@ -40,65 +40,18 @@
                         <div class="mb-3">
                             <label class="form-label">Ubicación <span class="text-danger">*</span></label>
                             
-                            <div class="row g-3 mb-2">
-                                <!-- Primera fila: País y Provincia juntos -->
-                                <div class="col-md-6">
-                                    <label for="pais" class="form-label small">País <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-globe-americas"></i></span>
-                                        <input type="text" class="form-control" id="pais" name="pais" 
-                                               placeholder="País" value="Argentina" style="text-overflow: ellipsis;" title="Argentina">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="provincia" class="form-label small">Provincia/Estado <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-map"></i></span>
-                                        <input type="text" class="form-control" id="provincia" name="provincia" 
-                                               placeholder="Provincia/Estado" style="text-overflow: ellipsis;" title="">
-                                    </div>
-                                    <div id="sugerenciasProvincia" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
-                                </div>
+                            <!-- Se eliminaron los campos de texto y el botón de validación -->
+                            <!-- Los campos ahora son ocultos y se actualizan desde el mapa -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Seleccione su ubicación directamente en el mapa haciendo clic en el punto deseado
                             </div>
                             
-                            <div class="row g-3 mb-2">
-                                <!-- Segunda fila: Ciudad y Dirección juntos -->
-                                <div class="col-md-6">
-                                    <label for="ciudad" class="form-label small">Ciudad/Localidad <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-city"></i></span>
-                                        <input type="text" class="form-control" id="ciudad" name="ciudad" 
-                                               placeholder="Ciudad/Localidad" style="text-overflow: ellipsis;" title="">
-                                    </div>
-                                    <div id="sugerenciasCiudad" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="direccion" class="form-label small">Dirección <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-home"></i></span>
-                                        <input type="text" class="form-control" id="direccion" name="direccion" 
-                                               placeholder="Calle, número..." style="text-overflow: ellipsis;" title="">
-                                        <span class="input-group-text bg-transparent" id="direccion-estado">
-                                            <i class="fas fa-map-marker-alt text-muted"></i>
-                                        </span>
-                                    </div>
-                                    <div class="form-text" id="direccion-ayuda">Ingrese la calle y número para ubicación exacta</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Botón para validar y ubicar en el mapa -->
-                            <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
-                                <div class="text-muted small">
-                                    <i class="fas fa-info-circle text-primary me-1"></i>
-                                    Complete los campos y valide su ubicación
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-sm btn-success shadow-sm" id="validarUbicacionBtn">
-                                        <i class="fas fa-map-pin me-1"></i>Ubicar en el Mapa
-                                    </button>
-                                    <span class="ms-2 text-muted small" id="validarUbicacionInfo" style="max-width: 200px; display: inline-block;">Complete los campos</span>
-                                </div>
-                            </div>
+                            <!-- Campos ocultos para compatibilidad con JS -->
+                            <input type="hidden" id="pais" name="pais" value="">
+                            <input type="hidden" id="provincia" name="provincia" value="">
+                            <input type="hidden" id="ciudad" name="ciudad" value="">
+                            <input type="hidden" id="direccion" name="direccion" value="">
                             
                             <!-- Campos ocultos para almacenar la ubicación y coordenadas -->
                             <input type="hidden" id="ubicacion" name="ubicacion" required>
