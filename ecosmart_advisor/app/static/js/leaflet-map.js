@@ -96,7 +96,7 @@ window.debugEcosmart = {
  * @param {string} containerId - ID del contenedor del mapa
  * @returns {Object} - Instancia del mapa o null si falla
  */
-function initMap(containerId) {
+window.initMap = function(containerId) {
     console.log("Inicializando mapa en:", containerId);
     
     try {
@@ -151,7 +151,7 @@ function initMap(containerId) {
  * @param {Object} map - Instancia del mapa
  * @param {Function} callback - Función a llamar cuando se hace clic (recibe lat, lng)
  */
-function setupMapClickEvent(map, callback) {
+window.setupMapClickEvent = function(map, callback) {
     if (!map) {
         console.error("Error: No se puede configurar evento de clic, el mapa no está inicializado");
         return;
@@ -214,7 +214,7 @@ function setupMapClickEvent(map, callback) {
  * @param {string} containerId - ID del contenedor del mapa
  * @returns {boolean} - true si el mapa está visible después de la operación
  */
-function toggleMap(containerId) {
+window.toggleMap = function(containerId) {
     const container = document.getElementById(containerId);
     if (!container) {
         console.error("Error: No se encontró el contenedor del mapa:", containerId);
@@ -331,7 +331,7 @@ function reverseGeocode(lat, lng, callback) {
  * @param {Function} callback - Función a llamar con los datos obtenidos (lat, lng)
  * @param {number} zoomLevel - Nivel de zoom a aplicar (opcional, por defecto 15)
  */
-function geocodeAddress(address, callback, zoomLevel = 15) {
+window.geocodeAddress = function(address, callback, zoomLevel = 15) {
     if (!address || address.trim() === '') {
         console.error("La dirección está vacía");
         return;
