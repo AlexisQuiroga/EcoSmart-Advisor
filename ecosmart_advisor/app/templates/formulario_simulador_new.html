@@ -2,12 +2,45 @@
 
 {% block title %}Simulador{% endblock %}
 
+{% block extra_css %}
+<style>
+    .pin-popup {
+        margin-bottom: 10px;
+    }
+    .pin-popup .leaflet-popup-content {
+        margin: 10px 10px;
+        line-height: 1.3;
+    }
+    .pin-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    .pin-details {
+        font-size: 0.9em;
+    }
+    #error-message {
+        display: none;
+    }
+    #location-error-message {
+        display: none;
+    }
+    .leaflet-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    @media (max-width: 576px) {
+        #mapaUbicacion {
+            height: 300px !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h2 class="h4 mb-0"><i class="fas fa-chart-line me-2"></i>Simulador de Energía Renovable</h2>
+                <h2 class="h4 mb-0"><i class="fas fa-calculator me-2"></i>Simulador de Energía Renovable</h2>
             </div>
             <div class="card-body p-4">
                 <p class="lead mb-4">En esta sección puede simular distintos escenarios de instalación de sistemas de energía renovable para evaluar rendimiento, ahorro y beneficio ambiental.</p>
@@ -34,7 +67,7 @@
                                        placeholder="Capacidad del sistema" min="0.1" step="0.1" required>
                                 <span class="input-group-text" id="unidad_capacidad">kW</span>
                             </div>
-                            <div class="form-text" id="capacidad_descripcion">Potencia total del sistema fotovoltaico</div>
+                            <div class="form-text" id="capacidad_descripcion">Potencia total del sistema</div>
                             <div class="mt-2">
                                 <div class="alert alert-info p-2">
                                     <i class="fas fa-info-circle me-2"></i>
@@ -43,7 +76,9 @@
                             </div>
                         </div>
                         
-                        <div class="mb-4">
+                        <h3 class="h5 mb-3">Ubicación</h3>
+                        
+                        <div class="mb-3">
                             <label class="form-label">Ubicación <span class="text-danger">*</span></label>
                             <p class="text-muted mb-3">Para un cálculo preciso, necesitamos conocer su ubicación. Por favor, marque directamente su posición en el mapa.</p>
                             
@@ -52,6 +87,12 @@
                             <input type="hidden" id="latitud" name="latitud">
                             <input type="hidden" id="longitud" name="longitud">
                             <input type="hidden" id="descripcion_ubicacion" name="descripcion_ubicacion">
+                            
+                            <!-- Campos ocultos para compatibilidad con JS -->
+                            <input type="hidden" id="pais" name="pais" value="">
+                            <input type="hidden" id="provincia" name="provincia" value="">
+                            <input type="hidden" id="ciudad" name="ciudad" value="">
+                            <input type="hidden" id="direccion" name="direccion" value="">
                             
                             <div class="position-relative mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -68,126 +109,278 @@
                                     <!-- El mapa se cargará aquí con JavaScript -->
                                 </div>
                                 
-                                <div id="map-loading-indicator" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                                    <div class="d-flex align-items-center">
-                                        <div class="spinner-border text-success" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
-                                        <span class="ms-2 small">Cargando mapa...</span>
+                                <div class="alert alert-danger mb-3" id="location-error-message" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    <span id="error-text">Error al procesar la ubicación</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="pais" class="form-label">País</label>
+                                        <input type="text" class="form-control" id="paisVisible" placeholder="Se detecta automáticamente" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="provincia" class="form-label">Provincia</label>
+                                        <input type="text" class="form-control" id="provinciaVisible" placeholder="Se detecta automáticamente" readonly>
                                     </div>
                                 </div>
                                 
-                                <!-- Instrucciones para el usuario -->
-                                <div class="alert alert-info mt-2 mb-2">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Cómo usar:</strong> Haga clic directamente en el mapa para marcar su ubicación exacta.
-                                </div>
-                                
-                                <!-- Panel para mostrar las coordenadas seleccionadas -->
-                                <div id="coordenadasSeleccionadas" class="d-none d-flex align-items-center bg-light rounded p-3 mb-2 border">
-                                    <div class="me-3">
-                                        <i class="fas fa-map-marker-alt text-danger fs-4"></i>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="ciudad" class="form-label">Ciudad</label>
+                                        <input type="text" class="form-control" id="ciudadVisible" placeholder="Se detecta automáticamente" readonly>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-1">Ubicación seleccionada</h6>
-                                        <div>
-                                            <span id="ubicacionDescripcion" class="d-block text-success fw-bold mb-1">Coordenadas seleccionadas</span>
+                                    <div class="col-md-6">
+                                        <label for="latitudDisplay" class="form-label">Coordenadas</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="latitudDisplay" placeholder="Latitud" readonly>
+                                            <input type="text" class="form-control" id="longitudDisplay" placeholder="Longitud" readonly>
                                         </div>
-                                        <div class="small text-muted">
-                                            Coordenadas: <span id="latitudSeleccionada">0.000000</span>,
-                                            <span id="longitudSeleccionada">0.000000</span>
-                                        </div>
                                     </div>
-                                    <button type="button" id="usarCoordenadas" class="btn btn-success ms-auto">
-                                        <i class="fas fa-check me-1"></i>Confirmar ubicación
-                                    </button>
-                                </div>
-                                
-                                <div id="location-error-message" class="alert alert-danger mt-2" style="display: none;">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <span id="error-text">Debe seleccionar una ubicación en el mapa para continuar.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <h3 class="h5 mb-3">Datos de Uso</h3>
+                        <h3 class="h5 mb-3">Información Adicional</h3>
                         
                         <div class="mb-3">
-                            <label for="consumo_mensual" class="form-label">Consumo Mensual <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-plug"></i></span>
-                                <input type="number" class="form-control" id="consumo_mensual" name="consumo_mensual" 
-                                       placeholder="Consumo mensual promedio" min="1" required>
-                                <span class="input-group-text">kWh/mes</span>
-                            </div>
-                            <div class="form-text">Consumo eléctrico mensual promedio en kilovatios-hora</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="tarifa" class="form-label">Tarifa Eléctrica <span class="text-danger">*</span></label>
+                            <label for="presupuesto" class="form-label">Presupuesto disponible (USD)</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
-                                <input type="number" class="form-control" id="tarifa" name="tarifa" 
-                                       placeholder="Precio por kWh" step="0.01" min="0.01" required>
-                                <span class="input-group-text">$/kWh</span>
-                            </div>
-                            <div class="form-text">Precio que paga por cada kilovatio-hora de electricidad</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="presupuesto" class="form-label">Presupuesto Disponible</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-wallet"></i></span>
                                 <input type="number" class="form-control" id="presupuesto" name="presupuesto" 
-                                       placeholder="Presupuesto disponible" min="0" step="1000">
-                                <span class="input-group-text">$</span>
+                                       placeholder="Opcional - Ingrese su presupuesto" min="0">
                             </div>
-                            <div class="form-text">Presupuesto estimado para la instalación (opcional)</div>
+                            <div class="form-text">Si lo proporciona, ajustaremos las recomendaciones a su presupuesto</div>
                         </div>
                     </div>
                     
-                    <div class="mb-4 text-center">
-                        <div class="d-grid gap-2 col-md-6 mx-auto">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-calculator me-2"></i>Ejecutar Simulación
-                            </button>
-                        </div>
-                        <p class="form-text mt-2">
-                            La simulación calculará rendimiento, ahorro económico y beneficio ambiental
-                        </p>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calculator me-2"></i>Simular Instalación
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Cargar Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Cargar nuestro script personalizado para el mapa -->
+<script src="{{ url_for('static', filename='js/mapa-simple.js') }}"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Cambiar unidades y descripción según el tipo de instalación
-    const tipoSelect = document.getElementById('tipo_instalacion');
-    const unidadCapacidad = document.getElementById('unidad_capacidad');
+    console.log("Inicializando formulario de simulación...");
+    
+    // Configurar cambio de unidades según tipo de instalación seleccionada
+    const tipoInstalacionSelect = document.getElementById('tipo_instalacion');
     const capacidadDescripcion = document.getElementById('capacidad_descripcion');
+    const unidadCapacidad = document.getElementById('unidad_capacidad');
     const descripcionTipo = document.getElementById('descripcion_tipo');
     
-    tipoSelect.addEventListener('change', function() {
-        const tipo = this.value;
+    tipoInstalacionSelect.addEventListener('change', function() {
+        const seleccion = this.value;
         
-        // Establecer unidades y descripción según el tipo
-        if (tipo === 'solar') {
+        if (seleccion === 'solar') {
             unidadCapacidad.textContent = 'kWp';
             capacidadDescripcion.textContent = 'Potencia pico de paneles solares fotovoltaicos';
-            descripcionTipo.innerHTML = 'Los sistemas solares fotovoltaicos <strong>convierten la luz solar en electricidad</strong> mediante paneles. La capacidad se mide en kWp (kilovatios pico) que representa la potencia máxima que puede generar el sistema en condiciones óptimas.';
-        } else if (tipo === 'eolica') {
+            descripcionTipo.innerHTML = '<strong>Paneles Solares</strong>: Generan electricidad a partir de la luz solar mediante celdas fotovoltaicas. Ideales para zonas con buena irradiación solar y bajo sombreado.';
+        } 
+        else if (seleccion === 'eolica') {
             unidadCapacidad.textContent = 'kW';
             capacidadDescripcion.textContent = 'Potencia nominal del aerogenerador';
-            descripcionTipo.innerHTML = 'Los sistemas eólicos <strong>aprovechan la fuerza del viento</strong> para generar electricidad. La capacidad representa la potencia nominal del aerogenerador a velocidad de viento óptima.';
-        } else if (tipo === 'termotanque') {
-            unidadCapacidad.textContent = 'L';
-            capacidadDescripcion.textContent = 'Capacidad del termotanque en litros';
-            descripcionTipo.innerHTML = 'Los termotanques solares <strong>calientan agua mediante energía solar térmica</strong>. La capacidad indica el volumen de agua que puede almacenar y calentar con energía solar.';
+            descripcionTipo.innerHTML = '<strong>Aerogenerador</strong>: Convierte la energía del viento en electricidad. Más efectivo en zonas con vientos constantes de al menos 3-4 m/s.';
+        } 
+        else if (seleccion === 'termotanque') {
+            unidadCapacidad.textContent = 'litros';
+            capacidadDescripcion.textContent = 'Volumen del termotanque solar';
+            descripcionTipo.innerHTML = '<strong>Termotanque Solar</strong>: Calienta agua utilizando energía solar térmica. Recomendado para reducir consumo en calentamiento de agua.';
         }
     });
+    
+    // Referencias a elementos del DOM
+    const latitudInput = document.getElementById('latitud');
+    const longitudInput = document.getElementById('longitud');
+    const latitudDisplay = document.getElementById('latitudDisplay');
+    const longitudDisplay = document.getElementById('longitudDisplay');
+    const paisInput = document.getElementById('pais');
+    const provinciaInput = document.getElementById('provincia');
+    const ciudadInput = document.getElementById('ciudad');
+    const direccionInput = document.getElementById('direccion');
+    const ubicacionInput = document.getElementById('ubicacion');
+    const paisVisible = document.getElementById('paisVisible');
+    const provinciaVisible = document.getElementById('provinciaVisible');
+    const ciudadVisible = document.getElementById('ciudadVisible');
+    const centrarEnArgentinaBtn = document.getElementById('centrarEnArgentina');
+    
+    // Función para actualizar datos de ubicación
+    function updateLocationData(lat, lng) {
+        // Actualizar inputs ocultos
+        if (latitudInput) latitudInput.value = lat;
+        if (longitudInput) longitudInput.value = lng;
+        
+        // Actualizar displays visibles
+        if (latitudDisplay) latitudDisplay.value = lat;
+        if (longitudDisplay) longitudDisplay.value = lng;
+        
+        // Actualizar campo de ubicación completa
+        updateFullLocation();
+    }
+    
+    // Función para actualizar campos visibles con datos de la ubicación
+    function updateVisibleFields() {
+        // Actualizar campos visibles desde campos ocultos
+        if (paisVisible && paisInput) paisVisible.value = paisInput.value;
+        if (provinciaVisible && provinciaInput) provinciaVisible.value = provinciaInput.value;
+        if (ciudadVisible && ciudadInput) ciudadVisible.value = ciudadInput.value;
+    }
+    
+    // Inicializar el mapa
+    const map = initMap('mapaUbicacion');
+    
+    if (map) {
+        // Configurar el evento de clic en el mapa para actualizar la ubicación
+        map.on('click', function(e) {
+            // Obtener las coordenadas del clic
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            console.log("Clic en mapa:", lat, lng);
+            
+            // Actualizar el marcador en el mapa
+            updateMarker(map, lat, lng);
+            
+            // Actualizar inputs de coordenadas
+            updateLocationData(lat.toFixed(6), lng.toFixed(6));
+            
+            // Realizar geocodificación inversa
+            reverseGeocode(lat, lng, function(data) {
+                if (data && data.address) {
+                    console.log("Datos de geocodificación:", data);
+                    
+                    // Extraer componentes de la dirección
+                    const addr = data.address;
+                    
+                    // Actualizar país si está disponible
+                    if (addr.country && paisInput) {
+                        paisInput.value = addr.country;
+                    }
+                    
+                    // Actualizar provincia
+                    if (provinciaInput) {
+                        if (addr.state) {
+                            provinciaInput.value = addr.state;
+                        } else if (addr.state_district) {
+                            provinciaInput.value = addr.state_district;
+                        } else if (addr.county) {
+                            provinciaInput.value = addr.county;
+                        }
+                    }
+                    
+                    // Actualizar ciudad
+                    if (ciudadInput) {
+                        if (addr.city) {
+                            ciudadInput.value = addr.city;
+                        } else if (addr.town) {
+                            ciudadInput.value = addr.town;
+                        } else if (addr.village) {
+                            ciudadInput.value = addr.village;
+                        }
+                    }
+                    
+                    // Actualizar dirección
+                    if (direccionInput) {
+                        let direccionTexto = '';
+                        
+                        if (addr.road) {
+                            direccionTexto = addr.road;
+                            if (addr.house_number) {
+                                direccionTexto += ' ' + addr.house_number;
+                            }
+                        }
+                        
+                        direccionInput.value = direccionTexto;
+                    }
+                    
+                    // Actualizar campos visibles
+                    updateVisibleFields();
+                    
+                    // Actualizar ubicación completa
+                    updateFullLocation();
+                }
+            });
+        });
+        
+        // Centrar en Argentina inicialmente
+        map.setView([-34.603722, -58.381592], 5);
+    } else {
+        console.error("No se pudo inicializar el mapa");
+    }
+    
+    // Función para actualizar el campo de ubicación completa
+    function updateFullLocation() {
+        // Construir la ubicación completa basada en los componentes
+        let ubicacionCompleta = '';
+        
+        // Agregar dirección si existe
+        if (direccionInput && direccionInput.value.trim()) {
+            ubicacionCompleta += direccionInput.value.trim();
+        }
+        
+        // Agregar ciudad si existe
+        if (ciudadInput && ciudadInput.value.trim()) {
+            if (ubicacionCompleta) ubicacionCompleta += ', ';
+            ubicacionCompleta += ciudadInput.value.trim();
+        }
+        
+        // Agregar provincia si existe
+        if (provinciaInput && provinciaInput.value.trim()) {
+            if (ubicacionCompleta) ubicacionCompleta += ', ';
+            ubicacionCompleta += provinciaInput.value.trim();
+        }
+        
+        // Agregar país si existe
+        if (paisInput && paisInput.value.trim()) {
+            if (ubicacionCompleta) ubicacionCompleta += ', ';
+            ubicacionCompleta += paisInput.value.trim();
+        }
+        
+        // Si hay coordenadas y no hay texto, usar las coordenadas
+        if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitudInput && longitudInput &&
+            latitudInput.value && longitudInput.value) {
+            ubicacionCompleta = `${latitudInput.value}, ${longitudInput.value}`;
+        }
+        
+        // Asignar al campo oculto
+        if (ubicacionCompleta && ubicacionInput) {
+            console.log("Ubicación completa:", ubicacionCompleta);
+            ubicacionInput.value = ubicacionCompleta;
+        }
+        
+        // Actualizar campos visibles
+        updateVisibleFields();
+    }
+    
+    // Centrar en Argentina
+    if (centrarEnArgentinaBtn) {
+        centrarEnArgentinaBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (map) {
+                console.log("Centrando mapa en Argentina");
+                map.setView([-34.603722, -58.381592], 5);
+            }
+        });
+    }
     
     // Verificar selección de ubicación antes de enviar
     const simuladorForm = document.getElementById('simuladorForm');
@@ -216,75 +409,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
-    // Inicializar el mapa
-    if (typeof initMap === 'function') {
-        const map = initMap('mapaUbicacion');
-        
-        // Configurar evento de clic en el mapa si se inicializó correctamente
-        if (map && typeof setupMapClickEvent === 'function') {
-            setupMapClickEvent(map, function(lat, lng, addressData) {
-                // Actualizar campos del formulario
-                document.getElementById('latitud').value = lat;
-                document.getElementById('longitud').value = lng;
-                
-                // Actualizar campos visuales
-                document.getElementById('latitudSeleccionada').textContent = lat;
-                document.getElementById('longitudSeleccionada').textContent = lng;
-                
-                // Actualizar ubicación si hay datos disponibles
-                if (addressData && addressData.display_name) {
-                    document.getElementById('ubicacion').value = addressData.display_name;
-                    document.getElementById('ubicacionDescripcion').textContent = addressData.display_name;
-                    document.getElementById('descripcion_ubicacion').value = addressData.display_name;
-                } else {
-                    document.getElementById('ubicacion').value = lat + ',' + lng;
-                    document.getElementById('ubicacionDescripcion').textContent = 'Coordenadas: ' + lat + ', ' + lng;
-                    document.getElementById('descripcion_ubicacion').value = '';
-                }
-                
-                // Mostrar panel de coordenadas
-                document.getElementById('coordenadasSeleccionadas').classList.remove('d-none');
-                
-                // Ocultar mensaje de error si estaba visible
-                const errorMsg = document.getElementById('location-error-message');
-                if (errorMsg) {
-                    errorMsg.style.display = 'none';
-                }
-            });
-            
-            // Configurar botón para centrar en Argentina
-            const centrarBtn = document.getElementById('centrarEnArgentina');
-            if (centrarBtn) {
-                centrarBtn.addEventListener('click', function() {
-                    map.setView([-38.416097, -63.616672], 4);
-                });
-            }
-            
-            // Configurar botón para usar coordenadas
-            const usarCoordenadasBtn = document.getElementById('usarCoordenadas');
-            if (usarCoordenadasBtn) {
-                usarCoordenadasBtn.addEventListener('click', function() {
-                    // Verificar si se han seleccionado coordenadas
-                    const latInput = document.getElementById('latitud');
-                    const lngInput = document.getElementById('longitud');
-                    
-                    if (latInput.value && lngInput.value) {
-                        // Ocultar mensaje de error si estaba visible
-                        const errorMsg = document.getElementById('location-error-message');
-                        if (errorMsg) {
-                            errorMsg.style.display = 'none';
-                        }
-                        
-                        // Desplazarse al siguiente campo
-                        document.getElementById('consumo_mensual').focus();
-                    } else {
-                        alert('Por favor, seleccione una ubicación en el mapa primero.');
-                    }
-                });
-            }
-        }
-    }
 });
 </script>
 {% endblock %}
