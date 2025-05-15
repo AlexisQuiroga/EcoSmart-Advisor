@@ -382,7 +382,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("Inicializando mapa con EcoSmart.Map en geocodeAddress...");
                 map = EcoSmart.Map.init('mapaUbicacion');
                 if (map) {
-                    setupMapClickEvent(map, updateLocationData);
+                    // Configurar el evento de clic en el mapa directamente usando el módulo EcoSmart.Map
+                    map.on('click', function(e) {
+                        const lat = e.latlng.lat;
+                        const lng = e.latlng.lng;
+                        
+                        console.log("Clic en mapa de diagnóstico:", lat, lng);
+                        
+                        // Actualizar el marcador usando el módulo centralizado
+                        EcoSmart.Map.setMarker(map, lat, lng);
+                        
+                        // Actualizar las coordenadas visibles
+                        updateLocationData(lat.toFixed(6), lng.toFixed(6));
+                    });
                 }
             }
 
@@ -401,12 +413,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // Forzar la creación del marcador
                         setTimeout(function() {
-                            // Intentar crear el marcador de diferentes maneras
-                            let marker = addOrUpdateMarker(map, lat, lng, zoomLevel);
+                            // Intentar crear el marcador usando el módulo centralizado
+                            let marker = EcoSmart.Map.setMarker(map, lat, lng, zoomLevel);
 
-                            if (!marker && window.debugEcosmart) {
-                                console.warn("Usando método de emergencia para marcador");
-                                window.debugEcosmart.emergencyCreateMarker(lat, lng);
+                            if (!marker) {
+                                console.warn("Error al crear marcador - reintentando...");
+                                // Segundo intento con timeout
+                                setTimeout(() => {
+                                    marker = EcoSmart.Map.setMarker(map, lat, lng, zoomLevel);
+                                }, 100);
                             }
 
                             // Actualizar todos los datos de ubicación

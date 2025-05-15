@@ -440,7 +440,7 @@
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-4 text-center mb-3 mb-md-0">
-                                <div class="display-4 text-success">{{ (resultados.reduccion_co2_anual / 1000)|round(1) }}</div>
+                                <div class="display-4 text-success">{{ (resultados.metricas_ambientales.co2_evitado / 1000)|round(1) }}</div>
                                 <div class="h5">Toneladas de CO₂</div>
                                 <div class="small text-muted">evitadas anualmente</div>
                             </div>
@@ -451,8 +451,8 @@
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="fas fa-car text-success me-2 fa-2x"></i>
                                             <div>
-                                                <div class="fw-bold">{{ (resultados.reduccion_co2_anual / 120)|round|int }}</div>
-                                                <div class="small">Vueltas al mundo en auto</div>
+                                                <div class="fw-bold">{{ resultados.metricas_ambientales.km_auto_equivalentes|round|int }}</div>
+                                                <div class="small">Kilómetros no recorridos</div>
                                             </div>
                                         </div>
                                     </div>
@@ -460,8 +460,8 @@
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="fas fa-tree text-success me-2 fa-2x"></i>
                                             <div>
-                                                <div class="fw-bold">{{ (resultados.reduccion_co2_anual / 25)|round|int }}</div>
-                                                <div class="small">Árboles plantados</div>
+                                                <div class="fw-bold">{{ resultados.metricas_ambientales.arboles_equivalentes|round|int }}</div>
+                                                <div class="small">Árboles equivalentes</div>
                                             </div>
                                         </div>
                                     </div>

@@ -17,6 +17,11 @@
     <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     
+    <!-- Leaflet JavaScript con múltiples CDN para mayor confiabilidad -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <!-- Script centralizado para mapas -->
     <script src="{{ url_for('static', filename='js/ecosmart-map.js') }}"></script>
     {% block extra_css %}{% endblock %}
