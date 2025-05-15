@@ -1,7 +1,9 @@
 """
 Módulo de rutas para la aplicación EcoSmart Advisor
 """
-from flask import Blueprint, render_template, request, jsonify
+import os
+import requests
+from flask import Blueprint, render_template, request, jsonify, current_app
 from ecosmart_advisor.app.services.clima_api import obtener_datos_clima
 from ecosmart_advisor.app.services.energia_calculo import calcular_recomendacion, calcular_estimacion_sin_kwh
 from ecosmart_advisor.app.services.simulador import simular_instalacion
@@ -105,6 +107,73 @@ def simulador_api():
     datos = request.json
     resultados = simular_instalacion(datos)
     return jsonify(resultados)
+
+# Blueprint para las APIs
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+@api_bp.route('/geocode', methods=['GET'])
+def geocode():
+    """API proxy para OpenCage Geocoder"""
+    try:
+        # Obtener la API key
+        api_key = os.environ.get('OPENCAGE_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'API key no configurada'}), 500
+        
+        # Obtener parámetros de búsqueda
+        q = request.args.get('q', '')
+        limit = request.args.get('limit', '5')
+        
+        if not q:
+            return jsonify({'error': 'Parámetro de búsqueda requerido'}), 400
+            
+        # Preprocesar la consulta para optimizar resultados para Argentina
+        if 'argentina' not in q.lower() and len(q.split(',')) > 1:
+            q = f"{q}, Argentina"
+            
+        # Construir URL de la API
+        url = 'https://api.opencagedata.com/geocode/v1/json'
+        params = {
+            'q': q,
+            'key': api_key,
+            'limit': limit,
+            'countrycode': 'ar',  # Priorizar Argentina
+            'language': 'es',     # Respuestas en español
+            'no_annotations': 1   # Respuestas más ligeras
+        }
+        
+        # Realizar la solicitud a OpenCage
+        response = requests.get(url, params=params)
+        data = response.json()
+        
+        # Simplificar la respuesta para mejorar rendimiento
+        results = []
+        if 'results' in data:
+            for result in data['results']:
+                simplified = {
+                    'formatted': result['formatted'],
+                    'lat': result['geometry']['lat'],
+                    'lng': result['geometry']['lng'],
+                    'confidence': result.get('confidence', 0)
+                }
+                # Agregar componentes de dirección si están disponibles
+                if 'components' in result:
+                    comp = result['components']
+                    simplified['components'] = {
+                        'street': comp.get('road', ''),
+                        'number': comp.get('house_number', ''),
+                        'city': comp.get('city', comp.get('town', comp.get('village', ''))),
+                        'state': comp.get('state', ''),
+                        'country': comp.get('country', '')
+                    }
+                results.append(simplified)
+                
+        return jsonify({'results': results})
+        
+    except Exception as e:
+        import logging
+        logging.error(f"Error al procesar geocodificación con OpenCage: {str(e)}")
+        return jsonify({'error': 'Error al procesar la solicitud', 'message': str(e)}), 500
 
 # Blueprint para el chatbot
 chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/chatbot')
