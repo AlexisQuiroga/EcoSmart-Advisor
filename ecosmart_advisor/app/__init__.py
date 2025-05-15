@@ -19,10 +19,11 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'clave_secreta_por_defecto')
     
     # Registrar blueprints (rutas)
-    from ecosmart_advisor.app.routes import main_bp, diagnostico_bp, simulador_bp, chatbot_bp
+    from ecosmart_advisor.app.routes import main_bp, diagnostico_bp, simulador_bp, chatbot_bp, api_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(diagnostico_bp)
     app.register_blueprint(simulador_bp)
     app.register_blueprint(chatbot_bp)
+    app.register_blueprint(api_bp)
     
     return app
