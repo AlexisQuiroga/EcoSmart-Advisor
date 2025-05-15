@@ -9,14 +9,32 @@ from ecosmart_advisor.app.services.clima_api import obtener_datos_clima
 from ecosmart_advisor.app.services.energia_calculo import calcular_recomendacion, calcular_estimacion_sin_kwh
 from ecosmart_advisor.app.services.simulador import simular_instalacion
 
-# Importar el nuevo chatbot mejorado con IA y el chatbot original como fallback
+# Importar el chatbot original como fallback
+from ecosmart_advisor.chatbot.chatbot import generar_respuesta_chatbot
+
+# Variable global para usar chatbot con IA
+USAR_IA_CHATBOT = False
+
+# Definir una función alternativa para cuando no está disponible la IA
+def generar_respuesta_ia_fallback(pregunta, historial_conversacion=None):
+    """Función de fallback cuando no se puede importar el módulo IA"""
+    texto = generar_respuesta_chatbot(pregunta)
+    return {
+        "respuesta": texto,
+        "sugerencias": [
+            "¿Qué sistema de energía renovable me conviene?",
+            "¿Cuánto cuesta instalar paneles solares?",
+            "¿Qué es un termotanque solar?"
+        ]
+    }
+
+# Intentar importar el nuevo chatbot mejorado con IA
 try:
     from ecosmart_advisor.chatbot.ai_chatbot import generar_respuesta_ia
     USAR_IA_CHATBOT = True
 except ImportError:
-    USAR_IA_CHATBOT = False
-    
-from ecosmart_advisor.chatbot.chatbot import generar_respuesta_chatbot
+    # Si falla la importación, usar la función de fallback
+    generar_respuesta_ia = generar_respuesta_ia_fallback
 
 # Blueprint principal
 main_bp = Blueprint('main', __name__)
@@ -259,47 +277,46 @@ def consulta_chatbot():
         if 'historial_chatbot' in session:
             historial = session['historial_chatbot']
         
-        # Usar el chatbot con IA si está disponible
-        if USAR_IA_CHATBOT:
-            try:
-                resultado = generar_respuesta_ia(pregunta, historial)
-                
-                # Actualizar historial de conversación
-                historial.append({"rol": "usuario", "contenido": pregunta})
-                historial.append({"rol": "asistente", "contenido": resultado['respuesta']})
-                
-                # Limitar el historial a las últimas 10 interacciones (5 intercambios)
-                historial = historial[-10:] if len(historial) > 10 else historial
-                
-                # Guardar historial en sesión
-                session['historial_chatbot'] = historial
-                
-                return jsonify(resultado)
-            except Exception as e:
-                import logging
-                logging.error(f"Error al usar chatbot IA, recurriendo a fallback: {str(e)}")
-                # Continuar al fallback si hay un error
-        
-        # Usar el chatbot basado en reglas como fallback
-        respuesta_texto = generar_respuesta_chatbot(pregunta)
-        
-        # Actualizar historial incluso con respuesta de fallback
-        historial.append({"rol": "usuario", "contenido": pregunta})
-        historial.append({"rol": "asistente", "contenido": respuesta_texto})
-        historial = historial[-10:] if len(historial) > 10 else historial
-        session['historial_chatbot'] = historial
-        
-        # Sugerencias por defecto para el fallback
-        sugerencias_default = [
-            "¿Qué sistema de energía renovable me conviene?",
-            "¿Cuánto cuesta instalar paneles solares?",
-            "¿Qué es un termotanque solar?"
-        ]
-        
-        return jsonify({
-            'respuesta': respuesta_texto,
-            'sugerencias': sugerencias_default
-        })
+        try:
+            # Usamos la función generar_respuesta_ia en cualquier caso (puede ser la original o la fallback)
+            resultado = generar_respuesta_ia(pregunta, historial)
+            
+            # Actualizar historial de conversación
+            historial.append({"rol": "usuario", "contenido": pregunta})
+            historial.append({"rol": "asistente", "contenido": resultado['respuesta']})
+            
+            # Limitar el historial a las últimas 10 interacciones (5 intercambios)
+            historial = historial[-10:] if len(historial) > 10 else historial
+            
+            # Guardar historial en sesión
+            session['historial_chatbot'] = historial
+            
+            return jsonify(resultado)
+            
+        except Exception as e:
+            import logging
+            logging.error(f"Error al procesar respuesta del chatbot: {str(e)}")
+            
+            # Respuesta de emergencia en caso de fallo total
+            respuesta_texto = "Lo siento, pero estoy teniendo problemas para procesar tu pregunta. Por favor, intenta nuevamente con otra consulta relacionada con energías renovables."
+            
+            # Actualizar historial incluso con respuesta de emergencia
+            historial.append({"rol": "usuario", "contenido": pregunta})
+            historial.append({"rol": "asistente", "contenido": respuesta_texto})
+            historial = historial[-10:] if len(historial) > 10 else historial
+            session['historial_chatbot'] = historial
+            
+            # Sugerencias por defecto para emergencia
+            sugerencias_default = [
+                "¿Qué sistema de energía renovable me conviene?",
+                "¿Cuánto cuesta instalar paneles solares?",
+                "¿Qué es un termotanque solar?"
+            ]
+            
+            return jsonify({
+                'respuesta': respuesta_texto,
+                'sugerencias': sugerencias_default
+            })
         
     except Exception as e:
         import logging
