@@ -37,7 +37,8 @@ def diagnostico():
             'consumo_mensual': request.form.get('consumo_mensual'),
             'superficie_disponible': request.form.get('superficie_disponible'),
             'objetivo': request.form.get('objetivo'),
-            'equipos': request.form.getlist('equipos')
+            'equipos': request.form.getlist('equipos'),
+            'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
         }
         
         # Valor por defecto para los campos que ya no están en el formulario

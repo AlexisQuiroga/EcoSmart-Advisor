@@ -38,7 +38,12 @@
                         <table class="table table-sm">
                             <tr>
                                 <th>Ubicación:</th>
-                                <td>{{ clima.ubicacion }}</td>
+                                <td>
+                                    {% if clima.descripcion_ubicacion %}
+                                    <div class="mb-1">{{ clima.descripcion_ubicacion }}</div>
+                                    {% endif %}
+                                    <div class="text-muted small">{{ clima.ubicacion }}</div>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Tipo de vivienda:</th>
