@@ -15,36 +15,132 @@ function initMap(mapContainerId) {
     if (mapContainerElement) {
         console.log("Contenedor de mapa encontrado, configurando Leaflet");
         
-        // Asegurarse de que el contenedor sea visible y tenga tamaño
+        // Asegurarse de que el contenedor sea visible y tenga tamaño apropiado
+        // Ajustamos altura según el dispositivo para mejorar la experiencia móvil
         mapContainerElement.style.display = 'block';
-        mapContainerElement.style.height = '400px';
+        
+        // Altura adaptativa según el ancho de pantalla (dispositivo móvil vs escritorio)
+        const isMobile = window.innerWidth < 768;
+        mapContainerElement.style.height = isMobile ? '300px' : '400px';
         
         // Inicializar con coordenadas predeterminadas (Argentina)
         const defaultLat = -38.416097;
         const defaultLng = -63.616672;
-        const defaultZoom = 4;
+        const defaultZoom = isMobile ? 3 : 4; // Zoom más lejano en móviles para mejor contexto
         
         try {
-            // Crear el mapa
-            const newMap = L.map(mapContainerElement.id).setView([defaultLat, defaultLng], defaultZoom);
+            // Verificación adicional de que Leaflet está disponible
+            if (typeof L === 'undefined') {
+                throw new Error("Leaflet no está disponible en este momento");
+            }
             
-            // Agregar capa de mosaicos
-            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19,
-                minZoom: 3
-            }).addTo(newMap);
+            // Crear el mapa con opciones optimizadas para móviles
+            const mapOptions = {
+                zoomControl: true,
+                attributionControl: true,
+                scrollWheelZoom: true,
+                dragging: !L.Browser.mobile, // Desactivar arrastre en móviles inicialmente
+                tap: !L.Browser.mobile       // Desactivar tap en móviles inicialmente
+            };
+            
+            const newMap = L.map(mapContainerElement.id, mapOptions).setView([defaultLat, defaultLng], defaultZoom);
+            
+            // Reactivar arrastre y tap después de un momento para evitar problemas al inicio
+            setTimeout(function() {
+                if (L.Browser.mobile) {
+                    newMap.dragging.enable();
+                    newMap.tap.enable();
+                }
+            }, 1000);
+            
+            // Agregar capa de mosaicos con URLs de respaldo
+            const tileUrls = [
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+                'https://tile.openstreetmap.de/{z}/{x}/{y}.png'
+            ];
+            
+            // Intentar el primer URL, si falla, probar con el siguiente
+            let tileLayerAdded = false;
+            for (let i = 0; i < tileUrls.length; i++) {
+                try {
+                    L.tileLayer(tileUrls[i], {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19,
+                        minZoom: 3
+                    }).addTo(newMap);
+                    tileLayerAdded = true;
+                    console.log("Mapa inicializado con URL de tiles:", tileUrls[i]);
+                    break;
+                } catch (tileError) {
+                    console.warn("Error al cargar tiles desde", tileUrls[i], tileError);
+                    continue;
+                }
+            }
+            
+            if (!tileLayerAdded) {
+                throw new Error("No se pudieron cargar las capas del mapa");
+            }
             
             console.log("Mapa inicializado correctamente desde initMap");
             
-            // Forzar actualización del mapa
+            // Forzar actualización del mapa varias veces para asegurar visualización
             setTimeout(function() {
                 newMap.invalidateSize();
-            }, 500);
+                console.log("Primera actualización de tamaño del mapa");
+                
+                // Segunda actualización después de un tiempo más largo
+                setTimeout(function() {
+                    newMap.invalidateSize();
+                    console.log("Segunda actualización de tamaño del mapa");
+                }, 1000);
+            }, 200);
             
             return newMap;
         } catch (error) {
             console.error("Error al inicializar el mapa desde initMap:", error);
+            
+            // Determinar si estamos en dispositivo móvil para personalizar mensaje
+            const esMovil = detectarDispositivoMovil();
+            let mensajeError = esMovil ? 
+                "Error al cargar el mapa en dispositivo móvil. Intente con WiFi o recargar la página." :
+                "Error al cargar el mapa. Por favor, recargue la página.";
+                
+            // Añadir detalles del error si están disponibles
+            if (error && error.message) {
+                console.error("Detalles del error:", error.message);
+                
+                // Personalizar para ciertos tipos de errores comunes en móviles
+                if (esMovil) {
+                    if (error.message.includes("timeout") || error.message.includes("timed out")) {
+                        mensajeError = "Tiempo de espera agotado al cargar el mapa. Verifique su conexión e intente nuevamente.";
+                    } else if (error.message.includes("network") || error.message.includes("Network")) {
+                        mensajeError = "Error de red. Verifique su conexión a internet y recargue la página.";
+                    }
+                }
+            }
+            
+            // Mostrar mensaje en el elemento de error específico
+            const errorMsgEl = document.getElementById('location-error-message');
+            if (errorMsgEl) {
+                errorMsgEl.style.display = 'block';
+                const errorTextEl = errorMsgEl.querySelector('#error-text');
+                if (errorTextEl) {
+                    errorTextEl.textContent = mensajeError;
+                }
+            }
+            
+            // También mostrar directamente en el contenedor
+            if (mapContainerElement) {
+                mapContainerElement.innerHTML = 
+                    '<div class="alert alert-danger p-3 m-0">' +
+                    '<i class="fas fa-exclamation-triangle me-2"></i>' + 
+                    mensajeError +
+                    '<br><button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">Recargar página</button>' +
+                    (esMovil ? '<br><small class="d-block mt-2">Consejo: Las conexiones WiFi suelen funcionar mejor para cargar mapas en dispositivos móviles.</small>' : '') +
+                    '</div>';
+            }
+            
             return null;
         }
     } else {
@@ -53,7 +149,64 @@ function initMap(mapContainerId) {
     }
 }
 
+// Función para detectar si estamos en un dispositivo móvil
+function detectarDispositivoMovil() {
+    // Detectar si el dispositivo es móvil basado en el User-Agent o el tamaño de pantalla
+    const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                    window.innerWidth <= 768;
+    
+    console.log("Detección de dispositivo: " + (esMobile ? "Móvil" : "Escritorio"), window.innerWidth + "x" + window.innerHeight);
+    
+    return esMobile;
+}
+
+// Función para manejar errores al cargar el mapa con mensaje específico para móviles
+function mostrarErrorMapaMobile(mensaje, containerElement) {
+    const esMovil = detectarDispositivoMovil();
+    
+    // Mensaje predeterminado según el dispositivo
+    let mensajeError = mensaje || (esMovil ? 
+        "Error al cargar el mapa en dispositivo móvil. Intente recargar la página o utilizar WiFi." :
+        "Error al cargar el mapa. Por favor, recargue la página.");
+    
+    console.error("Error de mapa:", mensajeError);
+    
+    // Mensaje para el contenedor de error específico
+    const errorMsgEl = document.getElementById('location-error-message');
+    if (errorMsgEl) {
+        errorMsgEl.style.display = 'block';
+        const errorTextEl = errorMsgEl.querySelector('#error-text');
+        if (errorTextEl) {
+            errorTextEl.textContent = mensajeError;
+        }
+    }
+    
+    // Mensaje directamente en el contenedor del mapa
+    if (containerElement) {
+        containerElement.innerHTML = '<div class="alert alert-danger p-3 m-0"><i class="fas fa-exclamation-triangle me-2"></i>' + 
+            mensajeError + 
+            '<br><button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">Recargar página</button>' +
+            (esMovil ? '<br><small class="d-block mt-2">Consejo: En dispositivos móviles, una conexión WiFi estable mejora la carga del mapa.</small>' : '') +
+            '</div>';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Detectar tipo de dispositivo
+    const esDispositivoMovil = detectarDispositivoMovil();
+    console.log("Aplicación cargada en: " + (esDispositivoMovil ? "Dispositivo móvil" : "Escritorio"));
+    
+    // Adaptar elementos de la interfaz si es móvil
+    if (esDispositivoMovil) {
+        const mapaContainers = document.querySelectorAll('.mapContainer');
+        mapaContainers.forEach(container => {
+            container.style.height = "300px"; // Altura reducida para móviles
+        });
+        
+        // Añadir clase para estilos específicos de móvil
+        document.body.classList.add('mobile-device');
+    }
+    
     // Referencias a elementos del DOM
     const mapaUbicacionDiv = document.getElementById('mapaUbicacion');
     const loadingIndicator = document.getElementById('map-loading-indicator');
@@ -66,7 +219,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const longitudInput = document.getElementById('longitud');
     const ubicacionInput = document.getElementById('ubicacion');
     const locationErrorMsg = document.getElementById('location-error-message');
-    const diagnosticoForm = document.getElementById('diagnosticoForm');
+    
+    // Configuraciones para móvil
+    if (esDispositivoMovil && mapaUbicacionDiv) {
+        console.log("Aplicando configuraciones para móvil al mapa");
+        mapaUbicacionDiv.style.height = "300px";
+    }
     
     // Variables globales
     let map = null;

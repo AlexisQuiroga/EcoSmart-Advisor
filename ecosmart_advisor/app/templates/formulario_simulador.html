@@ -85,10 +85,55 @@
                                 </div>
                                 
                                 <div class="position-relative">
-                                    <!-- El mapa siempre visible -->
-                                    <div id="mapaUbicacion" class="rounded border mb-2" style="height: 400px;">
+                                    <!-- El mapa siempre visible con clase para móvil -->
+                                    <div id="mapaUbicacion" class="rounded border mb-2 mapa-container" style="height: 400px; min-height: 250px; position: relative; z-index: 1;">
                                         <!-- El mapa se cargará aquí con JavaScript -->
+                                        <noscript>
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                JavaScript es necesario para utilizar el mapa interactivo.
+                                            </div>
+                                        </noscript>
                                     </div>
+                                    
+                                    <!-- Botón auxiliar para dispositivos móviles donde el mapa pueda tener problemas -->
+                                    <div id="mobile-map-helper" class="d-none d-sm-none">
+                                        <button type="button" class="btn btn-sm btn-outline-primary mb-2" onclick="reiniciarMapa()">
+                                            <i class="fas fa-sync-alt me-1"></i>Reiniciar mapa
+                                        </button>
+                                    </div>
+                                    
+                                    <script>
+                                    // Detectar si es móvil para mostrar botón de reinicio
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                                                        window.innerWidth <= 768;
+                                        
+                                        if (isMobile) {
+                                            const helperDiv = document.getElementById('mobile-map-helper');
+                                            if (helperDiv) {
+                                                helperDiv.classList.remove('d-none', 'd-sm-none');
+                                            }
+                                        }
+                                    });
+                                    
+                                    // Función para reiniciar el mapa en dispositivos móviles
+                                    function reiniciarMapa() {
+                                        const mapaDiv = document.getElementById('mapaUbicacion');
+                                        if (mapaDiv) {
+                                            // Limpiar el contenedor
+                                            mapaDiv.innerHTML = '';
+                                            
+                                            // Si existe la función cargarLeaflet, llamarla
+                                            if (typeof cargarLeaflet === 'function') {
+                                                setTimeout(cargarLeaflet, 100);
+                                            } else {
+                                                // Recargar la página si no hay función de recarga
+                                                window.location.reload();
+                                            }
+                                        }
+                                    }
+                                    </script>
                                     <div id="map-loading-indicator" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                                         <div class="d-flex align-items-center">
                                             <div class="spinner-border text-success" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
@@ -209,10 +254,56 @@
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
+                        <button type="submit" id="ejecutarSimulacion" class="btn btn-primary btn-lg">
                             <i class="fas fa-play-circle me-2"></i>Ejecutar Simulación
                         </button>
+                        <div id="form-error-mensaje" class="alert alert-danger mt-3" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="form-error-texto">Por favor, complete todos los campos requeridos.</span>
+                        </div>
                     </div>
+                    
+                    <!-- Script de validación específico para este formulario -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const ejecutarBtn = document.getElementById('ejecutarSimulacion');
+                            const formErrorMsg = document.getElementById('form-error-mensaje');
+                            const formErrorTexto = document.getElementById('form-error-texto');
+                            const formulario = document.getElementById('simuladorForm');
+                            
+                            // Cuando se hace clic en el botón
+                            ejecutarBtn.addEventListener('click', function(e) {
+                                // Verificar si se ha seleccionado una ubicación
+                                const latitudInput = document.getElementById('latitud');
+                                const longitudInput = document.getElementById('longitud');
+                                
+                                if (!latitudInput.value || !longitudInput.value) {
+                                    e.preventDefault(); // Evitar envío del formulario
+                                    
+                                    // Mostrar mensaje de error específico
+                                    formErrorMsg.style.display = 'block';
+                                    formErrorTexto.textContent = 'Debe seleccionar y confirmar una ubicación en el mapa para continuar.';
+                                    
+                                    // Desplazarse al mensaje de error y luego al mapa
+                                    formErrorMsg.scrollIntoView({ behavior: 'smooth' });
+                                    
+                                    setTimeout(function() {
+                                        const mapaDiv = document.getElementById('mapaUbicacion');
+                                        if (mapaDiv) {
+                                            mapaDiv.scrollIntoView({ behavior: 'smooth' });
+                                        }
+                                    }, 1500);
+                                    
+                                    return false;
+                                }
+                                
+                                // Si hay otros campos obligatorios, verificarlos aquí
+                                
+                                // Si todo está bien, permitir el envío del formulario
+                                formErrorMsg.style.display = 'none';
+                            });
+                        });
+                    </script>
                 </form>
             </div>
         </div>
@@ -221,50 +312,134 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Cargar Leaflet con Integrity para seguridad y crossorigin -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-      crossorigin=""/>
-<!-- Aseguramos cargar Leaflet antes de nuestros scripts -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
-        crossorigin=""></script>
+<!-- Cargar Leaflet para dispositivos móviles y escritorio -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-<!-- Script para verificar que Leaflet se cargó correctamente -->
+<!-- Script mejorado para verificar y cargar Leaflet de manera robusta -->
 <script>
-// Verificar si Leaflet se cargó correctamente
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Verificando disponibilidad de Leaflet...");
-    if (typeof L === 'undefined') {
-        console.error("ERROR: Leaflet no está disponible. Intentando cargar nuevamente...");
+// Función de carga de Leaflet con múltiples CDNs de respaldo
+function cargarLeaflet() {
+    // Lista de CDNs alternativos para Leaflet
+    const cdnOptions = [
+        {
+            js: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+            css: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        },
+        {
+            js: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js",
+            css: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+        },
+        {
+            js: "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js",
+            css: "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
+        }
+    ];
+    
+    // Verificar si Leaflet ya está disponible
+    if (typeof L !== 'undefined') {
+        console.log("Leaflet ya está disponible ✓");
         
-        // Intentar cargar Leaflet nuevamente desde un CDN alternativo
-        var leafletScript = document.createElement('script');
-        leafletScript.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js";
-        leafletScript.integrity = "sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGRixA2F7/t8YJQKF8+feltxw6tqCICEHikewuQiYvKLQQxn3g2NlZMXxE2w==";
-        leafletScript.crossOrigin = "anonymous";
-        leafletScript.referrerPolicy = "no-referrer";
-        leafletScript.onload = function() {
-            console.log("Leaflet cargado desde CDN alternativo");
-            // Ahora podemos inicializar el mapa
-            if (typeof initMap === 'function') {
-                console.log("Inicializando mapa después de carga alternativa");
+        // Inicializar el mapa después de una pequeña pausa
+        setTimeout(function() {
+            if (typeof initMap === 'function' && document.getElementById('mapaUbicacion')) {
+                console.log("Inicializando mapa con Leaflet existente");
+                // Limpiar cualquier instancia previa
+                document.getElementById('mapaUbicacion').innerHTML = '';
                 initMap('mapaUbicacion');
             }
-        };
-        document.head.appendChild(leafletScript);
+        }, 200);
         
-        // También cargar el CSS alternativo
-        var leafletCSS = document.createElement('link');
-        leafletCSS.rel = "stylesheet";
-        leafletCSS.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css";
-        leafletCSS.integrity = "sha512-Zcn6bjR/8RZbLEpLIeOwNtzZCjeoMZGSxQmJQL0Cyr7etFj3dN3Jt3JcmN9reHsNc/maNgGFPkdMwXYD1c21WA==";
-        leafletCSS.crossOrigin = "anonymous";
-        leafletCSS.referrerPolicy = "no-referrer";
-        document.head.appendChild(leafletCSS);
-    } else {
-        console.log("Leaflet está disponible ✓");
+        return true;
     }
+    
+    console.warn("Leaflet no disponible. Intentando carga alternativa...");
+    
+    // Cargar desde el primer CDN alternativo
+    let cdnIndex = 0;
+    
+    function intentarSiguienteCDN() {
+        if (cdnIndex >= cdnOptions.length) {
+            console.error("Todos los intentos de cargar Leaflet fallaron.");
+            mostrarErrorMapa("No se pudo cargar Leaflet después de múltiples intentos.");
+            return false;
+        }
+        
+        const cdn = cdnOptions[cdnIndex];
+        console.log("Intento " + (cdnIndex + 1) + ": Cargando Leaflet desde " + cdn.js);
+        
+        // Primero cargar el CSS
+        const cssLink = document.createElement('link');
+        cssLink.rel = "stylesheet";
+        cssLink.href = cdn.css;
+        document.head.appendChild(cssLink);
+        
+        // Luego cargar el JavaScript
+        const jsScript = document.createElement('script');
+        jsScript.src = cdn.js;
+        
+        jsScript.onload = function() {
+            console.log("✓ Leaflet cargado exitosamente desde " + cdn.js);
+            
+            // Inicializar mapa después de confirmar que Leaflet está disponible
+            setTimeout(function() {
+                if (typeof L !== 'undefined' && typeof initMap === 'function') {
+                    console.log("Inicializando mapa después de carga alternativa");
+                    initMap('mapaUbicacion');
+                } else {
+                    console.error("Leaflet se cargó pero no está disponible como L");
+                }
+            }, 300);
+        };
+        
+        jsScript.onerror = function() {
+            console.warn("✗ Error al cargar Leaflet desde " + cdn.js);
+            cdnIndex++;
+            intentarSiguienteCDN();
+        };
+        
+        document.head.appendChild(jsScript);
+    }
+    
+    intentarSiguienteCDN();
+}
+
+// Mostrar mensaje de error en el mapa
+function mostrarErrorMapa(mensaje) {
+    const errorMsgEl = document.getElementById('location-error-message');
+    if (errorMsgEl) {
+        errorMsgEl.style.display = 'block';
+        const errorTextEl = errorMsgEl.querySelector('#error-text');
+        if (errorTextEl) {
+            errorTextEl.textContent = mensaje || "Error al cargar el mapa. Por favor, recargue la página.";
+        }
+    }
+    
+    // También mostrar mensaje directo en el contenedor del mapa
+    const mapaContainer = document.getElementById('mapaUbicacion');
+    if (mapaContainer) {
+        mapaContainer.innerHTML = '<div class="alert alert-danger p-3 m-0"><i class="fas fa-exclamation-triangle me-2"></i>' + 
+            (mensaje || "Error al cargar el mapa. Por favor, recargue la página.") + 
+            '<br><button class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">Recargar página</button></div>';
+    }
+}
+
+// Iniciar verificación y carga cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM cargado, verificando Leaflet...");
+    
+    // Timeout para asegurar que todo esté disponible
+    setTimeout(function() {
+        cargarLeaflet();
+    }, 100);
+    
+    // Comprobar nuevamente después de un tiempo más largo por si el primer intento falla
+    setTimeout(function() {
+        if (typeof L === 'undefined') {
+            console.warn("Segunda verificación: Leaflet aún no disponible...");
+            cargarLeaflet();
+        }
+    }, 1000);
 });
 </script>
 
