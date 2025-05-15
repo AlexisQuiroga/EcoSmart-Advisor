@@ -336,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Función para manejar el botón de validación de ubicación
+    const validarUbicacionBtn = document.getElementById('validarUbicacionBtn');
     if (validarUbicacionBtn) {
         validarUbicacionBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -351,16 +352,23 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!ciudad) camposFaltantes.push('ciudad');
             if (!direccion) camposFaltantes.push('dirección');
             
+            // Obtener referencia al elemento de información
+            const validarUbicacionInfo = document.getElementById('validarUbicacionInfo');
+            
             if (camposFaltantes.length > 0) {
                 // Mostrar mensaje de error si faltan campos
-                validarUbicacionInfo.textContent = 'Complete: ' + camposFaltantes.join(', ');
-                validarUbicacionInfo.className = 'ms-2 text-danger small';
+                if (validarUbicacionInfo) {
+                    validarUbicacionInfo.textContent = 'Complete: ' + camposFaltantes.join(', ');
+                    validarUbicacionInfo.className = 'ms-2 text-danger small';
+                }
                 return;
             }
             
             // Mostrar mensaje de procesamiento
-            validarUbicacionInfo.textContent = 'Ubicando en el mapa...';
-            validarUbicacionInfo.className = 'ms-2 text-primary small';
+            if (validarUbicacionInfo) {
+                validarUbicacionInfo.textContent = 'Ubicando en el mapa...';
+                validarUbicacionInfo.className = 'ms-2 text-primary small';
+            }
             
             // Mostrar el mapa si está oculto
             const mapaDiv = document.getElementById('mapaUbicacion');
@@ -404,13 +412,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             updateLocationData(lat.toFixed(6), lng.toFixed(6));
                             
                             // Notificar éxito
-                            validarUbicacionInfo.textContent = 'Ubicación encontrada y marcada en el mapa';
-                            validarUbicacionInfo.className = 'ms-2 text-success small';
+                            const validarUbicacionInfo = document.getElementById('validarUbicacionInfo');
+                            if (validarUbicacionInfo) {
+                                validarUbicacionInfo.textContent = 'Ubicación encontrada y marcada en el mapa';
+                                validarUbicacionInfo.className = 'ms-2 text-success small';
+                            }
                         }, 200);
                     } else {
                         console.error("No se pudo ubicar la dirección");
-                        validarUbicacionInfo.textContent = 'No se pudo encontrar la ubicación exacta';
-                        validarUbicacionInfo.className = 'ms-2 text-danger small';
+                        const validarUbicacionInfo = document.getElementById('validarUbicacionInfo');
+                        if (validarUbicacionInfo) {
+                            validarUbicacionInfo.textContent = 'No se pudo encontrar la ubicación exacta';
+                            validarUbicacionInfo.className = 'ms-2 text-danger small';
+                        }
                         
                         // Mostrar mensaje de error más detallado
                         const errorMsgEl = document.getElementById('location-error-message');

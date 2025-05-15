@@ -420,7 +420,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     simuladorForm.addEventListener('submit', function(event) {
         console.log("Formulario enviado - iniciando validación");
-        // Solo para depuración sin prevenir comportamiento predeterminado
+        // Prevenimos el comportamiento por defecto para validar primero
+        event.preventDefault();
         
         const latitudInput = document.getElementById('latitud');
         const longitudInput = document.getElementById('longitud');
@@ -443,9 +444,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorMsg = document.getElementById('location-error-message');
             if (errorMsg) {
                 errorMsg.style.display = 'block';
-                const errorText = errorMsg.querySelector('#error-text');
+                const errorText = document.getElementById('error-text');
                 if (errorText) {
                     errorText.textContent = 'Debe seleccionar una ubicación en el mapa para continuar.';
+                } else {
+                    console.error("No se encontró el elemento error-text");
                 }
             }
             
@@ -483,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Si todo está bien, permitir que se envíe el formulario
+        // Si todo está bien, enviar el formulario manualmente
         console.log("Formulario validado correctamente, enviando datos...");
         
         // Mostrar al usuario que estamos procesando la solicitud
@@ -492,6 +495,9 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
         }
+        
+        // Enviar el formulario
+        simuladorForm.submit();
     });
 });
 </script>
