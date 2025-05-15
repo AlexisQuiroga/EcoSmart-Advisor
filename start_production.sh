@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script para iniciar la aplicación EcoSmart Advisor
+# Script para iniciar la aplicación EcoSmart Advisor en modo producción
 
 # Detener procesos existentes
 echo "Deteniendo posibles procesos anteriores..."
@@ -12,6 +12,6 @@ sleep 2
 # Configurar puerto
 export PORT=8080
 
-# Iniciar la aplicación en modo debug para desarrollo
-echo "Iniciando EcoSmart Advisor en modo debug en puerto $PORT..."
-python main.py
+# Iniciar con gunicorn para entorno de producción
+echo "Iniciando EcoSmart Advisor en modo producción en puerto $PORT..."
+gunicorn --config gunicorn_config.py app:app

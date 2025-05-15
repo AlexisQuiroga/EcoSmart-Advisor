@@ -3,6 +3,56 @@
  * Este script reemplaza la compleja implementación anterior
  */
 
+// Función global para inicializar el mapa que puede ser llamada desde otros scripts
+function initMap(mapContainerId) {
+    console.log("Función initMap llamada para inicializar el mapa en:", mapContainerId);
+    
+    // Si se proporciona un ID de contenedor, usarlo, de lo contrario usar el predeterminado
+    const mapContainerElement = mapContainerId ? 
+        document.getElementById(mapContainerId) : 
+        document.getElementById('mapaUbicacion');
+    
+    if (mapContainerElement) {
+        console.log("Contenedor de mapa encontrado, configurando Leaflet");
+        
+        // Asegurarse de que el contenedor sea visible y tenga tamaño
+        mapContainerElement.style.display = 'block';
+        mapContainerElement.style.height = '400px';
+        
+        // Inicializar con coordenadas predeterminadas (Argentina)
+        const defaultLat = -38.416097;
+        const defaultLng = -63.616672;
+        const defaultZoom = 4;
+        
+        try {
+            // Crear el mapa
+            const newMap = L.map(mapContainerElement.id).setView([defaultLat, defaultLng], defaultZoom);
+            
+            // Agregar capa de mosaicos
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+                minZoom: 3
+            }).addTo(newMap);
+            
+            console.log("Mapa inicializado correctamente desde initMap");
+            
+            // Forzar actualización del mapa
+            setTimeout(function() {
+                newMap.invalidateSize();
+            }, 500);
+            
+            return newMap;
+        } catch (error) {
+            console.error("Error al inicializar el mapa desde initMap:", error);
+            return null;
+        }
+    } else {
+        console.error("No se encontró el contenedor del mapa:", mapContainerId);
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias a elementos del DOM
     const mapaUbicacionDiv = document.getElementById('mapaUbicacion');
@@ -62,75 +112,114 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa si tenemos el contenedor
     if (mapaUbicacionDiv) {
         try {
+            // Verificar que Leaflet esté disponible
+            if (typeof L === 'undefined') {
+                throw new Error("La biblioteca Leaflet no está disponible");
+            }
+            
             // Si hay un mensaje de error visible, ocúltalo
             if (locationErrorMsg) {
                 locationErrorMsg.style.display = 'none';
             }
             
-            // Inicializar el mapa con Leaflet
-            map = L.map('mapaUbicacion').setView([ARGENTINA_LAT, ARGENTINA_LNG], ARGENTINA_ZOOM);
+            console.log("Intentando inicializar mapa con Leaflet. Estado de mapaUbicacionDiv:", mapaUbicacionDiv.clientWidth, "x", mapaUbicacionDiv.clientHeight);
             
-            // Agregar capa de mosaicos (tiles)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                maxZoom: 19
-            }).addTo(map);
-            
-            // Ocultar indicador de carga
+            // Mostrar indicador de carga mientras se inicializa
             if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
+                loadingIndicator.style.display = 'block';
             }
             
-            // Detectar país al iniciar y actualizar el botón
-            detectarPaisEnCentroMapa();
+            // Asegurarse de que el contenedor sea visible y tenga tamaño
+            mapaUbicacionDiv.style.display = 'block';
+            mapaUbicacionDiv.style.height = '400px';
             
-            // Detectar país cuando se mueve el mapa
-            map.on('moveend', function() {
-                detectarPaisEnCentroMapa();
-            });
-            
-            // Configurar evento de clic en el mapa
-            map.on('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-                
-                // Actualizar coordenadas seleccionadas
-                selectedLat = lat;
-                selectedLng = lng;
-                
-                // Actualizar marcador
-                updateMarker(lat, lng);
-                
-                // Mostrar panel de coordenadas
-                updateCoordinatesPanel(lat, lng);
-                
-                // Obtener descripción de la ubicación (país, provincia, ciudad)
-                obtenerDescripcionUbicacion(lat, lng);
-                
-                // Asegurarse de ocultar cualquier mensaje de error
-                if (locationErrorMsg) {
-                    locationErrorMsg.style.display = 'none';
+            // Pequeña pausa para asegurar que el DOM está listo
+            setTimeout(function() {
+                try {
+                    // Inicializar el mapa con Leaflet
+                    map = L.map('mapaUbicacion').setView([ARGENTINA_LAT, ARGENTINA_LNG], ARGENTINA_ZOOM);
+                    
+                    // Agregar capa de mosaicos (tiles) - usar un servidor más estable
+                    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19,
+                        minZoom: 3
+                    }).addTo(map);
+                    
+                    // Ocultar indicador de carga
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    // Detectar país al iniciar y actualizar el botón
+                    detectarPaisEnCentroMapa();
+                    
+                    // Detectar país cuando se mueve el mapa
+                    map.on('moveend', function() {
+                        detectarPaisEnCentroMapa();
+                    });
+                    
+                    // Configurar evento de clic en el mapa
+                    map.on('click', function(e) {
+                        const lat = e.latlng.lat;
+                        const lng = e.latlng.lng;
+                        
+                        // Actualizar coordenadas seleccionadas
+                        selectedLat = lat;
+                        selectedLng = lng;
+                        
+                        // Actualizar marcador
+                        updateMarker(lat, lng);
+                        
+                        // Mostrar panel de coordenadas
+                        updateCoordinatesPanel(lat, lng);
+                        
+                        // Obtener descripción de la ubicación (país, provincia, ciudad)
+                        obtenerDescripcionUbicacion(lat, lng);
+                        
+                        // Asegurarse de ocultar cualquier mensaje de error
+                        if (locationErrorMsg) {
+                            locationErrorMsg.style.display = 'none';
+                        }
+                    });
+                    
+                    console.log("Mapa inicializado correctamente");
+                    
+                    // Forzar actualización del mapa para evitar problemas de renderizado
+                    setTimeout(function() {
+                        if (map) {
+                            map.invalidateSize();
+                            console.log("Tamaño del mapa actualizado");
+                        }
+                    }, 500);
+                    
+                } catch (innerError) {
+                    console.error("Error durante la inicialización diferida del mapa:", innerError);
+                    manejarErrorMapa(innerError);
                 }
-            });
+            }, 100);
             
-            console.log("Mapa inicializado correctamente");
         } catch (error) {
             console.error("Error al inicializar el mapa:", error);
-            
-            // Ocultar indicador de carga
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
+            manejarErrorMapa(error);
+        }
+    }
+    
+    // Función para manejar errores de mapa de manera consistente
+    function manejarErrorMapa(error) {
+        // Ocultar indicador de carga
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+        
+        // Mostrar mensaje de error
+        if (locationErrorMsg) {
+            locationErrorMsg.style.display = 'block';
+            const errorTextEl = locationErrorMsg.querySelector('#error-text');
+            if (errorTextEl) {
+                errorTextEl.textContent = "Error al cargar el mapa. Por favor, recargue la página.";
             }
-            
-            // Mostrar mensaje de error solo si hay un problema real
-            // (no al cargar por primera vez)
-            if (locationErrorMsg && error.message && error.message !== "") {
-                locationErrorMsg.style.display = 'block';
-                const errorTextEl = locationErrorMsg.querySelector('#error-text');
-                if (errorTextEl) {
-                    errorTextEl.textContent = "Error al cargar el mapa. Por favor, recargue la página.";
-                }
-            }
+            console.warn("Mostrando mensaje de error al usuario:", errorTextEl ? errorTextEl.textContent : "Mensaje de error no disponible");
         }
     }
     
@@ -366,23 +455,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Validar que se hayan seleccionado coordenadas antes de enviar el formulario
-    if (diagnosticoForm) {
-        diagnosticoForm.addEventListener('submit', function(e) {
-            if (!selectedLat || !selectedLng || !ubicacionInput.value) {
-                e.preventDefault();
+    const formularios = [
+        document.getElementById('diagnosticoForm'),
+        document.getElementById('simuladorForm')
+    ];
+    
+    formularios.forEach(function(form) {
+        if (form) {
+            console.log("Configurando validación para formulario:", form.id);
+            form.addEventListener('submit', function(e) {
+                console.log("Verificando formulario antes de enviar:", form.id);
+                console.log("Estado de coordenadas:", {
+                    selectedLat: selectedLat,
+                    selectedLng: selectedLng,
+                    ubicacionInput: ubicacionInput ? ubicacionInput.value : 'no disponible'
+                });
                 
-                // Mostrar mensaje de error
-                if (locationErrorMsg) {
-                    locationErrorMsg.style.display = 'block';
-                    const errorTextEl = locationErrorMsg.querySelector('#error-text');
-                    if (errorTextEl) {
-                        errorTextEl.textContent = "Debe seleccionar y confirmar una ubicación en el mapa para continuar.";
+                if (!selectedLat || !selectedLng || (ubicacionInput && !ubicacionInput.value)) {
+                    console.warn("Formulario bloqueado: coordenadas no seleccionadas");
+                    e.preventDefault();
+                
+                    // Mostrar mensaje de error
+                    if (locationErrorMsg) {
+                        locationErrorMsg.style.display = 'block';
+                        const errorTextEl = locationErrorMsg.querySelector('#error-text');
+                        if (errorTextEl) {
+                            errorTextEl.textContent = "Debe seleccionar y confirmar una ubicación en el mapa para continuar.";
+                        }
                     }
+                    
+                    // Scroll hasta el mapa
+                    if (mapaUbicacionDiv) {
+                        mapaUbicacionDiv.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    console.log("Formulario validado correctamente, enviando datos");
                 }
-                
-                // Scroll hasta el mapa
-                mapaUbicacionDiv.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    }
+            });
+        }
+    });
 });

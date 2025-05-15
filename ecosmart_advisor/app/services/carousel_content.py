@@ -9,7 +9,12 @@ import json
 import requests
 import hashlib
 import time
+import logging
 from dotenv import load_dotenv
+
+# Configurar logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -28,6 +33,8 @@ UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
 # Caché para evitar generar el mismo contenido en cada solicitud
 # Usaremos un tiempo de expiración para refrescar el contenido periódicamente
 CONTENT_CACHE = {}  # Vaciar caché para forzar regeneración
+
+logger.info("---- Generando datos para el carrusel con imágenes filtradas de energías renovables ----")
 CACHE_EXPIRY = 10  # Reducir temporalmente a 10 segundos para pruebas
 
 # Temas predefinidos para las imágenes
@@ -122,29 +129,29 @@ def buscar_imagen_unsplash(tema, categoria=None):
     
     # Si no hay API key o no hay tema, usar fallback
     if not UNSPLASH_ACCESS_KEY:
-        print(f"No se encontró UNSPLASH_API_KEY en las variables de entorno")
+        logger.warning("No se encontró UNSPLASH_API_KEY en las variables de entorno")
         if categoria and categoria in imagenes_fallback:
-            print(f"Sin API key - Usando imagen local para {categoria}")
+            logger.info(f"Sin API key - Usando imagen local para {categoria}")
             return imagenes_fallback[categoria]
         return "/static/images/carousel/energia_eolica.jpg"
     
     if not tema:
-        print(f"No se proporcionó tema de búsqueda")
+        logger.warning("No se proporcionó tema de búsqueda")
         if categoria and categoria in imagenes_fallback:
-            print(f"Sin tema - Usando imagen local para {categoria}")
+            logger.info(f"Sin tema - Usando imagen local para {categoria}")
             return imagenes_fallback[categoria]
         return "/static/images/carousel/energia_eolica.jpg"
     
     # Verificar el formato de la API key (mostrar solo los primeros 5 caracteres por seguridad)
     if UNSPLASH_ACCESS_KEY:
-        print(f"API key encontrada: {UNSPLASH_ACCESS_KEY[:5]}..." + "*" * 10)
+        logger.info(f"API key encontrada: {UNSPLASH_ACCESS_KEY[:5]}..." + "*" * 10)
     
     try:
         # Agregar un filtro aleatorio relacionado con energías renovables
         filtro = random.choice(filtros_renovables)
         tema_filtrado = f"{tema} {filtro}"
         
-        print(f"Buscando imágenes de: {tema_filtrado}")
+        logger.info(f"Buscando imágenes de: {tema_filtrado}")
         
         # Parámetros para la API de Unsplash
         params = {
@@ -164,22 +171,22 @@ def buscar_imagen_unsplash(tema, categoria=None):
             if data.get("results") and len(data["results"]) > 0:
                 # Tomar la primera imagen del resultado
                 imagen_url = data["results"][0]["urls"]["regular"]
-                print(f"Imagen encontrada: {imagen_url}")
+                logger.info(f"Imagen encontrada: {imagen_url}")
                 return imagen_url
             else:
-                print("No se encontraron imágenes en Unsplash")
+                logger.warning("No se encontraron imágenes en Unsplash")
         else:
-            print(f"Error en la API de Unsplash: {response.status_code}")
+            logger.error(f"Error en la API de Unsplash: {response.status_code}")
     
     except Exception as e:
-        print(f"Error al buscar imagen en Unsplash: {str(e)}")
+        logger.error(f"Error al buscar imagen en Unsplash: {str(e)}")
     
     # En caso de error, usar imagen local como fallback
     if categoria and categoria in imagenes_fallback:
-        print(f"Fallback - Usando imagen local para {categoria}")
+        logger.info(f"Fallback - Usando imagen local para {categoria}")
         return imagenes_fallback[categoria]
     
-    print("Usando imagen genérica de fallback")
+    logger.info("Usando imagen genérica de fallback")
     return "/static/images/carousel/energia_eolica.jpg"
 
 def generar_datos_carrusel():

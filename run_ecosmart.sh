@@ -1,14 +1,46 @@
 #!/bin/bash
+# Script maestro para ejecutar EcoSmart Advisor
 
-# Script para iniciar EcoSmart Advisor en modo producción
-# Asegura que la aplicación se inicie correctamente tanto en desarrollo como en despliegue
+# Definir colores para mensajes
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
 
-# Configuración de la aplicación para producción
-export FLASK_ENV=production
-export FLASK_APP=ecosmart_advisor.app
+# Banner de inicio
+echo -e "${GREEN}"
+echo "====================================================="
+echo "        EcoSmart Advisor - Sistema de Inicio         "
+echo "====================================================="
+echo -e "${NC}"
 
-# Obtener el puerto de Replit o usar 5000 por defecto
-PORT=${PORT:-5000}
+# Verificar dependencias del sistema
+echo -e "${YELLOW}Verificando dependencias del sistema...${NC}"
+python check_dependencies.py
 
-# Iniciar la aplicación
-python -c "import os; os.environ['PORT'] = '$PORT'; from ecosmart_advisor.app import create_app; app = create_app(); app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)"
+# Comprobar si la verificación fue exitosa
+if [ $? -ne 0 ]; then
+  echo -e "${RED}Error: La verificación de dependencias falló. Revise el log para más detalles.${NC}"
+  exit 1
+fi
+
+# Detener posibles procesos previos
+echo -e "${YELLOW}Deteniendo posibles procesos previos...${NC}"
+pkill -f "python main.py" || true
+pkill -f "gunicorn" || true
+sleep 2
+
+# Determinar el modo de ejecución (desarrollo o producción)
+if [ "$1" == "prod" ]; then
+  echo -e "${GREEN}Iniciando EcoSmart Advisor en modo PRODUCCIÓN...${NC}"
+  # Configurar puerto
+  export PORT=8080
+  # Iniciar con gunicorn para producción
+  gunicorn --config gunicorn_config.py app:app
+else
+  echo -e "${GREEN}Iniciando EcoSmart Advisor en modo DESARROLLO...${NC}"
+  # Configurar puerto
+  export PORT=8080
+  # Iniciar la aplicación en modo debug
+  python main.py
+fi

@@ -243,27 +243,70 @@ def simulador():
 @simulador_bp.route('/api', methods=['POST'])
 def simulador_api():
     """API para el simulador (para uso con AJAX)"""
+    import logging
+    logger = logging.getLogger('simulador_api')
+    logger.setLevel(logging.DEBUG)
+    
     try:
-        datos = request.json
-        if not datos:
-            print("Error: Datos JSON vacíos o inválidos")
-            return jsonify({"error": "Se requieren datos completos para la simulación"}), 400
-            
-        # Validar campos requeridos
-        campos_requeridos = ['tipo_instalacion', 'capacidad', 'ubicacion', 'consumo_mensual']
-        campos_faltantes = [campo for campo in campos_requeridos if campo not in datos]
+        # Intentar obtener datos JSON, con manejo de errores mejorado
+        try:
+            datos = request.json
+            if datos is None:
+                # Intentar obtener datos de formulario si no hay JSON
+                logger.warning("No se recibieron datos JSON válidos, intentando obtener datos de formulario")
+                datos = {
+                    'tipo_instalacion': request.form.get('tipo_instalacion', 'solar'),
+                    'capacidad': request.form.get('capacidad', '1'),
+                    'ubicacion': request.form.get('ubicacion', '-34.61,-58.38'),
+                    'consumo_mensual': request.form.get('consumo_mensual', '300'),
+                    'descripcion_ubicacion': request.form.get('descripcion_ubicacion', 'Buenos Aires, Argentina')
+                }
+        except Exception as e:
+            logger.error(f"Error al procesar datos de entrada: {str(e)}")
+            datos = {}
         
-        if campos_faltantes:
-            print(f"Error: Faltan campos requeridos: {campos_faltantes}")
-            return jsonify({"error": f"Faltan campos requeridos: {', '.join(campos_faltantes)}"}), 400
+        logger.info(f"Recibidos datos para simulación API: {datos}")
+        
+        # Verificar datos mínimos necesarios
+        if not datos:
+            logger.error("No se recibieron datos para la simulación")
+            return jsonify({"error": "No se recibieron datos para la simulación"}), 400
             
-        print(f"Recibidos datos para simulación API: {datos}")
+        # Validar campos requeridos pero con valores por defecto si faltan
+        campos_requeridos = ['tipo_instalacion', 'capacidad', 'ubicacion', 'consumo_mensual']
+        valores_defecto = {
+            'tipo_instalacion': 'solar',
+            'capacidad': '1',
+            'ubicacion': '-34.61,-58.38',
+            'consumo_mensual': '300'
+        }
+        
+        # Completar valores faltantes con valores por defecto
+        for campo in campos_requeridos:
+            if campo not in datos or not datos[campo]:
+                logger.warning(f"Campo requerido faltante: {campo}, usando valor por defecto")
+                datos[campo] = valores_defecto[campo]
+            
+        # Ejecutar simulación con manejo robusto de errores
+        logger.info("Ejecutando simulación...")
         resultados = simular_instalacion(datos)
-        print(f"Resultados de simulación: {resultados}")
+        
+        # Verificar si hay error en resultados
+        if isinstance(resultados, dict) and 'error' in resultados:
+            logger.error(f"Error en simulación: {resultados['error']}")
+            return jsonify(resultados), 400
+            
+        logger.info(f"Simulación completada con éxito: {len(str(resultados))} bytes de resultados")
         return jsonify(resultados)
+        
     except Exception as e:
-        print(f"Error en simulador API: {str(e)}")
-        return jsonify({"error": f"Error en la simulación: {str(e)}"}), 500
+        import traceback
+        logger.error(f"Error general en simulador API: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "error": f"Error en la simulación: {str(e)}",
+            "tipo": "error_general"
+        }), 500
 
 # Blueprint para las APIs
 api_bp = Blueprint('api', __name__, url_prefix='/api')

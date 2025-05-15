@@ -6,7 +6,12 @@ más precisas y personalizadas sobre sistemas de energía renovable.
 import os
 import json
 import requests
+import logging
 from dotenv import load_dotenv
+
+# Configurar logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -14,6 +19,8 @@ load_dotenv()
 # Configurar la API de Deepseek
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+
+logger.info("Inicializando módulo de recomendaciones con IA")
 
 def evaluar_factores_energia_renovable(datos_usuario, clima):
     """
@@ -66,14 +73,14 @@ def evaluar_factores_energia_renovable(datos_usuario, clima):
                 return resultado
             else:
                 # Si no podemos encontrar JSON válido, devolver un mensaje de error
-                print(f"Error al procesar la respuesta de Deepseek: No se encontró JSON válido")
+                logger.error("Error al procesar la respuesta de Deepseek: No se encontró JSON válido")
                 return generar_respuesta_fallback()
         else:
-            print(f"Error en la petición a Deepseek: {response.status_code} - {response.text}")
+            logger.error(f"Error en la petición a Deepseek: {response.status_code} - {response.text}")
             return generar_respuesta_fallback()
         
     except Exception as e:
-        print(f"Error al procesar la recomendación con Deepseek: {str(e)}")
+        logger.error(f"Error al procesar la recomendación con Deepseek: {str(e)}")
         return generar_respuesta_fallback()
 
 def construir_prompt_evaluacion(datos_usuario, clima):

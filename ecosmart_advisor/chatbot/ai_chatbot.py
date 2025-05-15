@@ -6,7 +6,12 @@ sistema de reglas como fallback.
 import os
 import json
 import requests
+import logging
 from dotenv import load_dotenv
+
+# Configurar logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Importar el chatbot original para usar como fallback
 from .chatbot import generar_respuesta_chatbot as respuesta_fallback
@@ -17,6 +22,8 @@ load_dotenv()
 # Configurar la API de Deepseek
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+
+logger.info("Inicializando chatbot educativo con IA")
 
 def generar_respuesta_ia(pregunta, historial_conversacion=None):
     """
@@ -103,7 +110,7 @@ def generar_respuesta_ia(pregunta, historial_conversacion=None):
                 "sugerencias": sugerencias
             }
         else:
-            print(f"Error en la petición a Deepseek: {response.status_code} - {response.text}")
+            logger.error(f"Error en la petición a Deepseek: {response.status_code} - {response.text}")
             # Usar el sistema de fallback
             return {
                 "respuesta": respuesta_fallback(pregunta),
@@ -111,7 +118,7 @@ def generar_respuesta_ia(pregunta, historial_conversacion=None):
             }
         
     except Exception as e:
-        print(f"Error al procesar la respuesta con Deepseek: {str(e)}")
+        logger.error(f"Error al procesar la respuesta con Deepseek: {str(e)}")
         # Usar el sistema de fallback
         return {
             "respuesta": respuesta_fallback(pregunta),
@@ -204,11 +211,11 @@ def generar_sugerencias_preguntas(pregunta, respuesta=None):
                         if isinstance(sugerencias, list) and len(sugerencias) >= 3:
                             return sugerencias[:3]  # Limitar a 3 sugerencias
                 except Exception as e:
-                    print(f"Error al procesar sugerencias: {str(e)}")
+                    logger.error(f"Error al procesar sugerencias: {str(e)}")
         
         # Si no pudimos generar sugerencias personalizadas, usar las predeterminadas
         return sugerencias_default[:3]
         
     except Exception as e:
-        print(f"Error al generar sugerencias: {str(e)}")
+        logger.error(f"Error al generar sugerencias: {str(e)}")
         return sugerencias_default[:3]

@@ -24,21 +24,58 @@ def obtener_datos_clima(ubicacion):
     Returns:
         dict: Datos climáticos relevantes para la evaluación de energía renovable
     """
-    # Determinar si se trata de coordenadas (lat,lon) o un nombre de ciudad
-    if ',' in ubicacion and len(ubicacion.split(',')) == 2:
-        try:
-            lat_str, lon_str = ubicacion.strip().split(',')
-            lat = float(lat_str.strip())
-            lon = float(lon_str.strip())
-            logger.info(f"Procesando ubicación por coordenadas: {lat}, {lon}")
-            return obtener_datos_por_coordenadas(lat, lon)
-        except ValueError as e:
-            logger.error(f"Error al procesar coordenadas '{ubicacion}': {str(e)}")
-            # Si no se pueden convertir a float, tratar como ciudad
+    logger.info(f"Iniciando obtención de datos climáticos para: '{ubicacion}'")
+    
+    # Validar que la ubicación sea un string válido
+    if not ubicacion or not isinstance(ubicacion, str):
+        logger.error(f"Ubicación no válida: {ubicacion}, usando datos por defecto")
+        return {
+            'radiacion_solar': 4.5,  # kWh/m²/día (valor medio global)
+            'velocidad_viento': 4.0,  # m/s (valor medio global)
+            'temperatura_promedio': 18,  # °C (valor medio global)
+            'ubicacion': 'Ubicación no válida',
+            'latitud': None,
+            'longitud': None,
+            'fuente': 'datos_por_defecto'
+        }
+    
+    try:
+        # Determinar si se trata de coordenadas (lat,lon) o un nombre de ciudad
+        if ',' in ubicacion and len(ubicacion.split(',')) == 2:
+            try:
+                lat_str, lon_str = ubicacion.strip().split(',')
+                lat = float(lat_str.strip())
+                lon = float(lon_str.strip())
+                
+                # Validar rangos de coordenadas
+                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                    logger.error(f"Coordenadas fuera de rango: {lat}, {lon}")
+                    lat = max(-90, min(90, lat))  # Limitar a rango válido
+                    lon = max(-180, min(180, lon))  # Limitar a rango válido
+                
+                logger.info(f"Procesando ubicación por coordenadas: {lat}, {lon}")
+                return obtener_datos_por_coordenadas(lat, lon)
+            except ValueError as e:
+                logger.error(f"Error al procesar coordenadas '{ubicacion}': {str(e)}")
+                # Si no se pueden convertir a float, tratar como ciudad
+                return obtener_datos_por_ciudad(ubicacion)
+        else:
+            logger.info(f"Procesando ubicación por nombre: {ubicacion}")
             return obtener_datos_por_ciudad(ubicacion)
-    else:
-        logger.info(f"Procesando ubicación por nombre: {ubicacion}")
-        return obtener_datos_por_ciudad(ubicacion)
+    except Exception as e:
+        import traceback
+        logger.error(f"Error general en obtener_datos_clima: {str(e)}")
+        logger.error(traceback.format_exc())
+        # Retornar datos por defecto en caso de error
+        return {
+            'radiacion_solar': 4.5,
+            'velocidad_viento': 4.0,
+            'temperatura_promedio': 18,
+            'ubicacion': str(ubicacion) if ubicacion else 'Desconocida',
+            'latitud': None,
+            'longitud': None,
+            'fuente': 'error_datos_por_defecto'
+        }
 
 def obtener_datos_por_ciudad(ciudad, provincia=None, pais="Argentina"):
     """

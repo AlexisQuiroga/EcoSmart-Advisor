@@ -15,74 +15,187 @@ def simular_instalacion(datos):
     Returns:
         dict: Resultados de la simulación
     """
-    # Extraer datos de la simulación
-    tipo_instalacion = datos.get('tipo_instalacion', 'solar')
+    import logging
+    logger = logging.getLogger('simulador')
+    logger.setLevel(logging.DEBUG)
     
-    # Asegurar que capacidad y consumo sean valores numéricos válidos
     try:
-        capacidad = float(datos.get('capacidad', 0))
-        if capacidad <= 0:
-            capacidad = 1.0  # Valor por defecto si es 0 o negativo
-    except (ValueError, TypeError):
-        print(f"Error al convertir capacidad: {datos.get('capacidad')}")
-        capacidad = 1.0  # Valor por defecto si hay error
+        logger.info(f"Iniciando simulación con datos: {datos}")
         
-    try:
-        consumo_mensual = float(datos.get('consumo_mensual', 0))
-        if consumo_mensual <= 0:
-            consumo_mensual = 300.0  # Valor por defecto si es 0 o negativo
-    except (ValueError, TypeError):
-        print(f"Error al convertir consumo: {datos.get('consumo_mensual')}")
-        consumo_mensual = 300.0  # Valor por defecto si hay error
+        # Si datos es None o no es un diccionario, usar un diccionario vacío
+        if not datos or not isinstance(datos, dict):
+            logger.warning(f"Datos inválidos: {datos}, usando valores por defecto")
+            datos = {}
         
-    # Ubicación (asegurar que es un string válido)
-    ubicacion = str(datos.get('ubicacion', '-34.61,-58.38'))  # Defecto: Buenos Aires
-    if not ubicacion or ubicacion.strip() == '':
-        ubicacion = '-34.61,-58.38'  # Buenos Aires como fallback
+        # Extraer datos de la simulación con validación
+        tipo_instalacion = datos.get('tipo_instalacion')
         
-    descripcion_ubicacion = datos.get('descripcion_ubicacion', '')
-    
-    # Mostrar datos para debug
-    print(f"Simulando instalación de tipo: {tipo_instalacion}")
-    print(f"Capacidad: {capacidad} {'kW' if tipo_instalacion != 'termotanque_solar' else 'litros'}")
-    print(f"Consumo mensual: {consumo_mensual} kWh")
-    print(f"Ubicación: {ubicacion}")
-    
-    # Obtener datos climáticos
-    clima = obtener_datos_clima(ubicacion)
-    
-    # Simular según el tipo de instalación
-    if tipo_instalacion == 'solar':
-        resultados = simular_solar(capacidad, clima, consumo_mensual)
-    elif tipo_instalacion == 'eolica':
-        resultados = simular_eolica(capacidad, clima, consumo_mensual)
-    elif tipo_instalacion == 'termotanque_solar':
-        resultados = simular_termotanque(capacidad, clima, consumo_mensual)
-    else:
-        return {'error': 'Tipo de instalación no válido'}
-    
-    # Agregar métricas ambientales
-    resultados['metricas_ambientales'] = calcular_metricas_ambientales(resultados['generacion_anual'])
-    
-    # Agregar datos de cobertura
-    resultados['cobertura'] = min(100, (resultados['generacion_mensual'] / consumo_mensual) * 100)
-    
-    # Agregar datos de ahorro económico
-    # Asumiendo un precio promedio de 0.15 USD/kWh
-    precio_kwh = 0.15
-    resultados['ahorro_mensual_usd'] = resultados['generacion_mensual'] * precio_kwh
-    resultados['ahorro_anual_usd'] = resultados['generacion_anual'] * precio_kwh
-    
-    # Calcular retorno de inversión
-    if 'costo_estimado' in resultados and resultados['costo_estimado'] > 0:
-        resultados['retorno_inversion_anos'] = resultados['costo_estimado'] / resultados['ahorro_anual_usd']
-    else:
-        resultados['retorno_inversion_anos'] = None
-    
-    # Agregar descripción de ubicación a los resultados
-    resultados['descripcion_ubicacion'] = descripcion_ubicacion
-    
-    return resultados
+        # Validar tipo de instalación
+        tipos_validos = ['solar', 'eolica', 'termotanque_solar']
+        if not tipo_instalacion or tipo_instalacion not in tipos_validos:
+            logger.warning(f"Tipo de instalación no válido: {tipo_instalacion}, usando solar por defecto")
+            tipo_instalacion = 'solar'
+        
+        # Asegurar que capacidad y consumo sean valores numéricos válidos
+        try:
+            capacidad_valor = datos.get('capacidad', '')
+            capacidad = float(capacidad_valor) if capacidad_valor else 0
+            if capacidad <= 0:
+                logger.warning(f"Capacidad inválida: {capacidad}, usando valor por defecto")
+                # Valores por defecto según tipo de instalación
+                if tipo_instalacion == 'termotanque_solar':
+                    capacidad = 200.0  # 200 litros por defecto
+                else:
+                    capacidad = 1.0  # 1 kW por defecto
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error al convertir capacidad '{datos.get('capacidad')}': {str(e)}")
+            if tipo_instalacion == 'termotanque_solar':
+                capacidad = 200.0
+            else:
+                capacidad = 1.0
+            
+        try:
+            consumo_valor = datos.get('consumo_mensual', '')
+            consumo_mensual = float(consumo_valor) if consumo_valor else 0
+            if consumo_mensual <= 0:
+                logger.warning(f"Consumo mensual inválido: {consumo_mensual}, usando valor por defecto")
+                consumo_mensual = 300.0  # 300 kWh por defecto
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error al convertir consumo '{datos.get('consumo_mensual')}': {str(e)}")
+            consumo_mensual = 300.0
+            
+        # Ubicación con validación
+        ubicacion_default = '-34.61,-58.38'  # Buenos Aires como ubicación por defecto
+        ubicacion = datos.get('ubicacion')
+        
+        if not ubicacion or not isinstance(ubicacion, str) or ubicacion.strip() == '':
+            logger.warning(f"Ubicación inválida: {ubicacion}, usando Buenos Aires por defecto")
+            ubicacion = ubicacion_default
+            
+        descripcion_ubicacion = datos.get('descripcion_ubicacion', 'Buenos Aires, Argentina')
+        
+        # Registro detallado para debug
+        logger.info(f"Simulando instalación de tipo: {tipo_instalacion}")
+        logger.info(f"Capacidad: {capacidad} {'kW' if tipo_instalacion != 'termotanque_solar' else 'litros'}")
+        logger.info(f"Consumo mensual: {consumo_mensual} kWh")
+        logger.info(f"Ubicación: {ubicacion}")
+        
+        # Obtener datos climáticos
+        try:
+            clima = obtener_datos_clima(ubicacion)
+            logger.info(f"Datos climáticos obtenidos: {clima}")
+        except Exception as e:
+            logger.error(f"Error al obtener datos climáticos: {str(e)}")
+            # Datos climáticos por defecto en caso de error
+            clima = {
+                'radiacion_solar': 4.5,  # kWh/m²/día
+                'velocidad_viento': 4.0,  # m/s
+                'temperatura_promedio': 18.0,  # °C
+                'ubicacion': descripcion_ubicacion or 'No especificada',
+                'latitud': None,
+                'longitud': None,
+                'fuente': 'datos_por_defecto'
+            }
+        
+        # Simular según el tipo de instalación
+        logger.info(f"Iniciando simulación de {tipo_instalacion}")
+        if tipo_instalacion == 'solar':
+            resultados = simular_solar(capacidad, clima, consumo_mensual)
+        elif tipo_instalacion == 'eolica':
+            resultados = simular_eolica(capacidad, clima, consumo_mensual)
+        elif tipo_instalacion == 'termotanque_solar':
+            resultados = simular_termotanque(capacidad, clima, consumo_mensual)
+        else:
+            logger.error(f"Tipo de instalación no implementado: {tipo_instalacion}")
+            return {'error': f'Tipo de instalación no válido: {tipo_instalacion}'}
+        
+        # Verificar que resultados sea un diccionario
+        if not resultados or not isinstance(resultados, dict):
+            logger.error(f"Resultados inválidos de simulación: {resultados}")
+            return {'error': 'Error en la simulación: resultados inválidos'}
+        
+        # Verificar que los campos necesarios estén presentes
+        campos_necesarios = ['generacion_mensual', 'generacion_anual']
+        for campo in campos_necesarios:
+            if campo not in resultados:
+                logger.error(f"Campo necesario '{campo}' no presente en resultados")
+                resultados[campo] = 0  # Valor por defecto
+        
+        # Agregar métricas ambientales
+        try:
+            resultados['metricas_ambientales'] = calcular_metricas_ambientales(resultados.get('generacion_anual', 0))
+        except Exception as e:
+            logger.error(f"Error al calcular métricas ambientales: {str(e)}")
+            resultados['metricas_ambientales'] = {
+                'co2_evitado': 0,
+                'arboles_equivalentes': 0,
+                'km_auto_equivalentes': 0
+            }
+        
+        # Agregar datos de cobertura con validación
+        try:
+            if consumo_mensual > 0 and resultados.get('generacion_mensual', 0) > 0:
+                resultados['cobertura'] = min(100, (resultados['generacion_mensual'] / consumo_mensual) * 100)
+            else:
+                resultados['cobertura'] = 0
+        except Exception as e:
+            logger.error(f"Error al calcular cobertura: {str(e)}")
+            resultados['cobertura'] = 0
+        
+        # Agregar datos de ahorro económico
+        precio_kwh = 0.15  # USD/kWh
+        try:
+            resultados['ahorro_mensual_usd'] = resultados.get('generacion_mensual', 0) * precio_kwh
+            resultados['ahorro_anual_usd'] = resultados.get('generacion_anual', 0) * precio_kwh
+        except Exception as e:
+            logger.error(f"Error al calcular ahorro económico: {str(e)}")
+            resultados['ahorro_mensual_usd'] = 0
+            resultados['ahorro_anual_usd'] = 0
+        
+        # Calcular retorno de inversión
+        try:
+            costo_estimado = resultados.get('costo_estimado', 0)
+            ahorro_anual = resultados.get('ahorro_anual_usd', 0)
+            
+            if costo_estimado > 0 and ahorro_anual > 0:
+                resultados['retorno_inversion_anos'] = costo_estimado / ahorro_anual
+            else:
+                resultados['retorno_inversion_anos'] = None
+        except Exception as e:
+            logger.error(f"Error al calcular retorno de inversión: {str(e)}")
+            resultados['retorno_inversion_anos'] = None
+        
+        # Agregar descripción de ubicación a los resultados
+        resultados['descripcion_ubicacion'] = descripcion_ubicacion
+        
+        logger.info(f"Simulación completada con éxito")
+        return resultados
+        
+    except Exception as e:
+        logger.critical(f"Error general en simulador: {str(e)}")
+        logger.critical(f"Datos de entrada: {datos}")
+        import traceback
+        logger.critical(traceback.format_exc())
+        
+        # Crear una respuesta de emergencia para no romper la aplicación
+        tipo = datos.get('tipo_instalacion', 'solar') if datos else 'solar'
+        return {
+            'error': f'Error en la simulación: {str(e)}',
+            'tipo': tipo,
+            'capacidad_kw': 1.0,
+            'generacion_mensual': 0,
+            'generacion_anual': 0,
+            'costo_estimado': 0,
+            'cobertura': 0,
+            'ahorro_mensual_usd': 0,
+            'ahorro_anual_usd': 0,
+            'metricas_ambientales': {
+                'co2_evitado': 0,
+                'arboles_equivalentes': 0,
+                'km_auto_equivalentes': 0
+            },
+            'descripcion_ubicacion': datos.get('descripcion_ubicacion', '') if datos else ''
+        }
 
 def simular_solar(capacidad_kw, clima, consumo_mensual):
     """
@@ -361,22 +474,46 @@ def calcular_metricas_ambientales(generacion_anual):
     Returns:
         dict: Métricas ambientales
     """
-    # Factores de conversión
-    factor_co2 = 0.4  # kg CO2 por kWh (varía según matriz energética)
-    factor_arboles = 0.06  # árboles equivalentes por kg CO2 (aproximación)
+    import logging
+    logger = logging.getLogger('metricas_ambientales')
+    logger.setLevel(logging.DEBUG)
     
-    # Calcular ahorro de CO2
-    co2_evitado = generacion_anual * factor_co2
+    logger.info(f"Calculando métricas ambientales para generación anual: {generacion_anual} kWh")
     
-    # Calcular árboles equivalentes
-    arboles_equivalentes = co2_evitado * factor_arboles
-    
-    # Calcular kilómetros no recorridos en auto (equivalente)
-    # Aproximadamente 0.2 kg CO2 por km en auto promedio
-    km_auto_equivalentes = co2_evitado / 0.2
-    
-    return {
-        'co2_evitado': round(co2_evitado, 1),  # kg CO2/año
-        'arboles_equivalentes': round(arboles_equivalentes, 1),  # árboles/año
-        'km_auto_equivalentes': round(km_auto_equivalentes, 1)  # km/año
-    }
+    try:
+        # Validar entrada
+        if generacion_anual is None or not isinstance(generacion_anual, (int, float)) or generacion_anual < 0:
+            logger.warning(f"Valor de generación anual inválido: {generacion_anual}, usando valor por defecto")
+            generacion_anual = 0
+        
+        # Factores de conversión
+        factor_co2 = 0.4  # kg CO2 por kWh (varía según matriz energética)
+        factor_arboles = 0.06  # árboles equivalentes por kg CO2 (aproximación)
+        
+        # Calcular ahorro de CO2
+        co2_evitado = generacion_anual * factor_co2
+        
+        # Calcular árboles equivalentes
+        arboles_equivalentes = co2_evitado * factor_arboles
+        
+        # Calcular kilómetros no recorridos en auto (equivalente)
+        # Aproximadamente 0.2 kg CO2 por km en auto promedio
+        km_auto_equivalentes = co2_evitado / 0.2
+        
+        metricas = {
+            'co2_evitado': round(co2_evitado, 1),  # kg CO2/año
+            'arboles_equivalentes': round(arboles_equivalentes, 1),  # árboles/año
+            'km_auto_equivalentes': round(km_auto_equivalentes, 1)  # km/año
+        }
+        
+        logger.info(f"Métricas calculadas: CO2={co2_evitado}kg, árboles={arboles_equivalentes}, km={km_auto_equivalentes}")
+        return metricas
+        
+    except Exception as e:
+        logger.error(f"Error al calcular métricas ambientales: {str(e)}")
+        # Retornar valores por defecto seguros
+        return {
+            'co2_evitado': 0,  # kg CO2/año
+            'arboles_equivalentes': 0,  # árboles/año
+            'km_auto_equivalentes': 0  # km/año
+        }

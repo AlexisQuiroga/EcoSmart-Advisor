@@ -209,7 +209,9 @@ def calcular_recomendacion(datos_usuario, clima):
             
             return recomendacion
     except Exception as e:
-        print(f"Error al procesar recomendaciones de IA: {str(e)}")
+        import logging
+        logger = logging.getLogger('energia_calculo')
+        logger.error(f"Error al procesar recomendaciones de IA: {str(e)}")
         # En caso de error, usamos el método tradicional como fallback
     
     # Si llegamos a este punto, usar el método tradicional
