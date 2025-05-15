@@ -17,8 +17,8 @@
     <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     
-    <!-- Script base para mapas (sin Leaflet, lo cargaremos de manera optimizada en cada página) -->
-    <script src="{{ url_for('static', filename='js/mapa-simple.js') }}"></script>
+    <!-- Script centralizado para mapas -->
+    <script src="{{ url_for('static', filename='js/ecosmart-map.js') }}"></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-light">

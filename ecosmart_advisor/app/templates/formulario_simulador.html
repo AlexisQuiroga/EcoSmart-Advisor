@@ -277,26 +277,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Inicializar el mapa
-    const map = initMap('mapaUbicacion');
+    // Asegurar que el contenedor del mapa esté visible y con altura
+    const mapaDiv = document.getElementById('mapaUbicacion');
+    if (mapaDiv) {
+        mapaDiv.style.display = 'block';
+        mapaDiv.style.height = '400px';
+    }
+    
+    console.log("Inicializando mapa de simulador usando EcoSmart.Map...");
+    
+    // Inicializar el mapa con el módulo centralizado
+    const mapOptions = {
+        center: [-34.603722, -58.381592], // Buenos Aires
+        zoom: 5,
+        zoomControl: true
+    };
+    
+    // Usar el nuevo módulo EcoSmart.Map
+    const map = EcoSmart.Map.init('mapaUbicacion', mapOptions);
+    
+    // Hacer el mapa accesible globalmente para depuración
+    window.simuladorMap = map;
     
     if (map) {
+        console.log("✅ Mapa inicializado correctamente en simulador");
+        
         // Configurar el evento de clic en el mapa para actualizar la ubicación
         map.on('click', function(e) {
             // Obtener las coordenadas del clic
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
             
-            console.log("Clic en mapa:", lat, lng);
+            console.log("Clic en mapa de simulador:", lat, lng);
             
-            // Actualizar el marcador en el mapa
-            updateMarker(map, lat, lng);
+            // Actualizar el marcador usando el módulo centralizado
+            EcoSmart.Map.setMarker(map, lat, lng);
             
             // Actualizar inputs de coordenadas
             updateLocationData(lat.toFixed(6), lng.toFixed(6));
             
             // Realizar geocodificación inversa
-            reverseGeocode(lat, lng, function(data) {
+            EcoSmart.Map.reverseGeocode(lat, lng, function(data) {
                 if (data && data.address) {
                     console.log("Datos de geocodificación:", data);
                     
@@ -409,8 +430,9 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             if (map) {
-                console.log("Centrando mapa en Argentina");
-                map.setView([-34.603722, -58.381592], 5);
+                console.log("Centrando mapa en Argentina con EcoSmart.Map");
+                // Usar la función centralizada para centrar en Argentina
+                EcoSmart.Map.centerOnArgentina(map);
             }
         });
     }
