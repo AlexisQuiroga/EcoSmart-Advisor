@@ -62,6 +62,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar mapa si tenemos el contenedor
     if (mapaUbicacionDiv) {
         try {
+            // Si hay un mensaje de error visible, ocúltalo
+            if (locationErrorMsg) {
+                locationErrorMsg.style.display = 'none';
+            }
+            
             // Inicializar el mapa con Leaflet
             map = L.map('mapaUbicacion').setView([ARGENTINA_LAT, ARGENTINA_LNG], ARGENTINA_ZOOM);
             
@@ -101,6 +106,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Obtener descripción de la ubicación (país, provincia, ciudad)
                 obtenerDescripcionUbicacion(lat, lng);
+                
+                // Asegurarse de ocultar cualquier mensaje de error
+                if (locationErrorMsg) {
+                    locationErrorMsg.style.display = 'none';
+                }
             });
             
             console.log("Mapa inicializado correctamente");
@@ -112,8 +122,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadingIndicator.style.display = 'none';
             }
             
-            // Mostrar mensaje de error
-            if (locationErrorMsg) {
+            // Mostrar mensaje de error solo si hay un problema real
+            // (no al cargar por primera vez)
+            if (locationErrorMsg && error.message && error.message !== "") {
                 locationErrorMsg.style.display = 'block';
                 const errorTextEl = locationErrorMsg.querySelector('#error-text');
                 if (errorTextEl) {
