@@ -111,7 +111,10 @@ window.initMap = function(containerId) {
             return null;
         }
         
+        // Asegurar que el contenedor tenga una altura
         container.style.display = 'block';
+        container.style.height = '400px';
+        container.style.width = '100%';
         
         if (!ecosmartMap) {
             console.log("Creando nueva instancia del mapa");
