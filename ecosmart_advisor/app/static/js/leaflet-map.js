@@ -332,6 +332,8 @@ function reverseGeocode(lat, lng, callback) {
  * @param {number} zoomLevel - Nivel de zoom a aplicar (opcional, por defecto 15)
  */
 window.geocodeAddress = function(address, callback, zoomLevel = 15) {
+    // Flag para utilizar OpenCage API como primera opción
+    const useOpenCageFirst = true;
     if (!address || address.trim() === '') {
         console.error("La dirección está vacía");
         return;
@@ -469,6 +471,81 @@ window.geocodeAddress = function(address, callback, zoomLevel = 15) {
     }
     
     geocodingInProgress = true;
+    
+    // === PASO 4.1: Intentar primero con OpenCage API si está habilitado ===
+    if (useOpenCageFirst) {
+        console.log("Intentando geocodificación con OpenCage API:", address);
+        
+        // Configurar query para OpenCage
+        const queryParams = new URLSearchParams({
+            q: address,
+            limit: 5
+        }).toString();
+        
+        // Usar nuestra API interna que maneja la API key en el servidor
+        fetch(`/api/geocode?${queryParams}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error de respuesta: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error("Error en API de OpenCage:", data.error);
+                    throw new Error(data.error);
+                }
+                
+                if (data.results && data.results.length > 0) {
+                    // Encontramos resultados con OpenCage
+                    const result = data.results[0]; // Tomar el primer resultado
+                    console.log("Geocodificación exitosa con OpenCage:", result);
+                    
+                    // Preparar objeto de resultado en formato estándar
+                    const standardResult = {
+                        lat: result.lat,
+                        lon: result.lng,
+                        display_name: result.formatted,
+                        type: "address",
+                        importance: 0.9,
+                        zoomLevel: 18, // Zoom alto para direcciones exactas
+                        source: 'opencage'
+                    };
+                    
+                    // También guardamos en caché
+                    try {
+                        const cacheKey = `geocode_${normalizedAddress}`;
+                        localStorage.setItem(cacheKey, JSON.stringify({
+                            lat: standardResult.lat,
+                            lon: standardResult.lon,
+                            result: standardResult,
+                            zoomLevel: standardResult.zoomLevel || zoomLevel,
+                            timestamp: Date.now()
+                        }));
+                    } catch (e) {
+                        console.warn("Error guardando en caché:", e);
+                    }
+                    
+                    // Liberar bandera y notificar resultado
+                    geocodingInProgress = false;
+                    if (typeof callback === 'function') {
+                        callback(
+                            parseFloat(standardResult.lat), 
+                            parseFloat(standardResult.lon), 
+                            standardResult, 
+                            standardResult.zoomLevel || zoomLevel
+                        );
+                    }
+                    return;
+                } else {
+                    console.log("OpenCage no encontró resultados, usando métodos alternativos");
+                    throw new Error("No se encontraron resultados con OpenCage");
+                }
+            })
+            .catch(error => {
+                console.warn("Error o sin resultados con OpenCage, continuando con métodos alternativos:", error.message);
+                // Continuamos con los métodos alternativos, no liberamos geocodingInProgress
+            });
     
     // Mostrar indicador de carga
     const loadingEl = document.getElementById('map-loading-indicator');
