@@ -35,10 +35,14 @@
             
             <!-- Items del carrusel -->
             <div class="carousel-inner">
-                <!-- Diapositiva 1: Energía Eólica con datos dinámicos-->
+                <!-- Diapositiva 1: Energía Eólica con datos dinámicos e imagen dinámica-->
                 <div class="carousel-item active">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                        {% if carousel_data.get('energia_eolica', {}).get('imagen_url') %}
+                            <img src="{{ carousel_data.get('energia_eolica', {}).get('imagen_url') }}" class="d-block w-100" alt="Energía Eólica">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg') }}" class="d-block w-100" alt="Generador Eólico">
+                        {% endif %}
                         <div class="position-absolute bottom-0 start-0 bg-{{ carousel_data.get('energia_eolica', {}).get('color', 'success') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_eolica', {}).get('titulo', 'Energía Eólica - El Futuro') }}</h5>
                             <p class="mb-0 small">{{ carousel_data.get('energia_eolica', {}).get('texto_principal', 'La energía eólica es 100% renovable y no produce emisiones de gases de efecto invernadero.') }}</p>
@@ -47,10 +51,14 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 2: Eficiencia Energética con datos dinámicos -->
+                <!-- Diapositiva 2: Eficiencia Energética con datos dinámicos e imagen dinámica -->
                 <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" class="d-block w-100" alt="Aerogenerador Eólico">
+                        {% if carousel_data.get('eficiencia_energetica', {}).get('imagen_url') %}
+                            <img src="{{ carousel_data.get('eficiencia_energetica', {}).get('imagen_url') }}" class="d-block w-100" alt="Eficiencia Energética">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/carousel/generador eolico.jpg') }}" class="d-block w-100" alt="Aerogenerador Eólico">
+                        {% endif %}
                         <div class="position-absolute bottom-0 end-0 bg-{{ carousel_data.get('eficiencia_energetica', {}).get('color', 'warning') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('eficiencia_energetica', {}).get('titulo', 'Eficiencia Energética') }}</h5>
                             <p class="mb-0 small">{{ carousel_data.get('eficiencia_energetica', {}).get('texto_principal', 'Complementa tus sistemas renovables con prácticas eficientes para maximizar el ahorro.') }}</p>
@@ -74,10 +82,14 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 4: Energía Solar con datos dinámicos -->
+                <!-- Diapositiva 4: Energía Solar con datos dinámicos e imagen dinámica -->
                 <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" class="d-block w-100" alt="Paneles Solares Vista Aérea">
+                        {% if carousel_data.get('energia_solar', {}).get('imagen_url') %}
+                            <img src="{{ carousel_data.get('energia_solar', {}).get('imagen_url') }}" class="d-block w-100" alt="Energía Solar Fotovoltaica">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/carousel/vista aerea paneles solares.jpg') }}" class="d-block w-100" alt="Paneles Solares Vista Aérea">
+                        {% endif %}
                         <div class="position-absolute top-0 end-0 bg-{{ carousel_data.get('energia_solar', {}).get('color', 'primary') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('energia_solar', {}).get('titulo', 'Energía Solar Fotovoltaica') }}</h5>
                             <p class="mb-0 small">{{ carousel_data.get('energia_solar', {}).get('texto_principal', 'Los paneles solares convierten la luz solar en electricidad limpia y renovable.') }}</p>
@@ -86,10 +98,14 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 5: Termotanque Solar con datos dinámicos -->
+                <!-- Diapositiva 5: Termotanque Solar con datos dinámicos e imagen dinámica -->
                 <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" class="d-block w-100" alt="Instalación de Paneles Solares">
+                        {% if carousel_data.get('termotanque_solar', {}).get('imagen_url') %}
+                            <img src="{{ carousel_data.get('termotanque_solar', {}).get('imagen_url') }}" class="d-block w-100" alt="Termotanque Solar">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/carousel/vista hombre colocando panel solar.jpg') }}" class="d-block w-100" alt="Instalación de Paneles Solares">
+                        {% endif %}
                         <div class="position-absolute bottom-0 start-0 bg-{{ carousel_data.get('termotanque_solar', {}).get('color', 'info') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('termotanque_solar', {}).get('titulo', 'Termotanque Solar') }}</h5>
                             <p class="mb-0 small">{{ carousel_data.get('termotanque_solar', {}).get('texto_principal', 'Los termotanques solares calientan agua usando la radiación solar, sin consumir electricidad.') }}</p>
@@ -110,10 +126,14 @@
                     </div>
                 </div>
                 
-                <!-- Diapositiva 7: Futuro Renovable con datos dinámicos -->
+                <!-- Diapositiva 7: Futuro Renovable con datos dinámicos e imagen dinámica -->
                 <div class="carousel-item">
                     <div class="position-relative">
-                        <img src="{{ url_for('static', filename='images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg') }}" class="d-block w-100" alt="Planta de Energía Alternativa">
+                        {% if carousel_data.get('futuro_renovables', {}).get('imagen_url') %}
+                            <img src="{{ carousel_data.get('futuro_renovables', {}).get('imagen_url') }}" class="d-block w-100" alt="Futuro Renovable">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg') }}" class="d-block w-100" alt="Planta de Energía Alternativa">
+                        {% endif %}
                         <div class="position-absolute bottom-0 end-0 bg-{{ carousel_data.get('futuro_renovables', {}).get('color', 'danger') }} bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
                             <h5 class="fs-6 fw-bold mb-1">{{ carousel_data.get('futuro_renovables', {}).get('titulo', 'El Futuro Renovable') }}</h5>
                             <p class="mb-0 small">{{ carousel_data.get('futuro_renovables', {}).get('texto_principal', 'Las energías renovables son la clave para un futuro sostenible y libre de emisiones.') }}</p>
