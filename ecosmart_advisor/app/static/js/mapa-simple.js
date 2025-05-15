@@ -100,24 +100,15 @@ function initMap(mapContainerId) {
         } catch (error) {
             console.error("Error al inicializar el mapa desde initMap:", error);
             
-            // Determinar si estamos en dispositivo móvil para personalizar mensaje
-            const esMovil = detectarDispositivoMovil();
-            let mensajeError = esMovil ? 
-                "Error al cargar el mapa en dispositivo móvil. Intente con WiFi o recargar la página." :
-                "Error al cargar el mapa. Por favor, recargue la página.";
-                
-            // Añadir detalles del error si están disponibles
-            if (error && error.message) {
-                console.error("Detalles del error:", error.message);
-                
-                // Personalizar para ciertos tipos de errores comunes en móviles
-                if (esMovil) {
-                    if (error.message.includes("timeout") || error.message.includes("timed out")) {
-                        mensajeError = "Tiempo de espera agotado al cargar el mapa. Verifique su conexión e intente nuevamente.";
-                    } else if (error.message.includes("network") || error.message.includes("Network")) {
-                        mensajeError = "Error de red. Verifique su conexión a internet y recargue la página.";
-                    }
-                }
+            // Mensaje básico de error
+            let mensajeError = "Error al cargar el mapa. Por favor, recargue la página.";
+            
+            // Verificar si es dispositivo móvil
+            const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                            window.innerWidth <= 768;
+            
+            if (esMobile) {
+                mensajeError = "Error al cargar el mapa en dispositivo móvil. Intente con WiFi o recargar la página.";
             }
             
             // Mostrar mensaje en el elemento de error específico
@@ -137,7 +128,6 @@ function initMap(mapContainerId) {
                     '<i class="fas fa-exclamation-triangle me-2"></i>' + 
                     mensajeError +
                     '<br><button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">Recargar página</button>' +
-                    (esMovil ? '<br><small class="d-block mt-2">Consejo: Las conexiones WiFi suelen funcionar mejor para cargar mapas en dispositivos móviles.</small>' : '') +
                     '</div>';
             }
             
@@ -149,62 +139,11 @@ function initMap(mapContainerId) {
     }
 }
 
-// Función para detectar si estamos en un dispositivo móvil
-function detectarDispositivoMovil() {
-    // Detectar si el dispositivo es móvil basado en el User-Agent o el tamaño de pantalla
-    const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                    window.innerWidth <= 768;
-    
-    console.log("Detección de dispositivo: " + (esMobile ? "Móvil" : "Escritorio"), window.innerWidth + "x" + window.innerHeight);
-    
-    return esMobile;
-}
-
-// Función para manejar errores al cargar el mapa con mensaje específico para móviles
-function mostrarErrorMapaMobile(mensaje, containerElement) {
-    const esMovil = detectarDispositivoMovil();
-    
-    // Mensaje predeterminado según el dispositivo
-    let mensajeError = mensaje || (esMovil ? 
-        "Error al cargar el mapa en dispositivo móvil. Intente recargar la página o utilizar WiFi." :
-        "Error al cargar el mapa. Por favor, recargue la página.");
-    
-    console.error("Error de mapa:", mensajeError);
-    
-    // Mensaje para el contenedor de error específico
-    const errorMsgEl = document.getElementById('location-error-message');
-    if (errorMsgEl) {
-        errorMsgEl.style.display = 'block';
-        const errorTextEl = errorMsgEl.querySelector('#error-text');
-        if (errorTextEl) {
-            errorTextEl.textContent = mensajeError;
-        }
-    }
-    
-    // Mensaje directamente en el contenedor del mapa
-    if (containerElement) {
-        containerElement.innerHTML = '<div class="alert alert-danger p-3 m-0"><i class="fas fa-exclamation-triangle me-2"></i>' + 
-            mensajeError + 
-            '<br><button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">Recargar página</button>' +
-            (esMovil ? '<br><small class="d-block mt-2">Consejo: En dispositivos móviles, una conexión WiFi estable mejora la carga del mapa.</small>' : '') +
-            '</div>';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Detectar tipo de dispositivo
-    const esDispositivoMovil = detectarDispositivoMovil();
-    console.log("Aplicación cargada en: " + (esDispositivoMovil ? "Dispositivo móvil" : "Escritorio"));
-    
-    // Adaptar elementos de la interfaz si es móvil
-    if (esDispositivoMovil) {
-        const mapaContainers = document.querySelectorAll('.mapContainer');
-        mapaContainers.forEach(container => {
-            container.style.height = "300px"; // Altura reducida para móviles
-        });
-        
-        // Añadir clase para estilos específicos de móvil
-        document.body.classList.add('mobile-device');
+    // Función simple para detectar si estamos en un dispositivo móvil
+    function esMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               window.innerWidth <= 768;
     }
     
     // Referencias a elementos del DOM
@@ -220,10 +159,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const ubicacionInput = document.getElementById('ubicacion');
     const locationErrorMsg = document.getElementById('location-error-message');
     
-    // Configuraciones para móvil
-    if (esDispositivoMovil && mapaUbicacionDiv) {
-        console.log("Aplicando configuraciones para móvil al mapa");
+    // Adaptaciones para dispositivos móviles
+    if (esMobile() && mapaUbicacionDiv) {
+        console.log("Detectado dispositivo móvil, adaptando interfaz");
         mapaUbicacionDiv.style.height = "300px";
+        // Mostrar botón de reinicio si está oculto
+        const helperDiv = document.getElementById('mobile-map-helper');
+        if (helperDiv) {
+            helperDiv.classList.remove('d-none', 'd-sm-none');
+        }
     }
     
     // Variables globales

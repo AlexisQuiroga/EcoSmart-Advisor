@@ -2,6 +2,11 @@
 
 {% block title %}Simulador{% endblock %}
 
+{% block extra_css %}
+<!-- Scripts específicos para el simulador -->
+<script src="{{ url_for('static', filename='js/simulador-mapa.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -124,13 +129,42 @@
                                             // Limpiar el contenedor
                                             mapaDiv.innerHTML = '';
                                             
-                                            // Si existe la función cargarLeaflet, llamarla
-                                            if (typeof cargarLeaflet === 'function') {
-                                                setTimeout(cargarLeaflet, 100);
-                                            } else {
-                                                // Recargar la página si no hay función de recarga
-                                                window.location.reload();
-                                            }
+                                            // Recargar el mapa simplemente utilizando la función global initMap
+                                            setTimeout(function() {
+                                                if (typeof initMap === 'function') {
+                                                    console.log("Reiniciando mapa con initMap");
+                                                    const newMap = initMap('mapaUbicacion');
+                                                    
+                                                    // Configurar evento de clic si el mapa se inicializó correctamente
+                                                    if (newMap && typeof setupMapClickEvent === 'function') {
+                                                        setupMapClickEvent(newMap, function(lat, lng, addressData) {
+                                                            console.log("Ubicación seleccionada:", lat, lng);
+                                                            // Actualizar campos de formulario
+                                                            document.getElementById('latitud').value = lat;
+                                                            document.getElementById('longitud').value = lng;
+                                                            
+                                                            // Actualizar visualización
+                                                            if (document.getElementById('latitudSeleccionada')) {
+                                                                document.getElementById('latitudSeleccionada').textContent = lat;
+                                                            }
+                                                            if (document.getElementById('longitudSeleccionada')) {
+                                                                document.getElementById('longitudSeleccionada').textContent = lng;
+                                                            }
+                                                            
+                                                            // Actualizar campos de ubicación
+                                                            if (addressData && addressData.display_name) {
+                                                                document.getElementById('ubicacion').value = addressData.display_name;
+                                                            }
+                                                        });
+                                                    }
+                                                } else {
+                                                    console.error("Función initMap no disponible");
+                                                    window.location.reload();
+                                                }
+                                            }, 500);
+                                        } else {
+                                            // Si no existe el div del mapa, recargar página
+                                            window.location.reload();
                                         }
                                     }
                                     </script>
