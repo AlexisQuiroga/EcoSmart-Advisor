@@ -12,10 +12,19 @@ localPort = 8080
 externalPort = 8080
 
 [workflows]
-runButton = "Run"
+runButton = "Run Server"
 
 [[workflows.workflow]]
 name = "Run"
+author = 41524154
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[[workflows.workflow]]
+name = "Run Server"
 author = 41524154
 mode = "sequential"
 
