@@ -45,7 +45,7 @@
             <div class="card-body p-4">
                 <p class="lead mb-4">En esta sección puede simular distintos escenarios de instalación de sistemas de energía renovable para evaluar rendimiento, ahorro y beneficio ambiental.</p>
                 
-                <form id="simuladorForm" method="POST" action="{{ url_for('simulador.simulador') }}">
+                <form id="simuladorForm" method="POST" action="{{ url_for('simulador.simulador') }}" novalidate>
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Configuración de Simulación</h3>
                         
@@ -60,14 +60,14 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="capacidad" class="form-label">Capacidad <span class="text-danger">*</span></label>
+                            <label for="capacidad" class="form-label">Capacidad del sistema <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text" id="unidad_prefijo"><i class="fas fa-bolt"></i></span>
                                 <input type="number" class="form-control" id="capacidad" name="capacidad" 
-                                       placeholder="Capacidad del sistema" min="0.1" step="0.1" required>
+                                       placeholder="Potencia que desea instalar (p. ej.: 3 para 3 kW)" min="0.1" step="0.1" required>
                                 <span class="input-group-text" id="unidad_capacidad">kW</span>
                             </div>
-                            <div class="form-text" id="capacidad_descripcion">Potencia total del sistema</div>
+                            <div class="form-text" id="capacidad_descripcion">Introduzca la potencia total que desea simular para su sistema</div>
                             <div class="mt-2">
                                 <div class="alert alert-info p-2">
                                     <i class="fas fa-info-circle me-2"></i>
@@ -120,7 +120,10 @@
                                 <div class="row">
                                     <div class="col-lg-6 mb-3">
                                         <label for="ubicacionVisible" class="form-label">Ubicación Seleccionada</label>
-                                        <input type="text" class="form-control" id="ubicacionVisible" placeholder="Se mostrará automáticamente al seleccionar en el mapa" readonly>
+                                        <input type="text" class="form-control" id="ubicacionVisible" placeholder="Haga clic en el mapa para seleccionar su ubicación" readonly>
+                                        <div class="form-text text-info">
+                                            <i class="fas fa-info-circle"></i> Para seleccionar su ubicación, haga clic en el mapa en el punto donde desea instalar el sistema
+                                        </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <label for="latitudDisplay" class="form-label">Coordenadas</label>
@@ -128,6 +131,7 @@
                                             <input type="text" class="form-control" id="latitudDisplay" placeholder="Latitud" readonly>
                                             <input type="text" class="form-control" id="longitudDisplay" placeholder="Longitud" readonly>
                                         </div>
+                                        <div class="form-text">Las coordenadas se completarán automáticamente al hacer clic en el mapa</div>
                                     </div>
                                 </div>
                             </div>
@@ -415,7 +419,18 @@ document.addEventListener('DOMContentLoaded', function() {
     simuladorForm.addEventListener('submit', function(event) {
         const latitudInput = document.getElementById('latitud');
         const longitudInput = document.getElementById('longitud');
+        const capacidadInput = document.getElementById('capacidad');
+        const tipoInstalacionSelect = document.getElementById('tipo_instalacion');
         
+        // Validar que se haya seleccionado un tipo de instalación
+        if (!tipoInstalacionSelect.value) {
+            event.preventDefault();
+            alert('Por favor, seleccione un tipo de instalación');
+            tipoInstalacionSelect.focus();
+            return;
+        }
+        
+        // Validar que se haya seleccionado una ubicación
         if (!latitudInput.value || !longitudInput.value) {
             event.preventDefault();
             
@@ -434,7 +449,37 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mapaUbicacion) {
                 mapaUbicacion.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            return;
         }
+        
+        // Asegurarnos de que el campo ubicacion tenga las coordenadas correctas
+        const ubicacionInput = document.getElementById('ubicacion');
+        if (ubicacionInput && latitudInput.value && longitudInput.value) {
+            ubicacionInput.value = `${latitudInput.value},${longitudInput.value}`;
+            console.log("Coordenadas establecidas en campo ubicación:", ubicacionInput.value);
+        }
+        
+        console.log("Formulario validado correctamente, enviando...");
+        
+        // Validar el campo de capacidad
+        if (!capacidadInput.value || parseFloat(capacidadInput.value) <= 0) {
+            event.preventDefault();
+            alert('Por favor, ingrese una capacidad válida para el sistema (mayor a 0)');
+            capacidadInput.focus();
+            return;
+        }
+        
+        // Llenar la descripción de ubicación si está vacía
+        const descripcionUbicacionInput = document.getElementById('descripcion_ubicacion');
+        if (descripcionUbicacionInput && !descripcionUbicacionInput.value) {
+            const ubicacionVisibleInput = document.getElementById('ubicacionVisible');
+            if (ubicacionVisibleInput && ubicacionVisibleInput.value) {
+                descripcionUbicacionInput.value = ubicacionVisibleInput.value;
+            }
+        }
+        
+        // Si todo está bien, permitir que se envíe el formulario
+        console.log("Formulario validado correctamente, enviando datos...");
     });
 });
 </script>

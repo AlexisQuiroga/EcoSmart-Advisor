@@ -175,13 +175,34 @@ def simulador():
         try:
             # Registrar información detallada
             logger.info("=== INICIO PROCESAMIENTO DE SIMULACIÓN ===")
+            logger.info(f"Request method: {request.method}, Form data: {request.form}")
             
+            # Obtener los datos del formulario
+            tipo_instalacion = request.form.get('tipo_instalacion')
+            capacidad = request.form.get('capacidad')
+            latitud = request.form.get('latitud')
+            longitud = request.form.get('longitud')
+            
+            # Crear la ubicación a partir de las coordenadas
+            ubicacion = None
+            if latitud and longitud:
+                ubicacion = f"{latitud},{longitud}"
+                logger.info(f"Ubicación construida a partir de coordenadas: {ubicacion}")
+            else:
+                ubicacion = request.form.get('ubicacion')
+                logger.info(f"Usando campo de ubicación directamente: {ubicacion}")
+            
+            # Crear el diccionario de datos para la simulación
             datos_simulacion = {
-                'tipo_instalacion': request.form.get('tipo_instalacion'),
-                'capacidad': request.form.get('capacidad'),
-                'ubicacion': request.form.get('ubicacion'),
+                'tipo_instalacion': tipo_instalacion,
+                'capacidad': capacidad,
+                'ubicacion': ubicacion,
                 'consumo_mensual': request.form.get('consumo_mensual'),
-                'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
+                'precio_kwh': request.form.get('precio_kwh', '0.15'),
+                'presupuesto': request.form.get('presupuesto', ''),
+                'descripcion_ubicacion': request.form.get('descripcion_ubicacion', ''),
+                'latitud': latitud,
+                'longitud': longitud
             }
             
             logger.info(f"Datos recibidos del formulario: {datos_simulacion}")
@@ -197,6 +218,11 @@ def simulador():
                 logger.warning(f"Faltan campos requeridos: {campos_faltantes}")
                 return render_template('formulario_simulador.html', 
                                      error=f"Faltan campos requeridos: {', '.join(campos_faltantes)}")
+            
+            # Aplicar valores predeterminados si no se proporcionan
+            if not datos_simulacion['consumo_mensual']:
+                datos_simulacion['consumo_mensual'] = '300'
+                logger.info("Aplicando consumo mensual predeterminado: 300 kWh")
             
             # Validar datos numéricos
             try:
@@ -225,9 +251,24 @@ def simulador():
             
             logger.info("Llamando a simular_instalacion...")
             resultados = simular_instalacion(datos_simulacion)
-            logger.info(f"Resultados obtenidos: {resultados}")
+            
+            if not resultados:
+                logger.error("La función simular_instalacion devolvió resultados vacíos o nulos")
+                return render_template('formulario_simulador.html', 
+                                     error="Error al procesar la simulación: no se obtuvieron resultados")
+            
+            logger.info(f"Resultados obtenidos (tipo: {type(resultados)}): {str(resultados)[:200]}...")
+            
+            # Verificamos que resultados sea un diccionario con los datos esperados
+            if not isinstance(resultados, dict) or 'tipo' not in resultados:
+                logger.error(f"Resultados incompletos o de tipo incorrecto: {type(resultados)}")
+                return render_template('formulario_simulador.html', 
+                                     error="Error al procesar la simulación: resultados incompletos")
             
             logger.info("=== FIN PROCESAMIENTO DE SIMULACIÓN ===")
+            logger.info("Redirigiendo a la página de resultados de simulación")
+            
+            # Finalmente, renderizamos la página de resultados
             return render_template('resultado_simulacion.html', 
                                   resultados=resultados,
                                   datos=datos_simulacion)
