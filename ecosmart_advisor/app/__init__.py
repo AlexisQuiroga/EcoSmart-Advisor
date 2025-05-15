@@ -18,6 +18,9 @@ def create_app():
     # Configuración secreta de la aplicación
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'clave_secreta_por_defecto')
     
+    # Desactivar caché de plantillas (para desarrollo)
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    
     # Registrar blueprints (rutas)
     from ecosmart_advisor.app.routes import main_bp, diagnostico_bp, simulador_bp, chatbot_bp, api_bp
     app.register_blueprint(main_bp)

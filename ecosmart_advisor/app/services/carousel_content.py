@@ -43,13 +43,17 @@ IMAGENES_PREDEFINIDAS = {
     "futuro_renovables": [
         "https://images.unsplash.com/photo-1590272456521-1bbe160a18ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
         "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+    ],
+    "energia_termica": [
+        "https://images.unsplash.com/photo-1553434006-dc322885d7d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+        "https://images.unsplash.com/photo-1469048071019-6ac1aa26c008?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
     ]
 }
 
 # Caché para evitar generar el mismo contenido en cada solicitud
 # Usaremos un tiempo de expiración para refrescar el contenido periódicamente
-CONTENT_CACHE = {}
-CACHE_EXPIRY = 3600  # 1 hora en segundos
+CONTENT_CACHE = {}  # Vaciar caché para forzar regeneración
+CACHE_EXPIRY = 10  # Reducir temporalmente a 10 segundos para pruebas
 
 # Temas predefinidos para las imágenes
 IMAGE_TOPICS = {
@@ -57,7 +61,8 @@ IMAGE_TOPICS = {
     "energia_eolica": "wind turbine energy", 
     "termotanque_solar": "solar water heater",
     "eficiencia_energetica": "energy efficiency home",
-    "futuro_renovables": "renewable energy future"
+    "futuro_renovables": "renewable energy future",
+    "energia_termica": "solar thermal energy system"
 }
 
 # Categorías para el carrusel
@@ -66,7 +71,8 @@ CAROUSEL_CATEGORIES = [
     "energia_eolica", 
     "termotanque_solar",
     "eficiencia_energetica",
-    "futuro_renovables"
+    "futuro_renovables",
+    "energia_termica"
 ]
 
 # Datos predeterminados para cada slide del carrusel
@@ -100,6 +106,12 @@ DEFAULT_CAROUSEL_DATA = {
         "texto_principal": "Las energías renovables son la clave para un futuro sostenible y libre de emisiones.",
         "dato_destacado": "Se espera que para 2050, más del 85% de la electricidad mundial sea renovable.",
         "color": "danger"
+    },
+    "energia_termica": {
+        "titulo": "Energía Solar Térmica",
+        "texto_principal": "Los sistemas solares térmicos aprovechan el calor del sol para distintas aplicaciones energéticas.",
+        "dato_destacado": "Por cada m² de captador solar térmico se evita la emisión de una tonelada de CO2 al año.",
+        "color": "primary"
     }
 }
 
@@ -114,6 +126,7 @@ def buscar_imagen_unsplash(tema, categoria=None):
     Returns:
         str: URL de la imagen
     """
+    print(f"Buscando imagen para tema: {tema}, categoría: {categoria}")
     try:
         # Crear un hash del tema + timestamp redondeado (para cambiar cada cierto tiempo)
         # Esto permite obtener diferentes imágenes en cada carga, pero no en cada solicitud
@@ -155,13 +168,18 @@ def buscar_imagen_unsplash(tema, categoria=None):
             imagenes = IMAGENES_PREDEFINIDAS[categoria]
             if imagenes:
                 index = seed_hash % len(imagenes)
-                return imagenes[index]
+                imagen_seleccionada = imagenes[index]
+                print(f"Usando imagen predefinida para {categoria}: {imagen_seleccionada[:30]}...")
+                return imagen_seleccionada
         
         # Si no tenemos imágenes predefinidas para esta categoría, intentar buscar en otros temas
+        print(f"No se encontraron imágenes para categoría {categoria}, usando imágenes de otra categoría")
         for cat, urls in IMAGENES_PREDEFINIDAS.items():
             if urls:
                 index = seed_hash % len(urls)
-                return urls[index]
+                imagen_seleccionada = urls[index]
+                print(f"Usando imagen de categoría alternativa {cat}: {imagen_seleccionada[:30]}...")
+                return imagen_seleccionada
                 
         # Si todo falla, devolver string vacío (no None para evitar problemas de tipo)
         return ""
@@ -178,8 +196,9 @@ def generar_datos_carrusel():
     Returns:
         dict: Datos actualizados para el carrusel con URLs de imágenes
     """
+    print("---- Generando nuevos datos para el carrusel ----")
     try:
-        # Crear un identificador único basado en la hora (actualizado cada hora)
+        # Crear un identificador único basado en la hora (actualizado cada 10 segundos para pruebas)
         cache_key = int(time.time() / CACHE_EXPIRY)
         
         # Si tenemos datos en caché y no han expirado, usarlos
@@ -239,7 +258,8 @@ def generar_datos_categoria(categoria):
         "energia_eolica": "energía eólica",
         "termotanque_solar": "calentadores solares de agua (termotanques solares)",
         "eficiencia_energetica": "eficiencia energética en hogares",
-        "futuro_renovables": "futuro de las energías renovables y tendencias"
+        "futuro_renovables": "futuro de las energías renovables y tendencias",
+        "energia_termica": "sistemas de energía solar térmica"
     }
     
     tema = temas.get(categoria, "energías renovables")

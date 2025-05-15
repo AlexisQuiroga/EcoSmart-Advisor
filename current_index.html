@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSmart Advisor - Inicio</title>
+    <!-- Favicon -->
+    <link rel="icon" href="/static/images/favicon.png" type="image/png">
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/png">
+    <!-- Estilos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/carousel.css">
+    <link href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="/static/js/mapa-simple.js"></script>
+    
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-leaf"></i> EcoSmart Advisor
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" 
+                           href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " 
+                           href="/diagnostico/">Diagnóstico</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link " 
+                           href="/simulador/">Simulador</a>
+                    </li>
+                    <!-- Enlace a chatbot eliminado ya que ahora tenemos chatbot flotante -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold text-success">Asesoramiento Inteligente en Energías Renovables</h1>
+        <p class="lead">EcoSmart Advisor te ayuda a elegir el sistema de energía renovable perfecto para tu hogar o negocio con análisis personalizados basados en IA.</p>
+        <div class="mt-4">
+            <a href="/diagnostico/" class="btn btn-success btn-lg me-2">
+                <i class="fas fa-solar-panel me-2"></i>Comenzar Diagnóstico
+            </a>
+            <a href="/simulador/" class="btn btn-outline-success btn-lg">
+                <i class="fas fa-calculator me-2"></i>Usar Simulador
+            </a>
+        </div>
+    </div>
+
+
+    
+    <div class="col-lg-6 mt-4 mt-lg-0 p-0">
+        <!-- Carrusel con todas las imágenes y el video (reconstruido completamente) -->
+        <div id="carouselEnergiasRenovables" class="carousel slide" data-bs-ride="true">
+            <!-- Indicadores -->
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="0" class="active" aria-current="true"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="3"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="4"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="5"></button>
+                <button type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide-to="6"></button>
+            </div>
+            
+            <!-- Items del carrusel -->
+            <div class="carousel-inner">
+                <!-- Diapositiva 1: Energía Eólica con datos dinámicos-->
+                <div class="carousel-item active">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/generador-de-energia-de-turbina-de-viento-con-cielo-azul.jpg" class="d-block w-100" alt="Generador Eólico">
+                        <div class="position-absolute bottom-0 start-0 bg-success bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Energía Eólica</h5>
+                            <p class="mb-0 small">La energía eólica aprovecha la fuerza del viento para generar electricidad sin emisiones.</p>
+                            <p class="mb-0 small mt-2">Un solo aerogenerador puede abastecer a cientos de hogares con energía limpia.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 2: Eficiencia Energética con datos dinámicos -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/generador%20eolico.jpg" class="d-block w-100" alt="Aerogenerador Eólico">
+                        <div class="position-absolute bottom-0 end-0 bg-warning bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Eficiencia Energética</h5>
+                            <p class="mb-0 small">Complementa tus sistemas renovables con prácticas eficientes para maximizar el ahorro.</p>
+                            <p class="mb-0 small mt-2">Combinar energías renovables con eficiencia puede reducir hasta un 90% tu factura.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 3: Video de Generador Eólico con overlay central -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <video autoplay loop muted playsinline class="d-block w-100">
+                            <source src="/static/images/carousel/video%20generador%20eolico.mp4" type="video/mp4">
+                            Tu navegador no soporta videos HTML5.
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle bg-success bg-opacity-75 text-white p-3 rounded" style="max-width: 350px;">
+                            <h5 class="fs-6 fw-bold mb-1">Funcionamiento del Aerogenerador</h5>
+                            <p class="mb-0 small">Los aerogeneradores modernos generan electricidad cuando el viento mueve las palas a velocidades de 3-25 m/s.</p>
+                            <p class="mb-0 small mt-2">Una sola turbina puede reducir hasta 1.500 toneladas de CO2 al año.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 4: Energía Solar con datos dinámicos -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/vista%20aerea%20paneles%20solares.jpg" class="d-block w-100" alt="Paneles Solares Vista Aérea">
+                        <div class="position-absolute top-0 end-0 bg-primary bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Energía Solar Fotovoltaica</h5>
+                            <p class="mb-0 small">Los paneles solares convierten la luz solar en electricidad limpia y renovable.</p>
+                            <p class="mb-0 small mt-2">Los paneles modernos tienen una vida útil de más de 25 años con mínimo mantenimiento.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 5: Termotanque Solar con datos dinámicos -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/vista%20hombre%20colocando%20panel%20solar.jpg" class="d-block w-100" alt="Instalación de Paneles Solares">
+                        <div class="position-absolute bottom-0 start-0 bg-info bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Termotanque Solar</h5>
+                            <p class="mb-0 small">Los termotanques solares calientan agua usando la radiación solar, sin consumir electricidad.</p>
+                            <p class="mb-0 small mt-2">Puede reducir hasta un 70% del consumo energético para calentar agua.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 6: Otra vista de Energía Solar Térmica (backup) -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/energia-solar-termica.jpg" class="d-block w-100" alt="Energía Solar Térmica">
+                        <div class="position-absolute top-0 start-0 bg-primary bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">Energía Solar Térmica</h5>
+                            <p class="mb-0 small">Los sistemas solares térmicos pueden cubrir hasta el 70% de la necesidad anual de agua caliente en un hogar.</p>
+                            <p class="mb-0 small mt-2">Por cada m² de captador solar térmico se evita la emisión de una tonelada de CO2 al año.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diapositiva 7: Futuro Renovable con datos dinámicos -->
+                <div class="carousel-item">
+                    <div class="position-relative">
+                        <img src="/static/images/carousel/persona-cerca-de-la-planta-de-energia-alternativa.jpg" class="d-block w-100" alt="Planta de Energía Alternativa">
+                        <div class="position-absolute bottom-0 end-0 bg-danger bg-opacity-75 text-white p-3 m-3 rounded" style="max-width: 300px;">
+                            <h5 class="fs-6 fw-bold mb-1">El Futuro Renovable</h5>
+                            <p class="mb-0 small">Las energías renovables son la clave para un futuro sostenible y libre de emisiones.</p>
+                            <p class="mb-0 small mt-2">Se espera que para 2050, más del 85% de la electricidad mundial sea renovable.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controles del carrusel -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselEnergiasRenovables" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
+        </div>
+    </div>
+
+
+    
+<section class="py-5 bg-white rounded-3 shadow-sm mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Nuestras Herramientas</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-search-location fa-3x text-success"></i>
+                        </div>
+                        <h3 class="h5">Diagnóstico Inteligente</h3>
+                        <p class="text-muted">Analiza tu ubicación, consumo y preferencias para recomendarte el sistema de energía renovable ideal.</p>
+                        <a href="/diagnostico/" class="btn btn-outline-success btn-sm">Iniciar Diagnóstico</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="h5">Simulador Avanzado</h3>
+                        <p class="text-muted">Simula diferentes escenarios y configuraciones para visualizar rendimiento y retorno de inversión.</p>
+                        <a href="/simulador/" class="btn btn-outline-primary btn-sm">Probar Simulador</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-robot fa-3x text-info"></i>
+                        </div>
+                        <h3 class="h5">Chatbot Educativo</h3>
+                        <p class="text-muted">Resuelve tus dudas sobre energías renovables con nuestro asistente virtual basado en IA.</p>
+                        <button onclick="abrirChatbot()" class="btn btn-outline-info btn-sm">Hacer Preguntas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <h2 class="text-center mb-4">¿Por qué elegir energías renovables?</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-success bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-wallet text-success fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Ahorro económico</h3>
+                    </div>
+                    <p class="mb-0">Reduce tu factura energética hasta un 70% y obtén retorno de inversión en 4-8 años.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-primary bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-tree text-primary fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Impacto ambiental</h3>
+                    </div>
+                    <p class="mb-0">Reduce tu huella de carbono equivalente a plantar cientos de árboles cada año.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-warning bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-plug text-warning fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Independencia</h3>
+                    </div>
+                    <p class="mb-0">Genera tu propia energía y reduce tu dependencia de la red eléctrica y combustibles fósiles.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 bg-info bg-opacity-10">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-home text-info fa-2x me-3"></i>
+                        <h3 class="h5 mb-0">Valor inmobiliario</h3>
+                    </div>
+                    <p class="mb-0">Aumenta el valor de tu propiedad con instalaciones modernas de energía renovable.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-light p-5 rounded-3 shadow-sm mb-5">
+    <div class="text-center mb-4">
+        <h2>¿Listo para comenzar?</h2>
+        <p class="lead">Obtén tu diagnóstico personalizado en menos de 5 minutos</p>
+    </div>
+    <div class="d-flex justify-content-center">
+        <a href="/diagnostico/" class="btn btn-success btn-lg px-5">
+            <i class="fas fa-lightbulb me-2"></i>Comenzar Ahora
+        </a>
+    </div>
+</section>
+
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-leaf"></i> EcoSmart Advisor</h5>
+                    <p class="text-muted">
+                        Asesoramiento inteligente para la adopción de energías renovables.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Recursos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">Guías de Instalación</a></li>
+                        <li><a href="#" class="text-light">Preguntas Frecuentes</a></li>
+                        <li><a href="#" class="text-light">Calculadora de Ahorro</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contacto</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">Asesores Certificados</a></li>
+                        <li><a href="#" class="text-light">Soporte Técnico</a></li>
+                        <li><a href="#" class="text-light">Solicitar Presupuesto</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2025 EcoSmart Advisor. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot Flotante -->
+    <div class="floating-chatbot">
+        <div class="chat-icon" id="chatIcon">
+            <i class="fas fa-comments"></i>
+        </div>
+    </div>
+
+    <div class="floating-chat-container" id="floatingChat">
+        <div class="floating-chat-header">
+            <h5>
+                <i class="fas fa-robot me-2"></i>
+                <span>Asistente EcoSmart</span>
+            </h5>
+            <span class="close-chat" id="closeChat">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div class="floating-chat-body" id="floatingChatBody">
+            <!-- Mensaje inicial del bot -->
+            <div class="chat-message bot">
+                <div class="d-flex align-items-start">
+                    <div class="me-2 mt-1">
+                        <i class="fas fa-robot text-success"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0">¡Hola! Soy el asistente virtual de EcoSmart Advisor. Estoy aquí para responder tus preguntas sobre energías renovables. ¿En qué puedo ayudarte hoy?</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sugerencias de preguntas iniciales -->
+            <div class="chat-suggestions mt-3">
+                <div class="small text-muted mb-2">Puedes preguntarme sobre:</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Qué sistema de energía renovable me conviene?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Cuánto cuesta instalar paneles solares?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Cuánto puedo ahorrar con energía renovable?</span>
+                    <span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">¿Qué es un termotanque solar?</span>
+                </div>
+            </div>
+        </div>
+        <div class="floating-chat-input">
+            <div class="input-group">
+                <input type="text" class="form-control" id="floatingChatInput" placeholder="Escribe tu pregunta aquí...">
+                <button class="btn btn-success" type="button" id="sendFloatingChat">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/static/js/main.js"></script>
+
+    <!-- Script para el chatbot flotante -->
+    <script>
+        // Función global para abrir el chatbot (accesible desde cualquier parte de la aplicación)
+        function abrirChatbot() {
+            const floatingChat = document.getElementById('floatingChat');
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            
+            if (floatingChat) {
+                floatingChat.classList.add('show-chat');
+                if (floatingChatInput) {
+                    setTimeout(function() {
+                        floatingChatInput.focus();
+                    }, 100);
+                }
+            }
+        }
+        
+        // Función global para seleccionar una pregunta sugerida y enviarla automáticamente
+        function seleccionarPreguntaSugerida(elemento) {
+            // Obtener el texto de la pregunta
+            const pregunta = elemento.textContent.trim();
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            console.log("Pregunta seleccionada:", pregunta);
+            
+            // Colocar la pregunta en el campo de entrada
+            if (floatingChatInput) {
+                floatingChatInput.value = pregunta;
+            }
+            
+            // Añadir la pregunta como mensaje del usuario (definir en caso de que no exista)
+            if (typeof agregarMensajeUsuario !== 'function') {
+                function agregarMensajeUsuario(texto) {
+                    const mensajeHTML = `
+                        <div class="chat-message user">
+                            <div class="d-flex align-items-start justify-content-end">
+                                <div class="text-end">
+                                    <p class="mb-0">${texto}</p>
+                                </div>
+                                <div class="ms-2 mt-1">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (floatingChatBody) {
+                        floatingChatBody.innerHTML += mensajeHTML;
+                        floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                    }
+                }
+            }
+            
+            // Añadir mensaje del usuario
+            agregarMensajeUsuario(pregunta);
+            
+            // Limpiar el campo de entrada después de enviar
+            if (floatingChatInput) {
+                floatingChatInput.value = '';
+            }
+            
+            // Enviar la pregunta al servidor
+            fetch('/chatbot/consulta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pregunta: pregunta })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Añadir respuesta del bot
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">${data.respuesta}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (floatingChatBody) {
+                    floatingChatBody.innerHTML += mensajeHTML;
+                    floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                    
+                    // Mostrar nuevas preguntas sugeridas
+                    setTimeout(function() {
+                        // Usar las sugerencias que vienen de la API si existen
+                        if (data.sugerencias && Array.isArray(data.sugerencias) && data.sugerencias.length > 0) {
+                            mostrarNuevasSugerencias(data.sugerencias);
+                        } else {
+                            mostrarNuevasSugerencias();
+                        }
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                console.error('Error al consultar chatbot:', error);
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-success"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, intenta de nuevo más tarde.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (floatingChatBody) {
+                    floatingChatBody.innerHTML += mensajeHTML;
+                    floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+                }
+            });
+        }
+        
+        // Función para mostrar nuevas sugerencias
+        function mostrarNuevasSugerencias(sugerenciasCustom = null) {
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            // Eliminar sugerencias anteriores si existen
+            document.querySelectorAll('.chat-suggestion-new').forEach(el => {
+                el.remove();
+            });
+            
+            // Si tenemos sugerencias personalizadas, usarlas, sino usar las predeterminadas
+            const sugerencias = sugerenciasCustom || [
+                "¿Qué sistema de energía renovable es más económico?",
+                "¿Cuánto puedo ahorrar con energía renovable?",
+                "¿Para qué sirve el simulador?",
+                "¿Qué es un termotanque solar?"
+            ];
+            
+            // Si no hay sugerencias, no mostrar nada
+            if (!sugerencias || sugerencias.length === 0) {
+                return;
+            }
+            
+            // Crear HTML para sugerencias
+            const sugerenciasHTML = `
+                <div class="chat-suggestions mt-3 chat-suggestion-new">
+                    <div class="small text-muted mb-2">¿Te gustaría saber más sobre:</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        ${sugerencias.map(sugerencia => 
+                            `<span class="chat-suggestion-pill" onclick="seleccionarPreguntaSugerida(this)">
+                                ${sugerencia}
+                            </span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            if (floatingChatBody) {
+                floatingChatBody.innerHTML += sugerenciasHTML;
+                floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatIcon = document.getElementById('chatIcon');
+            const floatingChat = document.getElementById('floatingChat');
+            const closeChat = document.getElementById('closeChat');
+            const floatingChatInput = document.getElementById('floatingChatInput');
+            const sendFloatingChat = document.getElementById('sendFloatingChat');
+            const floatingChatBody = document.getElementById('floatingChatBody');
+            
+            // Abrir chat
+            chatIcon.addEventListener('click', function() {
+                abrirChatbot();
+            });
+            
+            // Cerrar chat
+            closeChat.addEventListener('click', function() {
+                floatingChat.classList.remove('show-chat');
+            });
+            
+            // Función para agregar mensaje del usuario
+            function agregarMensajeUsuario(texto) {
+                const mensajeHTML = `
+                    <div class="chat-message user">
+                        <div class="d-flex align-items-start">
+                            <div>
+                                <p class="mb-0">${texto}</p>
+                            </div>
+                            <div class="ms-2 mt-1">
+                                <i class="fas fa-user text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                scrollToBottom();
+            }
+            
+            // Función para agregar mensaje del bot
+            function agregarMensajeBot(texto) {
+                const mensajeHTML = `
+                    <div class="chat-message bot">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-info"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">${texto}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                
+                // Después de cada respuesta, mostrar sugerencias de preguntas relacionadas
+                mostrarSugerenciasPreguntas();
+                
+                scrollToBottom();
+            }
+            
+            // Ahora usamos la función mostrarNuevasSugerencias definida globalmente
+            
+            // Función para obtener sugerencias contextuales (rotamos categorías)
+            function obtenerSugerenciasContextuales() {
+                const todasLasSugerencias = {
+                    solar: [
+                        "¿Cuántos paneles solares necesito para mi casa?",
+                        "¿Cómo funcionan los paneles fotovoltaicos?",
+                        "¿Cuál es la vida útil de los paneles solares?"
+                    ],
+                    eolica: [
+                        "¿Funciona la energía eólica en zonas urbanas?",
+                        "¿Qué condiciones de viento se necesitan?",
+                        "¿Es ruidoso un aerogenerador doméstico?"
+                    ],
+                    termotanque: [
+                        "¿En qué se diferencia un termotanque solar de los paneles?",
+                        "¿Qué mantenimiento necesita un termotanque solar?",
+                        "¿Funciona en días nublados?"
+                    ],
+                    economia: [
+                        "¿Existen incentivos fiscales para energías renovables?",
+                        "¿Cuánto tiempo toma recuperar la inversión?",
+                        "¿Puedo vender energía a la red eléctrica?"
+                    ],
+                    instalacion: [
+                        "¿Qué permisos necesito para instalar paneles solares?",
+                        "¿Cuánto tiempo toma la instalación?",
+                        "¿Puedo instalar sistemas renovables en un apartamento?"
+                    ]
+                };
+                
+                // Seleccionar 2-3 categorías aleatorias
+                const categorias = Object.keys(todasLasSugerencias);
+                const categoriasSugeridas = [];
+                
+                while (categoriasSugeridas.length < 2) {
+                    const categoriaAleatoria = categorias[Math.floor(Math.random() * categorias.length)];
+                    if (!categoriasSugeridas.includes(categoriaAleatoria)) {
+                        categoriasSugeridas.push(categoriaAleatoria);
+                    }
+                }
+                
+                // Seleccionar 1 pregunta aleatoria de cada categoría seleccionada
+                const preguntasSugeridas = [];
+                categoriasSugeridas.forEach(categoria => {
+                    const preguntasCategoria = todasLasSugerencias[categoria];
+                    const preguntaAleatoria = preguntasCategoria[Math.floor(Math.random() * preguntasCategoria.length)];
+                    preguntasSugeridas.push(preguntaAleatoria);
+                });
+                
+                // Añadir 1-2 preguntas adicionales específicas
+                preguntasSugeridas.push("¿Qué sistema de energía renovable es más económico?");
+                
+                return preguntasSugeridas;
+            }
+            
+            // La función seleccionarPreguntaSugerida ya está definida globalmente
+            
+            // Función para mostrar indicador de escritura
+            function mostrarEscribiendo() {
+                const mensajeHTML = `
+                    <div class="chat-message bot" id="typing-message">
+                        <div class="d-flex align-items-start">
+                            <div class="me-2 mt-1">
+                                <i class="fas fa-robot text-info"></i>
+                            </div>
+                            <div class="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                floatingChatBody.innerHTML += mensajeHTML;
+                scrollToBottom();
+            }
+            
+            // Función para quitar indicador de escritura
+            function quitarEscribiendo() {
+                const typingMessage = document.getElementById('typing-message');
+                if (typingMessage) {
+                    typingMessage.remove();
+                }
+            }
+            
+            // Función para hacer scroll hasta el final del chat
+            function scrollToBottom() {
+                floatingChatBody.scrollTop = floatingChatBody.scrollHeight;
+            }
+            
+            // Función para enviar pregunta al servidor
+            function enviarPregunta() {
+                const pregunta = floatingChatInput.value.trim();
+                if (pregunta === '') return;
+                
+                // Agregar mensaje del usuario al chat
+                agregarMensajeUsuario(pregunta);
+                
+                // Limpiar input
+                floatingChatInput.value = '';
+                
+                // Mostrar indicador de escritura
+                mostrarEscribiendo();
+                
+                console.log("Enviando pregunta al chatbot:", pregunta);
+                
+                // Enviar pregunta a la API
+                fetch('/chatbot/consulta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pregunta: pregunta }),
+                })
+                .then(response => {
+                    console.log("Respuesta recibida:", response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Datos de respuesta:", data);
+                    // Quitar indicador de escritura
+                    quitarEscribiendo();
+                    
+                    // Agregar respuesta del bot
+                    agregarMensajeBot(data.respuesta);
+                    
+                    // Mostrar nuevas sugerencias después de un breve retraso
+                    setTimeout(function() {
+                        // Usar las sugerencias que vienen de la API si existen
+                        if (data.sugerencias && Array.isArray(data.sugerencias) && data.sugerencias.length > 0) {
+                            mostrarNuevasSugerencias(data.sugerencias);
+                        } else {
+                            mostrarNuevasSugerencias();
+                        }
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('Error en consulta chatbot:', error);
+                    quitarEscribiendo();
+                    agregarMensajeBot('Lo siento, ha ocurrido un error al procesar tu pregunta. Por favor, inténtalo de nuevo más tarde.');
+                });
+            }
+            
+            // Event listeners
+            sendFloatingChat.addEventListener('click', enviarPregunta);
+            
+            floatingChatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    enviarPregunta();
+                }
+            });
+        });
+    </script>
+
+    
+<script>
+    // Función para inicializar el carrusel
+    function initCarousel() {
+        var carouselElement = document.getElementById('carouselEnergiasRenovables');
+        
+        if (!carouselElement) {
+            console.error('No se encontró el elemento del carrusel');
+            return;
+        }
+        
+        // Destruir cualquier instancia previa para evitar conflictos
+        var carouselInstance = bootstrap.Carousel.getInstance(carouselElement);
+        if (carouselInstance) {
+            carouselInstance.dispose();
+        }
+        
+        // Crear nueva instancia con configuración óptima
+        var carousel = new bootstrap.Carousel(carouselElement, {
+            interval: 10000,       // Intervalo entre diapositivas (10 segundos)
+            pause: false,          // No pausar al hover (puede causar problemas)
+            wrap: true,            // Ciclo continuo
+            touch: true,           // Soporte para touch
+            keyboard: true,        // Soporte para teclado
+            ride: true             // Iniciar automáticamente al cargar
+        });
+        
+        console.log('Carrusel inicializado correctamente');
+        
+        // Detector para cambios de diapositiva
+        carouselElement.addEventListener('slide.bs.carousel', function(e) {
+            console.log('Cambiando a diapositiva: ' + e.to);
+        });
+        
+        // Forzar transición a la primera diapositiva para activar el carrusel
+        setTimeout(function() {
+            carousel.to(0);
+        }, 500);
+    }
+    
+    // Inicializar cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        initCarousel();
+        
+        // También inicializar cuando la ventana esté completamente cargada
+        window.addEventListener('load', function() {
+            initCarousel();
+        });
+        
+        // Evento para activar el chatbot desde el botón de la sección de herramientas
+        var botonActivarChatbot = document.getElementById('activarChatbot');
+        if (botonActivarChatbot) {
+            botonActivarChatbot.addEventListener('click', function() {
+                // Usando la función global definida en layout.html
+                if (typeof abrirChatbot === 'function') {
+                    abrirChatbot();
+                } else {
+                    console.error('La función abrirChatbot no está disponible');
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
