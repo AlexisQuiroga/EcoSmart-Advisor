@@ -45,7 +45,7 @@
             <div class="card-body p-4">
                 <p class="lead mb-4">En esta sección puede simular distintos escenarios de instalación de sistemas de energía renovable para evaluar rendimiento, ahorro y beneficio ambiental.</p>
                 
-                <form id="formularioSimulador" method="post" action="{{ url_for('simulador') }}" novalidate>
+                <form id="formularioSimulador" method="post" action="{{ url_for('main.simulador') }}" novalidate>
                     <!-- Token de depuración -->
                     <input type="hidden" name="form_debug" value="simulacion_energetica">
                     <div class="mb-4">

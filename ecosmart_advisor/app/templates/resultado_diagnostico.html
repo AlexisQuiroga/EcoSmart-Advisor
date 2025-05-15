@@ -146,7 +146,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="text-end mt-3">
-                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ recomendacion.principal.tipo }}" class="btn btn-outline-success">
+                                    <a href="{{ url_for('main.simulador') }}?tipo={{ recomendacion.principal.tipo }}" class="btn btn-outline-success">
                                         <i class="fas fa-calculator me-2"></i>Simular ajustes
                                     </a>
                                 </div>
@@ -228,7 +228,7 @@
                                 <td>USD ${{ opcion.ahorro_anual|round|int }}</td>
                                 <td>{{ opcion.impacto_ambiental|round|int }} kg CO₂</td>
                                 <td>
-                                    <a href="{{ url_for('simulador.simulador') }}?tipo={{ opcion.tipo }}&consumo={{ datos.consumo_mensual }}&provincia={{ datos.provincia|default('') }}&ciudad={{ datos.ciudad|default('') }}&direccion={{ datos.direccion|default('') }}&latitud={{ clima.latitud|default('') }}&longitud={{ clima.longitud|default('') }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url_for('main.simulador') }}?tipo={{ opcion.tipo }}&consumo={{ datos.consumo_mensual }}&provincia={{ datos.provincia|default('') }}&ciudad={{ datos.ciudad|default('') }}&direccion={{ datos.direccion|default('') }}&latitud={{ clima.latitud|default('') }}&longitud={{ clima.longitud|default('') }}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-calculator"></i> Simular
                                     </a>
                                 </td>
@@ -254,7 +254,7 @@
                         <i class="fas fa-redo me-2"></i>Nuevo diagnóstico
                     </a>
                     
-                    <a href="{{ url_for('simulador.simulador') }}?consumo={{ datos.consumo_mensual }}&provincia={{ datos.provincia|default('') }}&ciudad={{ datos.ciudad|default('') }}&direccion={{ datos.direccion|default('') }}&latitud={{ clima.latitud|default('') }}&longitud={{ clima.longitud|default('') }}" class="btn btn-primary">
+                    <a href="{{ url_for('main.simulador') }}?consumo={{ datos.consumo_mensual }}&provincia={{ datos.provincia|default('') }}&ciudad={{ datos.ciudad|default('') }}&direccion={{ datos.direccion|default('') }}&latitud={{ clima.latitud|default('') }}&longitud={{ clima.longitud|default('') }}" class="btn btn-primary">
                         <i class="fas fa-calculator me-2"></i>Ir al simulador
                     </a>
                 </div>
