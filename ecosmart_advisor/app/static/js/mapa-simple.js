@@ -65,6 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Mostrar panel de coordenadas
                 updateCoordinatesPanel(lat, lng);
+                
+                // Obtener descripción de la ubicación (país, provincia, ciudad)
+                obtenerDescripcionUbicacion(lat, lng);
             });
             
             console.log("Mapa inicializado correctamente");
@@ -118,6 +121,77 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Función para obtener la descripción de la ubicación (país, provincia, ciudad)
+    function obtenerDescripcionUbicacion(lat, lng) {
+        const descripcionElement = document.getElementById('ubicacionDescripcion');
+        
+        if (descripcionElement) {
+            descripcionElement.textContent = "Obteniendo ubicación...";
+            descripcionElement.classList.remove('text-success', 'text-danger');
+            descripcionElement.classList.add('text-muted');
+            
+            // Usar el servicio de geocodificación inversa de Nominatim
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=es`;
+            
+            fetch(url, {
+                headers: {
+                    'User-Agent': 'EcoSmartAdvisor/1.0'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.address) {
+                    // Construir descripción: País, estado/provincia, ciudad
+                    const address = data.address;
+                    const pais = address.country || '';
+                    const provincia = address.state || address.province || '';
+                    const ciudad = address.city || address.town || address.village || address.hamlet || '';
+                    
+                    let descripcion = '';
+                    
+                    if (ciudad) descripcion += ciudad;
+                    if (provincia) {
+                        if (descripcion) descripcion += ', ';
+                        descripcion += provincia;
+                    }
+                    if (pais) {
+                        if (descripcion) descripcion += ', ';
+                        descripcion += pais;
+                    }
+                    
+                    // Si no se pudo obtener una descripción completa
+                    if (!descripcion) {
+                        descripcion = data.display_name || 'Ubicación seleccionada';
+                    }
+                    
+                    descripcionElement.textContent = descripcion;
+                    descripcionElement.classList.remove('text-muted', 'text-danger');
+                    descripcionElement.classList.add('text-success');
+                    
+                    // Guardar la descripción para usarla en el formulario
+                    if (ubicacionInput) {
+                        ubicacionInput.dataset.descripcion = descripcion;
+                    }
+                } else {
+                    descripcionElement.textContent = "Ubicación seleccionada";
+                    descripcionElement.classList.remove('text-muted', 'text-danger');
+                    descripcionElement.classList.add('text-success');
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener descripción de ubicación:', error);
+                descripcionElement.textContent = "No se pudo obtener la dirección";
+                descripcionElement.classList.remove('text-muted', 'text-success');
+                descripcionElement.classList.add('text-danger');
+            });
+        }
+    }
+    
     // Botón para centrar mapa en Argentina
     if (centrarEnArgentinaBtn) {
         centrarEnArgentinaBtn.addEventListener('click', function() {
@@ -141,7 +215,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 if (ubicacionInput) {
+                    // Incluir tanto coordenadas como descripción
+                    const descripcion = ubicacionInput.dataset.descripcion || '';
                     ubicacionInput.value = `${selectedLat},${selectedLng}`;
+                    
+                    // Si tenemos descripción, guardarla en otro atributo para usar en el backend
+                    if (descripcion) {
+                        ubicacionInput.dataset.descripcionTexto = descripcion;
+                    }
                 }
                 
                 // Indicación visual de que se han confirmado las coordenadas
@@ -149,8 +230,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 usarCoordenadasBtn.classList.remove('btn-success');
                 usarCoordenadasBtn.classList.add('btn-outline-success');
                 
-                // Opcional: Mostrar mensaje de confirmación
-                alert('Ubicación confirmada correctamente. Puede continuar con el resto del formulario.');
+                // Mensaje de confirmación más amigable
+                const descripcionElement = document.getElementById('ubicacionDescripcion');
+                const lugarDescripcion = descripcionElement ? descripcionElement.textContent : 'seleccionada';
+                
+                // No interrumpir al usuario con alertas
+                const successMsg = document.createElement('div');
+                successMsg.className = 'alert alert-success mt-2 alert-dismissible fade show';
+                successMsg.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    Ubicación "${lugarDescripcion}" confirmada correctamente. Puede continuar con el resto del formulario.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Insertar mensaje de éxito después del panel de coordenadas
+                if (coordenadasDiv && coordenadasDiv.parentNode) {
+                    const existingMsg = coordenadasDiv.parentNode.querySelector('.alert-success');
+                    if (existingMsg) {
+                        existingMsg.remove();
+                    }
+                    coordenadasDiv.parentNode.insertBefore(successMsg, coordenadasDiv.nextSibling);
+                    
+                    // Auto-desaparición después de 5 segundos
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 5000);
+                }
             }
         });
     }
