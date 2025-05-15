@@ -16,11 +16,37 @@ def simular_instalacion(datos):
         dict: Resultados de la simulación
     """
     # Extraer datos de la simulación
-    tipo_instalacion = datos['tipo_instalacion']
-    capacidad = float(datos['capacidad'])
-    ubicacion = datos['ubicacion']
-    consumo_mensual = float(datos['consumo_mensual'])
+    tipo_instalacion = datos.get('tipo_instalacion', 'solar')
+    
+    # Asegurar que capacidad y consumo sean valores numéricos válidos
+    try:
+        capacidad = float(datos.get('capacidad', 0))
+        if capacidad <= 0:
+            capacidad = 1.0  # Valor por defecto si es 0 o negativo
+    except (ValueError, TypeError):
+        print(f"Error al convertir capacidad: {datos.get('capacidad')}")
+        capacidad = 1.0  # Valor por defecto si hay error
+        
+    try:
+        consumo_mensual = float(datos.get('consumo_mensual', 0))
+        if consumo_mensual <= 0:
+            consumo_mensual = 300.0  # Valor por defecto si es 0 o negativo
+    except (ValueError, TypeError):
+        print(f"Error al convertir consumo: {datos.get('consumo_mensual')}")
+        consumo_mensual = 300.0  # Valor por defecto si hay error
+        
+    # Ubicación (asegurar que es un string válido)
+    ubicacion = str(datos.get('ubicacion', '-34.61,-58.38'))  # Defecto: Buenos Aires
+    if not ubicacion or ubicacion.strip() == '':
+        ubicacion = '-34.61,-58.38'  # Buenos Aires como fallback
+        
     descripcion_ubicacion = datos.get('descripcion_ubicacion', '')
+    
+    # Mostrar datos para debug
+    print(f"Simulando instalación de tipo: {tipo_instalacion}")
+    print(f"Capacidad: {capacidad} {'kW' if tipo_instalacion != 'termotanque_solar' else 'litros'}")
+    print(f"Consumo mensual: {consumo_mensual} kWh")
+    print(f"Ubicación: {ubicacion}")
     
     # Obtener datos climáticos
     clima = obtener_datos_clima(ubicacion)

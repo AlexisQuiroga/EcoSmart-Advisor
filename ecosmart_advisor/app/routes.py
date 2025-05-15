@@ -167,19 +167,38 @@ def simulador():
     Permite al usuario jugar con distintas variables
     """
     if request.method == 'POST':
-        datos_simulacion = {
-            'tipo_instalacion': request.form.get('tipo_instalacion'),
-            'capacidad': request.form.get('capacidad'),
-            'ubicacion': request.form.get('ubicacion'),
-            'consumo_mensual': request.form.get('consumo_mensual'),
-            'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
-        }
-        
-        resultados = simular_instalacion(datos_simulacion)
-        
-        return render_template('resultado_simulacion.html', 
-                              resultados=resultados,
-                              datos=datos_simulacion)
+        try:
+            datos_simulacion = {
+                'tipo_instalacion': request.form.get('tipo_instalacion'),
+                'capacidad': request.form.get('capacidad'),
+                'ubicacion': request.form.get('ubicacion'),
+                'consumo_mensual': request.form.get('consumo_mensual'),
+                'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
+            }
+            
+            # Validar campos mínimos necesarios
+            campos_faltantes = []
+            if not datos_simulacion['tipo_instalacion']:
+                campos_faltantes.append('tipo_instalacion')
+            if not datos_simulacion['ubicacion']:
+                campos_faltantes.append('ubicacion')
+                
+            # Mostrar información de depuración
+            print(f"Datos de simulación recibidos por POST: {datos_simulacion}")
+            
+            if campos_faltantes:
+                return render_template('formulario_simulador.html', 
+                                     error=f"Faltan campos requeridos: {', '.join(campos_faltantes)}")
+            
+            resultados = simular_instalacion(datos_simulacion)
+            
+            return render_template('resultado_simulacion.html', 
+                                  resultados=resultados,
+                                  datos=datos_simulacion)
+        except Exception as e:
+            print(f"Error en simulador: {str(e)}")
+            return render_template('formulario_simulador.html', 
+                                  error=f"Error al procesar la simulación: {str(e)}")
     
     # Si es GET, mostrar formulario del simulador
     return render_template('formulario_simulador.html')
@@ -187,9 +206,27 @@ def simulador():
 @simulador_bp.route('/api', methods=['POST'])
 def simulador_api():
     """API para el simulador (para uso con AJAX)"""
-    datos = request.json
-    resultados = simular_instalacion(datos)
-    return jsonify(resultados)
+    try:
+        datos = request.json
+        if not datos:
+            print("Error: Datos JSON vacíos o inválidos")
+            return jsonify({"error": "Se requieren datos completos para la simulación"}), 400
+            
+        # Validar campos requeridos
+        campos_requeridos = ['tipo_instalacion', 'capacidad', 'ubicacion', 'consumo_mensual']
+        campos_faltantes = [campo for campo in campos_requeridos if campo not in datos]
+        
+        if campos_faltantes:
+            print(f"Error: Faltan campos requeridos: {campos_faltantes}")
+            return jsonify({"error": f"Faltan campos requeridos: {', '.join(campos_faltantes)}"}), 400
+            
+        print(f"Recibidos datos para simulación API: {datos}")
+        resultados = simular_instalacion(datos)
+        print(f"Resultados de simulación: {resultados}")
+        return jsonify(resultados)
+    except Exception as e:
+        print(f"Error en simulador API: {str(e)}")
+        return jsonify({"error": f"Error en la simulación: {str(e)}"}), 500
 
 # Blueprint para las APIs
 api_bp = Blueprint('api', __name__, url_prefix='/api')

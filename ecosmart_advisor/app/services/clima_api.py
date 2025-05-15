@@ -22,12 +22,17 @@ def obtener_datos_clima(ubicacion):
     # Determinar si se trata de coordenadas (lat,lon) o un nombre de ciudad
     if ',' in ubicacion and len(ubicacion.split(',')) == 2:
         try:
-            lat, lon = map(float, ubicacion.strip().split(','))
+            lat_str, lon_str = ubicacion.strip().split(',')
+            lat = float(lat_str.strip())
+            lon = float(lon_str.strip())
+            print(f"Procesando ubicación por coordenadas: {lat}, {lon}")
             return obtener_datos_por_coordenadas(lat, lon)
-        except ValueError:
+        except ValueError as e:
+            print(f"Error al procesar coordenadas '{ubicacion}': {str(e)}")
             # Si no se pueden convertir a float, tratar como ciudad
             return obtener_datos_por_ciudad(ubicacion)
     else:
+        print(f"Procesando ubicación por nombre: {ubicacion}")
         return obtener_datos_por_ciudad(ubicacion)
 
 def obtener_datos_por_ciudad(ciudad, provincia=None, pais="Argentina"):
@@ -64,12 +69,12 @@ def obtener_datos_por_ciudad(ciudad, provincia=None, pais="Argentina"):
         resp = requests.get(geocoding_url, headers=headers, timeout=5)
         data = resp.json()
         
-        if 'results' in data and len(data['results']) > 0:
-            lat = data['results'][0]['latitude']
-            lon = data['results'][0]['longitude']
-            lugar = data['results'][0]['name']
-            pais = data['results'][0]['country']
-            return obtener_datos_por_coordenadas(lat, lon, nombre_lugar=f"{lugar}, {pais}")
+        # Nominatim devuelve una lista de resultados, no un objeto con 'results'
+        if data and len(data) > 0:
+            lat = float(data[0]['lat'])
+            lon = float(data[0]['lon'])
+            lugar = data[0].get('display_name', 'Ubicación')
+            return obtener_datos_por_coordenadas(lat, lon, nombre_lugar=lugar)
         else:
             # Si no se encuentra, devolver datos genéricos
             return {
@@ -108,38 +113,62 @@ def obtener_datos_por_coordenadas(lat, lon, nombre_lugar=None):
         dict: Datos climáticos para la ubicación
     """
     try:
-        # Obtener datos de clima usando Open-Meteo
+        print(f"Obteniendo datos para lat={lat}, lon={lon}")
+        
+        # Obtener datos de clima usando Open-Meteo con clima histórico
         clima_url = (f"https://archive-api.open-meteo.com/v1/archive?"
                      f"latitude={lat}&longitude={lon}"
-                     f"&start_date=2021-01-01&end_date=2021-12-31"
+                     f"&start_date=2022-01-01&end_date=2022-12-31"
                      f"&daily=temperature_2m_mean,windspeed_10m_mean&timezone=auto")
         
-        # Obtener datos de radiación solar con otro endpoint de Open-Meteo
+        # Obtener datos de radiación solar con forecast API de Open-Meteo
         solar_url = (f"https://api.open-meteo.com/v1/forecast?"
                     f"latitude={lat}&longitude={lon}"
-                    f"&daily=shortwave_radiation_sum&timezone=auto")
+                    f"&daily=shortwave_radiation_sum&forecast_days=10&timezone=auto")
+        
+        print(f"Obteniendo clima de: {clima_url}")
+        print(f"Obteniendo radiación de: {solar_url}")
                      
-        clima_resp = requests.get(clima_url)
-        solar_resp = requests.get(solar_url)
+        clima_resp = requests.get(clima_url, timeout=10)
+        solar_resp = requests.get(solar_url, timeout=10)
+        
+        # Verificar respuestas HTTP
+        if clima_resp.status_code != 200:
+            print(f"Error al obtener datos de clima: {clima_resp.status_code}")
+            print(f"Respuesta: {clima_resp.text}")
+            raise Exception(f"API de clima devolvió: {clima_resp.status_code}")
+            
+        if solar_resp.status_code != 200:
+            print(f"Error al obtener datos de radiación: {solar_resp.status_code}")
+            print(f"Respuesta: {solar_resp.text}")
+            raise Exception(f"API de radiación devolvió: {solar_resp.status_code}")
         
         clima_data = clima_resp.json()
         solar_data = solar_resp.json()
         
+        # Verificar si los datos contienen la estructura esperada
+        print(f"Datos clima: {clima_data.keys() if clima_data else 'Vacío'}")
+        print(f"Datos solar: {solar_data.keys() if solar_data else 'Vacío'}")
+        
         # Calcular promedios anuales
-        if 'daily' in clima_data:
+        if 'daily' in clima_data and 'temperature_2m_mean' in clima_data['daily']:
             temp_promedio = sum(clima_data['daily']['temperature_2m_mean']) / len(clima_data['daily']['temperature_2m_mean'])
             viento_promedio = sum(clima_data['daily']['windspeed_10m_mean']) / len(clima_data['daily']['windspeed_10m_mean'])
+            print(f"Datos climáticos calculados - Temp: {temp_promedio}°C, Viento: {viento_promedio}m/s")
         else:
             temp_promedio = 15  # valor por defecto
             viento_promedio = 3.5  # valor por defecto
+            print("Usando valores por defecto para temperatura y viento")
             
         # Calcular radiación solar promedio (kWh/m²/día)
         if 'daily' in solar_data and 'shortwave_radiation_sum' in solar_data['daily']:
-            # Los datos vienen en W/m², los convertimos a kWh/m²/día
+            # Los datos vienen en MJ/m², los convertimos a kWh/m²/día
             radiacion_valores = solar_data['daily']['shortwave_radiation_sum']
-            radiacion_promedio = sum(radiacion_valores) / len(radiacion_valores) / 1000
+            radiacion_promedio = sum(radiacion_valores) / len(radiacion_valores) / 3.6  # Convertir MJ a kWh
+            print(f"Radiación solar calculada: {radiacion_promedio} kWh/m²/día")
         else:
             radiacion_promedio = 4.2  # valor por defecto
+            print("Usando valor por defecto para radiación solar")
             
         return {
             'radiacion_solar': round(radiacion_promedio, 2),  # kWh/m²/día
