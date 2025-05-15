@@ -22,6 +22,112 @@ function verificarLeaflet() {
     return true;
 }
 
+// Función para mostrar error específico para dispositivos móviles
+function mostrarErrorMapaMobile() {
+    const mapaDiv = document.getElementById('mapaUbicacion');
+    if (!mapaDiv) return;
+    
+    // Limpiar contenido existente
+    while (mapaDiv.firstChild) {
+        mapaDiv.removeChild(mapaDiv.firstChild);
+    }
+    
+    // Crear mensaje de error amigable
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger my-3 leaflet-error-message';
+    errorDiv.innerHTML = `
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error al cargar el mapa en dispositivo móvil.</strong>
+        </div>
+        <p>Intente con WiFi o recargue la página.</p>
+        <button class="btn btn-danger btn-sm" onclick="location.reload()">
+            Recargar página
+        </button>
+        <div class="mt-2">
+            <small>Consejo: Las conexiones WiFi suelen funcionar mejor para cargar mapas.</small>
+        </div>
+    `;
+    mapaDiv.appendChild(errorDiv);
+    
+    // Ocultar indicador de carga si existe
+    const loadingDiv = document.getElementById('mapa-loading');
+    if (loadingDiv) {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+// Función para cargar Leaflet desde múltiples CDNs en paralelo (optimizada para móviles)
+function cargarMultiplesCDN() {
+    console.log("Iniciando carga paralela de Leaflet desde múltiples CDNs");
+    
+    // Si ya está cargado, no hacer nada
+    if (typeof L !== 'undefined') {
+        console.log("Leaflet ya está disponible");
+        inicializarMapaSimulador();
+        return;
+    }
+    
+    const cdns = [
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js",
+        "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+        "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"
+    ];
+    
+    let loadedSuccessfully = false;
+    let scriptsAdded = 0;
+    
+    // Intentar todos los CDNs a la vez para maximizar probabilidad de éxito en móviles
+    cdns.forEach((cdn, index) => {
+        const script = document.createElement('script');
+        script.src = cdn;
+        
+        script.onload = function() {
+            console.log(`Leaflet cargado desde CDN #${index + 1}: ${cdn}`);
+            scriptsAdded++;
+            
+            if (!loadedSuccessfully) {
+                loadedSuccessfully = true;
+                // Inicializar mapa solo la primera vez que un script cargue
+                setTimeout(() => cargarLeaflet(), 100);
+                
+                // Ocultar mensaje de carga si existe
+                const loadingDiv = document.getElementById('mapa-loading');
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+            }
+            
+            // Remover mensaje de error si está visible
+            const errorMsg = document.querySelector('.leaflet-error-message');
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+        };
+        
+        script.onerror = function() {
+            console.warn(`Falló carga desde CDN #${index + 1}: ${cdn}`);
+            scriptsAdded++;
+            
+            // Si todos los scripts fallaron, mostrar mensaje de error
+            if (scriptsAdded === cdns.length && !loadedSuccessfully) {
+                console.error("Todos los CDNs fallaron al cargar Leaflet");
+                mostrarErrorMapaMobile();
+            }
+        };
+        
+        document.head.appendChild(script);
+    });
+    
+    // Establecer un tiempo límite general
+    setTimeout(() => {
+        if (!loadedSuccessfully) {
+            console.error("Timeout al cargar Leaflet desde CDNs");
+            mostrarErrorMapaMobile();
+        }
+    }, 10000);
+}
+
 // Función para cargar leaflet desde CDN alternativo
 function cargarLeafletAlternativo() {
     console.log("Intentando cargar Leaflet desde CDN alternativo");
@@ -277,13 +383,9 @@ function mostrarErrorMapa(mensaje) {
     const mapaDiv = document.getElementById('mapaUbicacion');
     const indicadorCarga = document.getElementById('map-loading-indicator');
     
-    // Determinar si es dispositivo móvil
-    const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                    window.innerWidth <= 768;
-    
     // Personalizar mensaje para dispositivos móviles
     let mensajeError = mensaje;
-    if (esMobile && !mensaje.includes("móvil")) {
+    if (dispositivoMovil && !mensaje.includes("móvil")) {
         mensajeError = "Error al cargar el mapa en dispositivo móvil. Intente con WiFi o recargar la página.";
     }
     
@@ -311,13 +413,13 @@ function mostrarErrorMapa(mensaje) {
                 <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.reload()">
                     Recargar página
                 </button>
-                ${esMobile ? '<br><small class="d-block mt-2">Consejo: Las conexiones WiFi suelen funcionar mejor para cargar mapas.</small>' : ''}
+                ${dispositivoMovil ? '<br><small class="d-block mt-2">Consejo: Las conexiones WiFi suelen funcionar mejor para cargar mapas.</small>' : ''}
             </div>
         `;
     }
     
     // Asegurar que el botón de reinicio esté visible en dispositivos móviles
-    if (esMobile) {
+    if (dispositivoMovil) {
         const helperDiv = document.getElementById('mobile-map-helper');
         if (helperDiv) {
             helperDiv.classList.remove('d-none', 'd-sm-none');
@@ -364,12 +466,16 @@ function reiniciarMapa() {
     setTimeout(cargarLeaflet, 500);
 }
 
+// Variable global para detectar dispositivos móviles
+let dispositivoMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                window.innerWidth <= 768;
+
 // Ejecutar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM cargado, preparando mapa para simulador");
+    console.log("DOM cargado, preparando mapa optimizado para simulador");
     
-    // Inicializar mapa con un pequeño retraso para asegurar carga completa
-    setTimeout(cargarLeaflet, 500);
+    // Cargar Leaflet directamente, sin importar el dispositivo
+    setTimeout(cargarLeaflet, 100);
     
     // Configurar botón para usar coordenadas
     const usarCoordenadasBtn = document.getElementById('usarCoordenadas');
@@ -386,8 +492,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.style.display = 'none';
                 }
                 
-                // Mostrar mensaje de éxito
-                alert('Ubicación seleccionada correctamente. Continue con el formulario.');
+                // Mover foco al siguiente campo
+                const consumoInput = document.getElementById('consumo_mensual');
+                if (consumoInput) {
+                    consumoInput.focus();
+                }
             } else {
                 alert('Por favor, seleccione una ubicación en el mapa primero.');
             }
@@ -400,11 +509,8 @@ document.addEventListener('DOMContentLoaded', function() {
         resetBtn.addEventListener('click', reiniciarMapa);
     }
     
-    // Detectar si es dispositivo móvil para mostrar el botón de reinicio
-    const esMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                     window.innerWidth <= 768;
-    
-    if (esMobile) {
+    // Usar la variable global para detectar dispositivos móviles
+    if (dispositivoMovil) {
         const helperDiv = document.getElementById('mobile-map-helper');
         if (helperDiv) {
             helperDiv.classList.remove('d-none', 'd-sm-none');

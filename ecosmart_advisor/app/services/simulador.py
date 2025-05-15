@@ -1,8 +1,22 @@
 """
 Módulo para simular instalaciones de energía renovable
 con diferentes parámetros y calcular su rendimiento.
+Puede utilizar Deepseek AI para recomendaciones más avanzadas.
 """
+import os
+import json
+import requests
+import logging
+from dotenv import load_dotenv
 from ecosmart_advisor.app.services.clima_api import obtener_datos_clima
+
+# Cargar variables de entorno
+load_dotenv()
+
+# Configurar la API de Deepseek
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+USAR_DEEPSEEK = DEEPSEEK_API_KEY is not None and len(DEEPSEEK_API_KEY.strip()) > 0
 
 def simular_instalacion(datos):
     """
@@ -164,6 +178,27 @@ def simular_instalacion(datos):
         except Exception as e:
             logger.error(f"Error al calcular retorno de inversión: {str(e)}")
             resultados['retorno_inversion_anos'] = None
+            
+        # Obtener recomendaciones avanzadas con Deepseek AI
+        try:
+            logger.info(f"Solicitando recomendaciones avanzadas para {tipo_instalacion}")
+            recomendaciones = obtener_recomendacion_avanzada(
+                tipo_instalacion, 
+                capacidad, 
+                clima, 
+                resultados
+            )
+            resultados['recomendaciones'] = recomendaciones
+            logger.info(f"Recomendaciones obtenidas con éxito: {recomendaciones.get('recomendacion_principal', '')}")
+        except Exception as e:
+            logger.error(f"Error al obtener recomendaciones avanzadas: {str(e)}")
+            # En caso de error, incluir recomendaciones básicas
+            resultados['recomendaciones'] = generar_recomendacion_basica(
+                tipo_instalacion, 
+                capacidad, 
+                clima, 
+                resultados
+            )
         
         # Agregar descripción de ubicación a los resultados
         resultados['descripcion_ubicacion'] = descripcion_ubicacion
@@ -517,3 +552,235 @@ def calcular_metricas_ambientales(generacion_anual):
             'arboles_equivalentes': 0,  # árboles/año
             'km_auto_equivalentes': 0  # km/año
         }
+
+
+def obtener_recomendacion_avanzada(tipo_instalacion, capacidad, clima, resultados_simulacion):
+    """
+    Obtiene recomendaciones avanzadas para la instalación utilizando Deepseek AI.
+    
+    Args:
+        tipo_instalacion (str): Tipo de instalación (solar, eolica, termotanque_solar)
+        capacidad (float): Capacidad del sistema
+        clima (dict): Datos climáticos de la ubicación
+        resultados_simulacion (dict): Resultados de la simulación técnica
+        
+    Returns:
+        dict: Recomendaciones avanzadas con consejos de optimización
+    """
+    logger = logging.getLogger('recomendacion_avanzada')
+    
+    # Si no está habilitado Deepseek, devolver recomendaciones básicas
+    if not USAR_DEEPSEEK:
+        logger.info("Deepseek no está configurado, usando recomendaciones básicas")
+        return generar_recomendacion_basica(tipo_instalacion, capacidad, clima, resultados_simulacion)
+    
+    try:
+        # Construir prompt para Deepseek
+        prompt = construir_prompt_recomendacion(tipo_instalacion, capacidad, clima, resultados_simulacion)
+        
+        # Configurar headers
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {DEEPSEEK_API_KEY}"
+        }
+        
+        # Configurar payload
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "Eres un experto en energías renovables que proporciona recomendaciones técnicas precisas y realistas."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "temperature": 0.3,
+            "max_tokens": 800
+        }
+        
+        logger.info(f"Enviando consulta a Deepseek para recomendación de {tipo_instalacion}")
+        
+        # Enviar solicitud a la API
+        response = requests.post(
+            DEEPSEEK_API_URL,
+            headers=headers,
+            data=json.dumps(payload),
+            timeout=10
+        )
+        
+        # Verificar respuesta
+        if response.status_code == 200:
+            respuesta = response.json()
+            contenido = respuesta.get('choices', [{}])[0].get('message', {}).get('content', '')
+            
+            if contenido:
+                logger.info("Recomendación de Deepseek recibida con éxito")
+                
+                # Parsear la respuesta en formato JSON si es posible
+                try:
+                    # Intentar extraer JSON si existe en la respuesta
+                    import re
+                    json_match = re.search(r'\{.*\}', contenido, re.DOTALL)
+                    
+                    if json_match:
+                        json_str = json_match.group(0)
+                        recomendacion = json.loads(json_str)
+                    else:
+                        # Si no hay JSON, crear estructura con el texto completo
+                        recomendacion = {
+                            "recomendacion_principal": contenido[:150] + "...",
+                            "detalles": contenido,
+                            "consejos": ["Optimiza la orientación del sistema", 
+                                        "Considera la limpieza y mantenimiento periódicos",
+                                        "Evalúa la posibilidad de ampliar el sistema en el futuro"]
+                        }
+                        
+                    return recomendacion
+                    
+                except Exception as e:
+                    logger.error(f"Error al procesar respuesta JSON: {str(e)}")
+                    # Devolver la respuesta en texto plano si falla el parsing
+                    return {
+                        "recomendacion_principal": contenido[:150] + "...",
+                        "detalles": contenido,
+                        "consejos": ["Optimiza la orientación del sistema", 
+                                    "Considera la limpieza y mantenimiento periódicos",
+                                    "Evalúa la posibilidad de ampliar el sistema en el futuro"]
+                    }
+            else:
+                logger.warning("Respuesta de Deepseek vacía")
+        else:
+            logger.error(f"Error en la respuesta de Deepseek: {response.status_code} - {response.text}")
+            
+    except Exception as e:
+        logger.error(f"Error al obtener recomendación avanzada: {str(e)}")
+    
+    # En caso de error o problemas, devolver recomendaciones básicas
+    return generar_recomendacion_basica(tipo_instalacion, capacidad, clima, resultados_simulacion)
+
+def construir_prompt_recomendacion(tipo_instalacion, capacidad, clima, resultados):
+    """
+    Construye un prompt detallado para consultar a Deepseek AI.
+    
+    Args:
+        tipo_instalacion (str): Tipo de instalación 
+        capacidad (float): Capacidad del sistema
+        clima (dict): Datos climáticos
+        resultados (dict): Resultados de la simulación
+        
+    Returns:
+        str: Prompt estructurado para la consulta
+    """
+    unidad = "kW" if tipo_instalacion != "termotanque_solar" else "litros"
+    tipo_nombre = {
+        "solar": "sistema solar fotovoltaico",
+        "eolica": "sistema eólico",
+        "termotanque_solar": "termotanque solar"
+    }.get(tipo_instalacion, tipo_instalacion)
+    
+    prompt = f"""
+Actúa como un experto en energías renovables y proporciona recomendaciones técnicas para un {tipo_nombre} con las siguientes características:
+
+DATOS DEL SISTEMA:
+- Tipo: {tipo_nombre}
+- Capacidad: {capacidad} {unidad}
+- Ubicación: {clima.get('ubicacion', 'No especificada')}
+- Radiación solar: {clima.get('radiacion_solar', 'N/A')} kWh/m²/día
+- Velocidad del viento: {clima.get('velocidad_viento', 'N/A')} m/s
+- Temperatura promedio: {clima.get('temperatura_promedio', 'N/A')} °C
+
+RESULTADOS DE LA SIMULACIÓN:
+- Generación mensual estimada: {resultados.get('generacion_mensual', 0)} kWh
+- Generación anual estimada: {resultados.get('generacion_anual', 0)} kWh
+- Cobertura del consumo: {resultados.get('cobertura', 0)}%
+- Ahorro anual estimado: {resultados.get('ahorro_anual_usd', 0)} USD
+
+Con base en estos datos, proporciona:
+1. Una recomendación principal sobre la viabilidad y optimización del sistema
+2. Al menos 3 consejos técnicos específicos para mejorar el rendimiento
+3. Consideraciones adicionales sobre mantenimiento y vida útil
+
+Formato de la respuesta:
+```json
+{
+  "recomendacion_principal": "Una recomendación concisa de una o dos frases",
+  "viabilidad": "Alta/Media/Baja", 
+  "detalles": "Explicación detallada de la recomendación",
+  "consejos": ["Consejo 1", "Consejo 2", "Consejo 3"],
+  "mantenimiento": "Recomendaciones de mantenimiento",
+  "vida_util": "Información sobre vida útil"
+}
+```
+"""
+    return prompt
+
+def generar_recomendacion_basica(tipo_instalacion, capacidad, clima, resultados):
+    """
+    Genera recomendaciones básicas basadas en reglas cuando no se puede usar Deepseek.
+    
+    Args:
+        tipo_instalacion (str): Tipo de instalación
+        capacidad (float): Capacidad del sistema
+        clima (dict): Datos climáticos
+        resultados (dict): Resultados de la simulación
+        
+    Returns:
+        dict: Recomendaciones básicas
+    """
+    # Determinar viabilidad basada en cobertura
+    cobertura = resultados.get('cobertura', 0)
+    if cobertura >= 70:
+        viabilidad = "Alta"
+    elif cobertura >= 40:
+        viabilidad = "Media"
+    else:
+        viabilidad = "Baja"
+    
+    # Recomendaciones específicas según el tipo de instalación
+    if tipo_instalacion == 'solar':
+        recomendacion_principal = "Optimiza la orientación e inclinación de los paneles solares para maximizar la captación de energía solar."
+        consejos = [
+            "Orienta los paneles hacia el norte si estás en el hemisferio sur (o sur si estás en el norte)",
+            "Mantén los paneles limpios de polvo y residuos para mantener su eficiencia",
+            "Considera instalar microinversores para mejorar el rendimiento en caso de sombras parciales"
+        ]
+        mantenimiento = "Limpieza regular de paneles, inspección anual de conexiones y verificación del funcionamiento del inversor."
+        
+    elif tipo_instalacion == 'eolica':
+        recomendacion_principal = "Asegúrate de que el aerogenerador esté instalado a una altura suficiente y sin obstáculos cercanos."
+        consejos = [
+            "Instala el aerogenerador a una altura mínima de 10 metros sobre el suelo o edificaciones cercanas",
+            "Evita zonas con turbulencias como cerca de edificios o árboles altos",
+            "Considera un sistema híbrido solar-eólico para mayor estabilidad energética"
+        ]
+        mantenimiento = "Inspección regular de palas, comprobación de ruidos anormales y revisión anual de componentes mecánicos."
+        
+    else:  # termotanque_solar
+        recomendacion_principal = "Asegura una correcta inclinación del colector solar y aislamiento térmico del tanque."
+        consejos = [
+            "Instala el colector con la inclinación óptima según tu latitud para maximar la captación de radiación",
+            "Asegura un buen aislamiento térmico del tanque para minimizar pérdidas de calor",
+            "Considera un sistema auxiliar para días con poca radiación solar"
+        ]
+        mantenimiento = "Verificación periódica del fluido caloportador, limpieza del colector y comprobación de aislamiento."
+    
+    # Determinar vida útil según tipo
+    if tipo_instalacion == 'solar':
+        vida_util = "25-30 años para los paneles, 10-15 años para el inversor"
+    elif tipo_instalacion == 'eolica':
+        vida_util = "20-25 años con mantenimiento adecuado"
+    else:
+        vida_util = "15-20 años para el colector, 10-15 años para el tanque"
+    
+    return {
+        "recomendacion_principal": recomendacion_principal,
+        "viabilidad": viabilidad,
+        "detalles": f"El sistema propuesto tiene una viabilidad {viabilidad.lower()} considerando la cobertura del {cobertura:.1f}% de tu consumo. " +
+                  f"Con las condiciones climáticas de la ubicación, puedes esperar una generación anual de aproximadamente {resultados.get('generacion_anual', 0):.1f} kWh.",
+        "consejos": consejos,
+        "mantenimiento": mantenimiento,
+        "vida_util": vida_util
+    }

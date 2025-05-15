@@ -12,19 +12,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/carousel.css') }}">
-    <!-- Leaflet con múltiples CDN para mayor confiabilidad (especialmente en móviles) -->
+    <!-- Leaflet CSS con múltiples CDN para mayor confiabilidad (sin integridad para máxima compatibilidad) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
     
-    <!-- Scripts de Leaflet (con respaldo) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script>
-    if (typeof L === 'undefined') {
-        document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""><\/script>');
-    }
-    </script>
-    
-    <!-- Script base para mapas -->
+    <!-- Script base para mapas (sin Leaflet, lo cargaremos de manera optimizada en cada página) -->
     <script src="{{ url_for('static', filename='js/mapa-simple.js') }}"></script>
     {% block extra_css %}{% endblock %}
 </head>

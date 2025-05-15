@@ -2,6 +2,18 @@
 
 {% block title %}Simulador{% endblock %}
 
+{% block extra_css %}
+<!-- Asegurar que el CSS de Leaflet esté cargado primero -->
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<!-- Cargar Leaflet directamente en la página para evitar problemas de mobile -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Nuestro script de mapa -->
+<script src="{{ url_for('static', filename='js/simulador-mapa.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
@@ -74,6 +86,15 @@
                                         <span class="ms-2 small">Cargando mapa...</span>
                                     </div>
                                 </div>
+                                
+                                <!-- Helper para dispositivos móviles -->
+                                <div id="mobile-map-helper" class="d-none d-flex justify-content-center my-2">
+                                    <button type="button" id="reiniciarMapaBtn" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-sync-alt me-1"></i> Reiniciar mapa
+                                    </button>
+                                </div>
+                                
+                                <!-- El mapa es gestionado por el archivo simulador-mapa.js -->
                                 
                                 <!-- Instrucciones para el usuario -->
                                 <div class="alert alert-info mt-2 mb-2">
@@ -217,74 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Inicializar el mapa
-    if (typeof initMap === 'function') {
-        const map = initMap('mapaUbicacion');
-        
-        // Configurar evento de clic en el mapa si se inicializó correctamente
-        if (map && typeof setupMapClickEvent === 'function') {
-            setupMapClickEvent(map, function(lat, lng, addressData) {
-                // Actualizar campos del formulario
-                document.getElementById('latitud').value = lat;
-                document.getElementById('longitud').value = lng;
-                
-                // Actualizar campos visuales
-                document.getElementById('latitudSeleccionada').textContent = lat;
-                document.getElementById('longitudSeleccionada').textContent = lng;
-                
-                // Actualizar ubicación si hay datos disponibles
-                if (addressData && addressData.display_name) {
-                    document.getElementById('ubicacion').value = addressData.display_name;
-                    document.getElementById('ubicacionDescripcion').textContent = addressData.display_name;
-                    document.getElementById('descripcion_ubicacion').value = addressData.display_name;
-                } else {
-                    document.getElementById('ubicacion').value = lat + ',' + lng;
-                    document.getElementById('ubicacionDescripcion').textContent = 'Coordenadas: ' + lat + ', ' + lng;
-                    document.getElementById('descripcion_ubicacion').value = '';
-                }
-                
-                // Mostrar panel de coordenadas
-                document.getElementById('coordenadasSeleccionadas').classList.remove('d-none');
-                
-                // Ocultar mensaje de error si estaba visible
-                const errorMsg = document.getElementById('location-error-message');
-                if (errorMsg) {
-                    errorMsg.style.display = 'none';
-                }
-            });
-            
-            // Configurar botón para centrar en Argentina
-            const centrarBtn = document.getElementById('centrarEnArgentina');
-            if (centrarBtn) {
-                centrarBtn.addEventListener('click', function() {
-                    map.setView([-38.416097, -63.616672], 4);
-                });
-            }
-            
-            // Configurar botón para usar coordenadas
-            const usarCoordenadasBtn = document.getElementById('usarCoordenadas');
-            if (usarCoordenadasBtn) {
-                usarCoordenadasBtn.addEventListener('click', function() {
-                    // Verificar si se han seleccionado coordenadas
-                    const latInput = document.getElementById('latitud');
-                    const lngInput = document.getElementById('longitud');
-                    
-                    if (latInput.value && lngInput.value) {
-                        // Ocultar mensaje de error si estaba visible
-                        const errorMsg = document.getElementById('location-error-message');
-                        if (errorMsg) {
-                            errorMsg.style.display = 'none';
-                        }
-                        
-                        // Desplazarse al siguiente campo
-                        document.getElementById('consumo_mensual').focus();
-                    } else {
-                        alert('Por favor, seleccione una ubicación en el mapa primero.');
-                    }
-                });
-            }
-        }
-    }
+    // El mapa se inicializa y gestiona a través de simulador-mapa.js
+    // Solo configuramos la validación del formulario para asegurar que se selecciona una ubicación
 });
 </script>
 {% endblock %}
