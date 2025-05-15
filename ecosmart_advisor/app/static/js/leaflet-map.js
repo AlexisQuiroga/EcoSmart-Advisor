@@ -1287,14 +1287,17 @@ window.addOrUpdateMarker = function(map, lat, lng, zoom = 15) {
         ecosmartMarker.bindPopup("Ubicación seleccionada").openPopup();
         
         // Centrar el mapa en la ubicación del marcador con el zoom especificado
-        map.setView([lat, lng], zoom);
+        map.setView([lat, lfunction initMap(containerId) {
+    try {
+        const map = L.map(containerId).setView([-34.603722, -58.381592], 4);
         
-        // Log para verificar que el marcador se creó correctamente
-        console.log("Marcador creado exitosamente:", ecosmartMarker);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
         
-        return ecosmartMarker;
+        return map;
     } catch (e) {
-        console.error("Error al crear marcador:", e);
+        console.error("Error al inicializar mapa:", e);
         return null;
     }
 }

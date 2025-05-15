@@ -11,27 +11,27 @@
             </div>
             <div class="card-body p-4">
                 <p class="lead mb-4">Complete el siguiente formulario para recibir una recomendación personalizada del sistema de energía renovable más adecuado para su caso.</p>
-                
+
                 <form id="diagnosticoForm" method="POST" action="{{ url_for('diagnostico.diagnostico') }}">
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Ubicación y Vivienda</h3>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Ubicación <span class="text-danger">*</span></label>
                             <p class="text-muted mb-3">Para un diagnóstico preciso, necesitamos conocer su ubicación. Por favor, marque directamente su posición en el mapa.</p>
-                            
+
                             <!-- Campos ocultos para almacenar la ubicación y coordenadas -->
                             <input type="hidden" id="ubicacion" name="ubicacion" required>
                             <input type="hidden" id="latitud" name="latitud">
                             <input type="hidden" id="longitud" name="longitud">
                             <input type="hidden" id="descripcion_ubicacion" name="descripcion_ubicacion">
-                            
+
                             <!-- Campos ocultos para compatibilidad con JS -->
                             <input type="hidden" id="pais" name="pais" value="">
                             <input type="hidden" id="provincia" name="provincia" value="">
                             <input type="hidden" id="ciudad" name="ciudad" value="">
                             <input type="hidden" id="direccion" name="direccion" value="">
-                            
+
                             <div class="position-relative mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h5 class="mb-0">Seleccione su ubicación en el mapa</h5>
@@ -41,25 +41,25 @@
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <!-- El mapa siempre visible -->
                                 <div id="mapaUbicacion" class="rounded border mb-2" style="height: 400px;">
                                     <!-- El mapa se cargará aquí con JavaScript -->
                                 </div>
-                                
+
                                 <div id="map-loading-indicator" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                                     <div class="d-flex align-items-center">
                                         <div class="spinner-border text-success" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
                                         <span class="ms-2 small">Cargando mapa...</span>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Instrucciones para el usuario -->
                                 <div class="alert alert-info mt-2 mb-2">
                                     <i class="fas fa-info-circle me-2"></i>
                                     <strong>Cómo usar:</strong> Haga clic directamente en el mapa para marcar su ubicación exacta.
                                 </div>
-                                
+
                                 <!-- Panel para mostrar las coordenadas seleccionadas -->
                                 <div id="coordenadasSeleccionadas" class="d-none d-flex align-items-center bg-light rounded p-3 mb-2 border">
                                     <div class="me-3">
@@ -79,14 +79,14 @@
                                         <i class="fas fa-check me-1"></i>Confirmar ubicación
                                     </button>
                                 </div>
-                                
+
                                 <div id="location-error-message" class="alert alert-danger mt-2" style="display: none;">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     <span id="error-text">Debe seleccionar una ubicación en el mapa para continuar.</span>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="tipo_vivienda" class="form-label">Tipo de Vivienda <span class="text-danger">*</span></label>
                             <select class="form-select" id="tipo_vivienda" name="tipo_vivienda" required>
@@ -101,10 +101,10 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Consumo Energético</h3>
-                        
+
                         <div class="mb-3">
                             <label for="consumo_mensual" class="form-label">Consumo Eléctrico Mensual (kWh)</label>
                             <div class="input-group">
@@ -115,7 +115,7 @@
                             </div>
                             <div class="form-text">Si no conoce su consumo, déjelo en blanco y lo estimaremos por usted</div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Equipos Eléctricos (seleccione todos los que apliquen)</label>
                             <div class="row g-2">
@@ -194,10 +194,10 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Instalación Potencial</h3>
-                        
+
                         <div class="mb-3">
                             <label for="superficie_disponible" class="form-label">Superficie Disponible <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -208,7 +208,7 @@
                             </div>
                             <div class="form-text">Superficie en techo, terreno u otra área donde podría instalar paneles o equipos</div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="objetivo" class="form-label">Objetivo Principal <span class="text-danger">*</span></label>
                             <select class="form-select" id="objetivo" name="objetivo" required>
@@ -219,7 +219,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
                             <i class="fas fa-lightbulb me-2"></i>Generar Recomendación
@@ -232,17 +232,19 @@
 </div>
 {% endblock %}
 
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+{% endblock %}
+
 {% block extra_js %}
-<!-- Cargar Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- Cargar nuestro script personalizado para el mapa -->
 <script src="{{ url_for('static', filename='js/leaflet-map.js') }}"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Inicializando formulario de diagnóstico...");
-    
+
     // Referencias a elementos del DOM
     const toggleMapBtn = document.getElementById('toggleMapBtn');
     const latitudInput = document.getElementById('latitud');
@@ -254,28 +256,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const ciudadInput = document.getElementById('ciudad');
     const direccionInput = document.getElementById('direccion');
     const ubicacionInput = document.getElementById('ubicacion');
-    
+
     // Función para actualizar datos de ubicación
     function updateLocationData(lat, lng) {
         // Actualizar inputs ocultos
         latitudInput.value = lat;
         longitudInput.value = lng;
-        
+
         // Actualizar textos visibles
         latitudDisplay.textContent = lat;
         longitudDisplay.textContent = lng;
-        
+
         // Realizar geocodificación inversa para obtener la dirección
         reverseGeocode(lat, lng, function(data) {
             if (data && data.address) {
                 console.log("Datos de dirección recibidos:", data.address);
-                
+
                 // Limpiar todos los campos primero para evitar mezcla de datos
                 let shouldUpdateFields = confirm(
                     "¿Desea completar automáticamente los campos de ubicación con los datos obtenidos?\n" +
                     "(Si ya ingresó sus datos manualmente, seleccione 'Cancelar')"
                 );
-                
+
                 if (shouldUpdateFields) {
                     // Extraer información de la dirección con cuidado extra para evitar datos erróneos
                     const direccion = data.address.road || data.address.pedestrian || '';
@@ -283,30 +285,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     const ciudad = data.address.city || data.address.town || data.address.village || '';
                     const provincia = data.address.state || data.address.county || '';
                     const pais = data.address.country || '';
-                    
+
                     // Solo actualizar campos vacíos o si el usuario confirma
                     if (pais && (!paisInput.value || confirm("¿Reemplazar país existente?"))) {
                         paisInput.value = pais;
                     }
-                    
+
                     if (provincia && (!provinciaInput.value || confirm("¿Reemplazar provincia existente?"))) {
                         provinciaInput.value = provincia;
                     }
-                    
+
                     if (ciudad && (!ciudadInput.value || confirm("¿Reemplazar ciudad existente?"))) {
                         ciudadInput.value = ciudad;
                     }
-                    
+
                     if (direccion && (!direccionInput.value || confirm("¿Reemplazar dirección existente?"))) {
                         let direccionCompleta = direccion;
                         if (numero) direccionCompleta += ' ' + numero;
                         direccionInput.value = direccionCompleta;
                     }
                 }
-                
+
                 // Actualizar siempre la ubicación completa para el campo oculto
                 updateFullLocation();
-                
+
                 // Actualizar el estado visual de los campos
                 setTimeout(function() {
                     // Verificar si todos los campos están completos
@@ -315,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         provinciaInput.value.trim() && 
                         ciudadInput.value.trim() && 
                         direccionInput.value.trim();
-                        
+
                     // Actualizar el mensaje del botón de validación
                     if (todosLosCamposCompletos) {
                         validarUbicacionInfo.textContent = 'Ubicación lista para validar';
@@ -326,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!provinciaInput.value.trim()) camposFaltantes.push('provincia');
                         if (!ciudadInput.value.trim()) camposFaltantes.push('ciudad');
                         if (!direccionInput.value.trim()) camposFaltantes.push('dirección');
-                        
+
                         validarUbicacionInfo.textContent = 'Complete: ' + camposFaltantes.join(', ');
                         validarUbicacionInfo.className = 'ms-2 text-warning small';
                     }
@@ -334,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Función para manejar el botón de validación de ubicación
     const validarUbicacionBtn = document.getElementById('validarUbicacionBtn');
     if (validarUbicacionBtn) {
@@ -344,17 +346,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const provincia = provinciaInput.value.trim();
             const ciudad = ciudadInput.value.trim();
             const direccion = direccionInput.value.trim();
-            
+
             // Verificar si todos los campos necesarios están completos
             const camposFaltantes = [];
             if (!pais) camposFaltantes.push('país');
             if (!provincia) camposFaltantes.push('provincia');
             if (!ciudad) camposFaltantes.push('ciudad');
             if (!direccion) camposFaltantes.push('dirección');
-            
+
             // Obtener referencia al elemento de información
             const validarUbicacionInfo = document.getElementById('validarUbicacionInfo');
-            
+
             if (camposFaltantes.length > 0) {
                 // Mostrar mensaje de error si faltan campos
                 if (validarUbicacionInfo) {
@@ -363,19 +365,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 return;
             }
-            
+
             // Mostrar mensaje de procesamiento
             if (validarUbicacionInfo) {
                 validarUbicacionInfo.textContent = 'Ubicando en el mapa...';
                 validarUbicacionInfo.className = 'ms-2 text-primary small';
             }
-            
+
             // Mostrar el mapa si está oculto
             const mapaDiv = document.getElementById('mapaUbicacion');
             if (mapaDiv.style.display === 'none') {
                 toggleMap('mapaUbicacion');
             }
-            
+
             // Inicializar o referenciar el mapa
             let map = window.ecosmartMap;
             if (!map) {
@@ -384,33 +386,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     setupMapClickEvent(map, updateLocationData);
                 }
             }
-            
+
             if (map) {
                 // Realizar geocodificación con todos los datos
                 const queryCompleta = `${direccion}, ${ciudad}, ${provincia}, ${pais}`;
                 console.log("Validando dirección completa:", queryCompleta);
-                
+
                 // Usar geocodificación directa para obtener coordenadas exactas
                 geocodeAddress(queryCompleta, function(lat, lng, result, zoom) {
                     if (lat && lng) {
                         console.log("Ubicación encontrada:", lat, lng, "zoom:", zoom);
-                        
+
                         // Asegurar que el zoom es apropiado para una dirección específica
                         const zoomLevel = 18; // Nivel de zoom apropiado para una dirección
-                        
+
                         // Forzar la creación del marcador
                         setTimeout(function() {
                             // Intentar crear el marcador de diferentes maneras
                             let marker = addOrUpdateMarker(map, lat, lng, zoomLevel);
-                            
+
                             if (!marker && window.debugEcosmart) {
                                 console.warn("Usando método de emergencia para marcador");
                                 window.debugEcosmart.emergencyCreateMarker(lat, lng);
                             }
-                            
+
                             // Actualizar todos los datos de ubicación
                             updateLocationData(lat.toFixed(6), lng.toFixed(6));
-                            
+
                             // Notificar éxito
                             const validarUbicacionInfo = document.getElementById('validarUbicacionInfo');
                             if (validarUbicacionInfo) {
@@ -425,15 +427,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             validarUbicacionInfo.textContent = 'No se pudo encontrar la ubicación exacta';
                             validarUbicacionInfo.className = 'ms-2 text-danger small';
                         }
-                        
+
                         // Mostrar mensaje de error más detallado
                         const errorMsgEl = document.getElementById('location-error-message');
                         const errorTextEl = document.getElementById('error-text');
-                        
+
                         if (errorMsgEl && errorTextEl) {
                             // Personalizar mensaje según la dirección
                             let sugerencia = '';
-                            
+
                             // Verificar si es una dirección de Argentina
                             if (pais.toLowerCase().includes('argent')) {
                                 // Crear sugerencias específicas para Argentina
@@ -442,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 } else {
                                     sugerencia = `Intente con el formato: "Calle Número, ${ciudad}, ${provincia}, Argentina"`;
                                 }
-                                
+
                                 errorTextEl.textContent = `No se pudo encontrar: "${direccion}, ${ciudad}, ${provincia}".`;
                                 errorMsgEl.innerHTML = `
                                     <i class="fas fa-exclamation-triangle me-1"></i>
@@ -461,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 `;
                             }
-                            
+
                             errorMsgEl.style.display = 'block';
                         }
                     }
@@ -469,35 +471,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Configurar evento para el botón de mostrar/ocultar mapa
     if (toggleMapBtn) {
         toggleMapBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             console.log("Click en botón mostrar/ocultar mapa");
-            
+
             // Usar la función de toggle del módulo
             const isVisible = toggleMap('mapaUbicacion');
-            
+
             // Si el mapa está visible ahora, inicializarlo y configurar eventos
             if (isVisible) {
                 const map = initMap('mapaUbicacion');
-                
+
                 if (map) {
                     // Configurar el evento de clic en el mapa para actualizar la ubicación
                     setupMapClickEvent(map, function(lat, lng, addressData) {
                         console.log("Datos de dirección recibidos del clic:", addressData);
-                        
+
                         // Actualizar coordenadas
                         updateLocationData(lat, lng);
-                        
+
                         // Si tenemos datos de dirección, actualizar los campos de ubicación
                         if (addressData && addressData.address) {
                             try {
                                 // Extraer componentes de la dirección
                                 const addr = addressData.address;
-                                
+
                                 // Actualizar país si está disponible
                                 if (addr.country && paisInput) {
                                     paisInput.value = addr.country;
@@ -505,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const event = new Event('change');
                                     paisInput.dispatchEvent(event);
                                 }
-                                
+
                                 // Actualizar provincia - usar state, state_district o county según disponibilidad
                                 if (provinciaInput) {
                                     if (addr.state) {
@@ -519,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const event = new Event('change');
                                     provinciaInput.dispatchEvent(event);
                                 }
-                                
+
                                 // Actualizar ciudad - usar city, town, o village según disponibilidad
                                 if (ciudadInput) {
                                     if (addr.city) {
@@ -533,22 +535,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const event = new Event('change');
                                     ciudadInput.dispatchEvent(event);
                                 }
-                                
+
                                 // Actualizar dirección - combinar road, house_number y suburb para una dirección más completa
                                 if (direccionInput) {
                                     let direccionCompleta = '';
-                                    
+
                                     if (addr.road) {
                                         direccionCompleta += addr.road;
                                         if (addr.house_number) {
                                             direccionCompleta += ' ' + addr.house_number;
                                         }
                                     }
-                                    
+
                                     if (addr.suburb && !direccionCompleta.includes(addr.suburb)) {
                                         direccionCompleta += (direccionCompleta ? ', ' : '') + addr.suburb;
                                     }
-                                    
+
                                     if (direccionCompleta) {
                                         direccionInput.value = direccionCompleta;
                                         // Disparar el evento change
@@ -556,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         direccionInput.dispatchEvent(event);
                                     }
                                 }
-                                
+
                                 // Actualizar la ubicación completa
                                 setTimeout(function() {
                                     updateFullLocation();
@@ -570,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Función para actualizar el campo oculto de ubicación completa
     function updateFullLocation() {
         const pais = paisInput ? paisInput.value.trim() : '';
@@ -579,61 +581,61 @@ document.addEventListener('DOMContentLoaded', function() {
         const direccion = direccionInput ? direccionInput.value.trim() : '';
         const latitud = latitudInput ? latitudInput.value.trim() : '';
         const longitud = longitudInput ? longitudInput.value.trim() : '';
-        
+
         console.log("Actualizando ubicación completa con:", {pais, provincia, ciudad, direccion, latitud, longitud});
-        
+
         let ubicacionCompleta = '';
-        
+
         // Primero añadir dirección textual si existe
         if (direccion) {
             ubicacionCompleta += direccion;
             if (ciudad || provincia || pais) ubicacionCompleta += ', ';
         }
-        
+
         if (ciudad) {
             ubicacionCompleta += ciudad;
             if (provincia || pais) ubicacionCompleta += ', ';
         }
-        
+
         if (provincia) {
             ubicacionCompleta += provincia;
             if (pais) ubicacionCompleta += ', ';
         }
-        
+
         if (pais) {
             ubicacionCompleta += pais;
         }
-        
+
         // Si hay coordenadas y no hay texto, usar las coordenadas
         if ((!ubicacionCompleta || ubicacionCompleta.trim() === ',') && latitud && longitud) {
             ubicacionCompleta = `${latitud}, ${longitud}`;
         }
-        
+
         // Asignar al campo oculto
         if (ubicacionCompleta && ubicacionInput) {
             console.log("Ubicación completa:", ubicacionCompleta);
             ubicacionInput.value = ubicacionCompleta;
         }
     }
-    
+
     // Inicializar el mapa directamente al cargar la página
     const map = initMap('mapaUbicacion');
-    
+
     if (map) {
         // Configurar evento de clic en el mapa
         map.on('click', function(e) {
             // Obtener coordenadas del clic
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
-            
+
             console.log("Clic en mapa:", lat, lng);
-            
+
             // Actualizar el marcador
             updateMarker(map, lat, lng);
-            
+
             // Actualizar inputs de coordenadas
             updateLocationData(lat.toFixed(6), lng.toFixed(6));
-            
+
             // Realizar geocodificación inversa
             reverseGeocode(lat, lng, function(data) {
                 if (data && data.address) {
@@ -645,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("No se pudo inicializar el mapa");
     }
-    
+
     // Configurar eventos para los campos de ubicación
     // País: actualizar al cambiar
     if (paisInput) {
@@ -657,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         paisInput.addEventListener('input', updateFullLocation);
     }
-    
+
     // Provincia: geocodificar inmediatamente al cambiar
     if (provinciaInput) {
         provinciaInput.addEventListener('change', function() {
@@ -668,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         provinciaInput.addEventListener('input', updateFullLocation);
     }
-    
+
     // Ciudad: geocodificar inmediatamente al cambiar
     if (ciudadInput) {
         ciudadInput.addEventListener('change', function() {
@@ -679,12 +681,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         ciudadInput.addEventListener('input', updateFullLocation);
     }
-    
+
     // Dirección: geocodificar después de una pequeña pausa al escribir
     if (direccionInput) {
         let typingTimer;
         const doneTypingInterval = 800; // Tiempo en ms (reducido para mayor reactividad)
-        
+
         direccionInput.addEventListener('keyup', function() {
             clearTimeout(typingTimer);
             if (direccionInput.value.trim()) {
@@ -695,12 +697,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                                   provinciaInput.value.trim() && 
                                                   ciudadInput.value.trim() && 
                                                   direccionInput.value.trim();
-                    
+
                     // Siempre actualizar el mapa para mostrar la vista general
                     if (provinciaInput.value.trim() && paisInput.value.trim()) {
                         tryToGeocodeAddress();
                     }
-                    
+
                     // Si tenemos una dirección completa, actualizar la UI para indicar que está lista
                     if (todosLosCamposCompletos) {
                         console.log("Dirección completa lista para geocodificación precisa");
@@ -731,20 +733,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, doneTypingInterval);
             }
         });
-        
+
         direccionInput.addEventListener('keydown', function() {
             clearTimeout(typingTimer);
         });
-        
+
         direccionInput.addEventListener('change', function() {
             updateFullLocation();
-            
+
             // Verificar si tenemos todos los datos necesarios para una geocodificación completa
             const todosLosCamposCompletos = paisInput.value.trim() && 
                                           provinciaInput.value.trim() && 
                                           ciudadInput.value.trim() && 
                                           direccionInput.value.trim();
-            
+
             if (todosLosCamposCompletos) {
                 console.log("Dirección completa, realizando geocodificación precisa");
                 // Actualizar indicador visual
@@ -758,24 +760,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     ayudaTexto.textContent = 'Dirección completa - Se colocará un pin en el mapa';
                     ayudaTexto.className = 'form-text text-success';
                 }
-                
+
                 // Forzar un pequeño retraso para que termine de procesar el evento change
                 setTimeout(function() {
                     tryToGeocodeAddress();
                 }, 100);
             }
         });
-        
+
         direccionInput.addEventListener('blur', function() {
             // Al perder el foco, intentar geocodificar si tenemos datos suficientes
             const todosLosCamposCompletos = paisInput.value.trim() && 
                                            provinciaInput.value.trim() && 
                                            ciudadInput.value.trim() && 
                                            direccionInput.value.trim();
-            
+
             if (todosLosCamposCompletos) {
                 console.log("Dirección completa (blur), realizando geocodificación precisa");
-                
+
                 // Actualizar indicador visual
                 const indicador = document.getElementById('direccion-estado');
                 const ayudaTexto = document.getElementById('direccion-ayuda');
@@ -787,7 +789,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ayudaTexto.textContent = 'Dirección completa - Se colocará un pin en el mapa';
                     ayudaTexto.className = 'form-text text-success';
                 }
-                
+
                 // Forzar un pequeño retraso para asegurar que los cambios de UI se apliquen
                 setTimeout(function() {
                     tryToGeocodeAddress();
@@ -805,41 +807,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!paisInput.value.trim()) camposFaltantes.push('país');
                     if (!provinciaInput.value.trim()) camposFaltantes.push('provincia');
                     if (!ciudadInput.value.trim()) camposFaltantes.push('ciudad');
-                    
+
                     ayudaTexto.textContent = 'Falta completar: ' + camposFaltantes.join(', ');
                     ayudaTexto.className = 'form-text text-warning';
                 }
             }
         });
-        
+
         direccionInput.addEventListener('input', updateFullLocation);
     }
-    
+
     // Función para intentar geocodificar la dirección progresivamente
     function tryToGeocodeAddress() {
         const pais = paisInput.value.trim();
         const provincia = provinciaInput.value.trim();
         const ciudad = ciudadInput.value.trim();
         const direccion = direccionInput.value.trim();
-        
+
         // Log de datos ingresados
         console.log("Datos para geocodificación:", { pais, provincia, ciudad, direccion });
-        
+
         // Verificar si todos los campos necesarios están completos para colocar el pin
         const todosLosCamposCompletos = pais && provincia && ciudad && direccion;
-        
+
         console.log("¿Todos los campos completos?", todosLosCamposCompletos);
-        
+
         // Solo intentar geocodificar si tenemos al menos la provincia
         if (provincia) {
             console.log("Iniciando geocodificación progresiva con:", { pais, provincia, ciudad, direccion });
-            
+
             // Mostrar el mapa si está oculto
             const mapaDiv = document.getElementById('mapaUbicacion');
             if (mapaDiv.style.display === 'none') {
                 toggleMap('mapaUbicacion');
             }
-            
+
             // Usar el mapa ya inicializado
             if (map) {
                 // Usar geocodificación progresiva para ajustar la vista del mapa
@@ -848,15 +850,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     function(lat, lng, result, zoom) {
                         if (lat && lng) {
                             console.log("Geocodificación exitosa. Coordenadas:", lat, lng);
-                            
+
                             // Solo colocar el pin si todos los campos están completos
                             if (todosLosCamposCompletos) {
                                 console.log("Todos los campos completos, colocando pin...");
-                                
+
                                 // Actualizar marcador y centrar mapa con el zoom apropiado
                                 const marker = updateMarker(map, lat, lng, zoom);
                                 console.log("Resultado de updateMarker:", marker ? "Pin creado" : "Fallo al crear pin");
-                                
+
                                 // Actualizar datos de la ubicación
                                 updateLocationData(lat.toFixed(6), lng.toFixed(6));
                             } else {
@@ -867,9 +869,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         } else {
                             console.warn("Geocodificación falló. No se obtuvieron coordenadas.");
                         }
-                    );
-                }
-            }, 300);
+                    }
+                }, 300);
             } else {
                 // El mapa ya está visible, verificar si está inicializado
                 if (ecosmartMap) {
@@ -882,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (todosLosCamposCompletos) {
                                     // Actualizar marcador y centrar mapa con el zoom apropiado
                                     addOrUpdateMarker(ecosmartMap, lat, lng, zoom);
-                                    
+
                                     // Actualizar datos de la ubicación
                                     updateLocationData(lat.toFixed(6), lng.toFixed(6));
                                 } else {
@@ -896,37 +897,37 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Validación del formulario
     const formulario = document.getElementById('diagnosticoForm');
     if (formulario) {
         formulario.addEventListener('submit', function(event) {
             // Asegurarse de que la ubicación completa se actualice
             updateFullLocation();
-            
+
             // Validar que tengamos al menos provincia y ciudad o coordenadas
             const provincia = provinciaInput.value;
             const ciudad = ciudadInput.value;
             const latitud = latitudInput.value;
             const longitud = longitudInput.value;
-            
+
             if ((!provincia || !ciudad) && (!latitud || !longitud)) {
                 event.preventDefault();
                 alert('Por favor, indique su ubicación seleccionando provincia y ciudad o usando el mapa para seleccionar coordenadas.');
                 return false;
             }
-            
+
             // Validar otros campos requeridos
             const tipoVivienda = document.getElementById('tipo_vivienda').value;
             const superficie = document.getElementById('superficie_disponible').value;
             const objetivo = document.getElementById('objetivo').value;
-            
+
             if (!tipoVivienda || !superficie || !objetivo) {
                 event.preventDefault();
                 alert('Por favor, complete todos los campos obligatorios.');
                 return false;
             }
-            
+
             // Validar superficie (valor numérico positivo)
             const superficieNum = parseFloat(superficie);
             if (isNaN(superficieNum) || superficieNum <= 0) {
@@ -934,7 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Por favor, ingrese un valor válido para la superficie disponible.');
                 return false;
             }
-            
+
             return true;
         });
     }
