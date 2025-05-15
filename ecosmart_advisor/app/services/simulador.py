@@ -96,9 +96,19 @@ def simular_solar(capacidad_kw, clima, consumo_mensual):
     Returns:
         dict: Resultados de la simulación
     """
-    # Extraer radiación solar
-    radiacion_solar = clima['radiacion_solar']  # kWh/m²/día
-    temperatura = clima['temperatura_promedio']  # °C
+    import logging
+    logger = logging.getLogger('simulador_solar')
+    logger.setLevel(logging.DEBUG)
+    
+    # Validar parámetros de entrada
+    logger.info(f"Simulando solar con capacidad={capacidad_kw}kW, consumo={consumo_mensual}kWh")
+    logger.info(f"Datos clima: {clima}")
+    
+    # Extraer radiación solar con valores por defecto seguros
+    radiacion_solar = clima.get('radiacion_solar', 4.5)  # kWh/m²/día
+    temperatura = clima.get('temperatura_promedio', 18)  # °C
+    
+    logger.info(f"Radiación solar: {radiacion_solar}, Temperatura: {temperatura}")
     
     # Factor de pérdida por temperatura
     factor_temperatura = 1 - max(0, (temperatura - 25) * 0.004)
@@ -120,8 +130,27 @@ def simular_solar(capacidad_kw, clima, consumo_mensual):
     costo_por_kw = 1200  # USD/kW (varía según país y tecnología)
     costo_estimado = capacidad_kw * costo_por_kw
     
+    try:
+        factor_capacidad = (generacion_anual / (capacidad_kw * 8760) * 100) if capacidad_kw > 0 else 0
+    except Exception as e:
+        logger.error(f"Error al calcular factor de capacidad: {str(e)}")
+        factor_capacidad = 0
+    
+    try:
+        eficiencia_sistema = factor_temperatura * otras_perdidas * 100
+    except Exception as e:
+        logger.error(f"Error al calcular eficiencia: {str(e)}")
+        eficiencia_sistema = 85  # Valor por defecto
+    
+    # Crear detalle del clima seguro
+    detalle_clima = {
+        'radiacion_solar': radiacion_solar,
+        'temperatura': temperatura,
+        'ubicacion': clima.get('ubicacion', 'No especificada')
+    }
+    
     # Retornar resultados
-    return {
+    resultados = {
         'tipo': 'solar',
         'capacidad_kw': capacidad_kw,
         'superficie_m2': round(superficie_paneles, 1),
@@ -129,14 +158,13 @@ def simular_solar(capacidad_kw, clima, consumo_mensual):
         'generacion_mensual': round(generacion_mensual, 1),
         'generacion_anual': round(generacion_anual, 1),
         'costo_estimado': round(costo_estimado, 0),
-        'factor_capacidad': round(generacion_anual / (capacidad_kw * 8760) * 100, 1),  # Porcentaje
-        'eficiencia_sistema': round(factor_temperatura * otras_perdidas * 100, 1),  # Porcentaje
-        'detalle_clima': {
-            'radiacion_solar': radiacion_solar,
-            'temperatura': temperatura,
-            'ubicacion': clima['ubicacion']
-        }
+        'factor_capacidad': round(factor_capacidad, 1),  # Porcentaje
+        'eficiencia_sistema': round(eficiencia_sistema, 1),  # Porcentaje
+        'detalle_clima': detalle_clima
     }
+    
+    logger.info(f"Resultados solares generados: {resultados}")
+    return resultados
 
 def simular_eolica(capacidad_kw, clima, consumo_mensual):
     """
@@ -150,8 +178,17 @@ def simular_eolica(capacidad_kw, clima, consumo_mensual):
     Returns:
         dict: Resultados de la simulación
     """
-    # Extraer velocidad del viento
-    velocidad_viento = clima['velocidad_viento']  # m/s
+    import logging
+    logger = logging.getLogger('simulador_eolica')
+    logger.setLevel(logging.DEBUG)
+    
+    # Validar parámetros de entrada
+    logger.info(f"Simulando eólica con capacidad={capacidad_kw}kW, consumo={consumo_mensual}kWh")
+    logger.info(f"Datos clima para eólica: {clima}")
+    
+    # Extraer velocidad del viento con valor por defecto seguro
+    velocidad_viento = clima.get('velocidad_viento', 4.0)  # m/s
+    logger.info(f"Velocidad del viento: {velocidad_viento} m/s")
     
     # Evaluar viabilidad según velocidad
     if velocidad_viento < 3.0:
@@ -170,27 +207,47 @@ def simular_eolica(capacidad_kw, clima, consumo_mensual):
     
     # Calcular factor de capacidad estimado
     # Este cálculo es una aproximación, en la realidad depende de la distribución de Weibull del viento
-    if velocidad_viento < velocidad_arranque:
-        factor_capacidad = 0
-    elif velocidad_viento > velocidad_nominal:
-        factor_capacidad = 0.35 * factor_viabilidad  # Factor máximo para pequeños aerogeneradores
-    else:
-        # Interpolación para velocidades entre arranque y nominal
-        factor_capacidad = (0.35 * factor_viabilidad) * ((velocidad_viento - velocidad_arranque) / 
-                                                     (velocidad_nominal - velocidad_arranque))
+    try:
+        if velocidad_viento < velocidad_arranque:
+            factor_capacidad = 0
+        elif velocidad_viento > velocidad_nominal:
+            factor_capacidad = 0.35 * factor_viabilidad  # Factor máximo para pequeños aerogeneradores
+        else:
+            # Interpolación para velocidades entre arranque y nominal
+            factor_capacidad = (0.35 * factor_viabilidad) * ((velocidad_viento - velocidad_arranque) / 
+                                                        (velocidad_nominal - velocidad_arranque))
+    except Exception as e:
+        logger.error(f"Error al calcular factor de capacidad eólico: {str(e)}")
+        factor_capacidad = 0.15  # Valor conservador por defecto
     
     # Calcular generación
     horas_anuales = 8760  # horas en un año
-    generacion_anual = capacidad_kw * factor_capacidad * horas_anuales
-    generacion_mensual = generacion_anual / 12
-    generacion_diaria = generacion_mensual / 30
+    try:
+        generacion_anual = capacidad_kw * factor_capacidad * horas_anuales
+        generacion_mensual = generacion_anual / 12
+        generacion_diaria = generacion_mensual / 30
+    except Exception as e:
+        logger.error(f"Error al calcular generación eólica: {str(e)}")
+        # Valores conservadores por defecto
+        generacion_anual = capacidad_kw * 0.15 * horas_anuales  # 15% factor de capacidad como fallback
+        generacion_mensual = generacion_anual / 12
+        generacion_diaria = generacion_mensual / 30
     
     # Estimar costo del sistema
     costo_por_kw = 2000  # USD/kW (varía según país y tecnología)
     costo_estimado = capacidad_kw * costo_por_kw
     
+    # Crear detalle de viento seguro
+    detalle_viento = {
+        'velocidad_viento': velocidad_viento,
+        'velocidad_arranque': velocidad_arranque,
+        'velocidad_nominal': velocidad_nominal,
+        'velocidad_corte': velocidad_corte,
+        'ubicacion': clima.get('ubicacion', 'No especificada')
+    }
+    
     # Retornar resultados
-    return {
+    resultados = {
         'tipo': 'eolica',
         'capacidad_kw': capacidad_kw,
         'generacion_diaria': round(generacion_diaria, 1),
@@ -199,14 +256,11 @@ def simular_eolica(capacidad_kw, clima, consumo_mensual):
         'costo_estimado': round(costo_estimado, 0),
         'factor_capacidad': round(factor_capacidad * 100, 1),  # Porcentaje
         'factor_viabilidad': round(factor_viabilidad, 2),
-        'detalle_viento': {
-            'velocidad_viento': velocidad_viento,
-            'velocidad_arranque': velocidad_arranque,
-            'velocidad_nominal': velocidad_nominal,
-            'velocidad_corte': velocidad_corte,
-            'ubicacion': clima['ubicacion']
-        }
+        'detalle_viento': detalle_viento
     }
+    
+    logger.info(f"Resultados eólicos generados: {resultados}")
+    return resultados
 
 def simular_termotanque(capacidad_litros, clima, consumo_mensual):
     """
@@ -220,37 +274,68 @@ def simular_termotanque(capacidad_litros, clima, consumo_mensual):
     Returns:
         dict: Resultados de la simulación
     """
-    # Extraer datos climáticos
-    radiacion_solar = clima['radiacion_solar']  # kWh/m²/día
-    temperatura = clima['temperatura_promedio']  # °C
+    import logging
+    logger = logging.getLogger('simulador_termotanque')
+    logger.setLevel(logging.DEBUG)
     
-    # Personas que pueden abastecerse con este termotanque
-    personas_abastecidas = capacidad_litros / 50  # Asumiendo 50L/persona/día
+    # Validar parámetros de entrada
+    logger.info(f"Simulando termotanque con capacidad={capacidad_litros}L, consumo={consumo_mensual}kWh")
+    logger.info(f"Datos clima para termotanque: {clima}")
     
-    # Eficiencia del termotanque solar
-    eficiencia_termotanque = 0.7  # 70% de eficiencia
+    # Extraer datos climáticos con valores por defecto seguros
+    radiacion_solar = clima.get('radiacion_solar', 4.5)  # kWh/m²/día
+    temperatura = clima.get('temperatura_promedio', 18)  # °C
     
-    # Capacidad de captura (dependiendo de la radiación solar)
-    factor_radiacion = min(1.0, radiacion_solar / 4.0)  # Normalizado para una radiación de referencia de 4 kWh/m²/día
+    logger.info(f"Radiación solar: {radiacion_solar}, Temperatura: {temperatura}")
     
-    # Consumo típico de energía para calentamiento de agua
-    # Estimamos 1 kWh para elevar 1L de agua a 45°C desde la temperatura ambiente
-    energia_necesaria_diaria = capacidad_litros * 0.00116 * (45 - temperatura)
+    try:
+        # Personas que pueden abastecerse con este termotanque
+        personas_abastecidas = capacidad_litros / 50  # Asumiendo 50L/persona/día
+        
+        # Eficiencia del termotanque solar
+        eficiencia_termotanque = 0.7  # 70% de eficiencia
+        
+        # Capacidad de captura (dependiendo de la radiación solar)
+        factor_radiacion = min(1.0, radiacion_solar / 4.0)  # Normalizado para una radiación de referencia de 4 kWh/m²/día
+        
+        # Consumo típico de energía para calentamiento de agua
+        # Estimamos 1 kWh para elevar 1L de agua a 45°C desde la temperatura ambiente
+        energia_necesaria_diaria = capacidad_litros * 0.00116 * (45 - temperatura)
+        
+        # Energía aportada por el termotanque solar
+        energia_aportada_diaria = energia_necesaria_diaria * eficiencia_termotanque * factor_radiacion
+        
+        # Calcular ahorro energético
+        ahorro_mensual = energia_aportada_diaria * 30
+        ahorro_anual = energia_aportada_diaria * 365
+        
+        # Estimar costo del sistema
+        costo_base = 800  # USD (costo base del sistema)
+        costo_por_litro = 2  # USD/litro
+        costo_estimado = costo_base + capacidad_litros * costo_por_litro
+        
+        # Calcular eficiencia total
+        eficiencia_total = eficiencia_termotanque * factor_radiacion * 100
+    except Exception as e:
+        logger.error(f"Error en cálculos del termotanque: {str(e)}")
+        # Valores por defecto conservadores en caso de error
+        personas_abastecidas = capacidad_litros / 50
+        energia_necesaria_diaria = capacidad_litros * 0.05  # Valor aproximado
+        energia_aportada_diaria = energia_necesaria_diaria * 0.5  # 50% de eficiencia como fallback
+        ahorro_mensual = energia_aportada_diaria * 30
+        ahorro_anual = energia_aportada_diaria * 365
+        costo_estimado = 800 + capacidad_litros * 2
+        eficiencia_total = 50  # 50% como valor por defecto
     
-    # Energía aportada por el termotanque solar
-    energia_aportada_diaria = energia_necesaria_diaria * eficiencia_termotanque * factor_radiacion
-    
-    # Calcular ahorro energético
-    ahorro_mensual = energia_aportada_diaria * 30
-    ahorro_anual = energia_aportada_diaria * 365
-    
-    # Estimar costo del sistema
-    costo_base = 800  # USD (costo base del sistema)
-    costo_por_litro = 2  # USD/litro
-    costo_estimado = costo_base + capacidad_litros * costo_por_litro
+    # Crear detalle del clima seguro
+    detalle_clima = {
+        'radiacion_solar': radiacion_solar,
+        'temperatura': temperatura,
+        'ubicacion': clima.get('ubicacion', 'No especificada')
+    }
     
     # Retornar resultados
-    return {
+    resultados = {
         'tipo': 'termotanque_solar',
         'capacidad_litros': round(capacidad_litros, 0),
         'personas_abastecidas': round(personas_abastecidas, 1),
@@ -259,13 +344,12 @@ def simular_termotanque(capacidad_litros, clima, consumo_mensual):
         'generacion_mensual': round(ahorro_mensual, 1),  # Para compatibilidad con otros tipos
         'generacion_anual': round(ahorro_anual, 1),
         'costo_estimado': round(costo_estimado, 0),
-        'eficiencia': round(eficiencia_termotanque * factor_radiacion * 100, 1),  # Porcentaje
-        'detalle_clima': {
-            'radiacion_solar': radiacion_solar,
-            'temperatura': temperatura,
-            'ubicacion': clima['ubicacion']
-        }
+        'eficiencia': round(eficiencia_total, 1),  # Porcentaje
+        'detalle_clima': detalle_clima
     }
+    
+    logger.info(f"Resultados termotanque generados: {resultados}")
+    return resultados
 
 def calcular_metricas_ambientales(generacion_anual):
     """

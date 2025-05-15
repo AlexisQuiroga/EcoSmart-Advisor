@@ -166,8 +166,16 @@ def simulador():
     Ruta para el simulador de energía renovable
     Permite al usuario jugar con distintas variables
     """
+    import traceback
+    import logging
+    logger = logging.getLogger('simulador')
+    logger.setLevel(logging.DEBUG)
+    
     if request.method == 'POST':
         try:
+            # Registrar información detallada
+            logger.info("=== INICIO PROCESAMIENTO DE SIMULACIÓN ===")
+            
             datos_simulacion = {
                 'tipo_instalacion': request.form.get('tipo_instalacion'),
                 'capacidad': request.form.get('capacidad'),
@@ -176,27 +184,56 @@ def simulador():
                 'descripcion_ubicacion': request.form.get('descripcion_ubicacion', '')
             }
             
+            logger.info(f"Datos recibidos del formulario: {datos_simulacion}")
+            
             # Validar campos mínimos necesarios
             campos_faltantes = []
             if not datos_simulacion['tipo_instalacion']:
                 campos_faltantes.append('tipo_instalacion')
             if not datos_simulacion['ubicacion']:
                 campos_faltantes.append('ubicacion')
-                
-            # Mostrar información de depuración
-            print(f"Datos de simulación recibidos por POST: {datos_simulacion}")
             
             if campos_faltantes:
+                logger.warning(f"Faltan campos requeridos: {campos_faltantes}")
                 return render_template('formulario_simulador.html', 
                                      error=f"Faltan campos requeridos: {', '.join(campos_faltantes)}")
             
-            resultados = simular_instalacion(datos_simulacion)
+            # Validar datos numéricos
+            try:
+                if datos_simulacion['capacidad']:
+                    capacidad = float(datos_simulacion['capacidad'])
+                    if capacidad <= 0:
+                        logger.warning(f"Capacidad inválida: {capacidad}")
+                        return render_template('formulario_simulador.html', 
+                                             error=f"La capacidad debe ser un número positivo.")
+            except ValueError:
+                logger.warning(f"Error al convertir capacidad: {datos_simulacion['capacidad']}")
+                return render_template('formulario_simulador.html', 
+                                     error=f"La capacidad debe ser un número válido.")
+                                     
+            try:
+                if datos_simulacion['consumo_mensual']:
+                    consumo = float(datos_simulacion['consumo_mensual'])
+                    if consumo <= 0:
+                        logger.warning(f"Consumo inválido: {consumo}")
+                        return render_template('formulario_simulador.html', 
+                                             error=f"El consumo mensual debe ser un número positivo.")
+            except ValueError:
+                logger.warning(f"Error al convertir consumo: {datos_simulacion['consumo_mensual']}")
+                return render_template('formulario_simulador.html', 
+                                     error=f"El consumo mensual debe ser un número válido.")
             
+            logger.info("Llamando a simular_instalacion...")
+            resultados = simular_instalacion(datos_simulacion)
+            logger.info(f"Resultados obtenidos: {resultados}")
+            
+            logger.info("=== FIN PROCESAMIENTO DE SIMULACIÓN ===")
             return render_template('resultado_simulacion.html', 
                                   resultados=resultados,
                                   datos=datos_simulacion)
         except Exception as e:
-            print(f"Error en simulador: {str(e)}")
+            logger.error(f"Error en simulador: {str(e)}")
+            logger.error(traceback.format_exc())
             return render_template('formulario_simulador.html', 
                                   error=f"Error al procesar la simulación: {str(e)}")
     
