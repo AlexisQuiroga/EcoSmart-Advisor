@@ -23,11 +23,36 @@ document.addEventListener('DOMContentLoaded', function() {
     let marker = null;
     let selectedLat = null;
     let selectedLng = null;
+    let currentCountry = 'Argentina'; // País por defecto
     
     // Coordenadas por defecto (centro de Argentina)
     const ARGENTINA_LAT = -38.416097;
     const ARGENTINA_LNG = -63.616672;
     const ARGENTINA_ZOOM = 4;
+    
+    // Diccionario de traducciones de países (inglés a español)
+    const countryTranslations = {
+        'Argentina': 'Argentina',
+        'Brazil': 'Brasil',
+        'Bolivia': 'Bolivia',
+        'Chile': 'Chile',
+        'Colombia': 'Colombia',
+        'Ecuador': 'Ecuador',
+        'Paraguay': 'Paraguay',
+        'Peru': 'Perú',
+        'Uruguay': 'Uruguay',
+        'Venezuela': 'Venezuela',
+        'United States': 'Estados Unidos',
+        'Mexico': 'México',
+        'Spain': 'España',
+        'France': 'Francia',
+        'Italy': 'Italia',
+        'Germany': 'Alemania',
+        'United Kingdom': 'Reino Unido',
+        'Portugal': 'Portugal',
+        'Canada': 'Canadá'
+        // Añadir más países según sea necesario
+    };
     
     // Mostrar indicador de carga
     if (loadingIndicator) {
@@ -50,6 +75,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (loadingIndicator) {
                 loadingIndicator.style.display = 'none';
             }
+            
+            // Detectar país al iniciar y actualizar el botón
+            detectarPaisEnCentroMapa();
+            
+            // Detectar país cuando se mueve el mapa
+            map.on('moveend', function() {
+                detectarPaisEnCentroMapa();
+            });
             
             // Configurar evento de clic en el mapa
             map.on('click', function(e) {
@@ -198,11 +231,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Función para detectar el país en el centro del mapa
+    function detectarPaisEnCentroMapa() {
+        if (!map || !centrarEnArgentinaBtn) return;
+        
+        // Obtener centro del mapa
+        const center = map.getCenter();
+        const lat = center.lat;
+        const lng = center.lng;
+        
+        // Consultar Nominatim para obtener el país
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=3&addressdetails=1&accept-language=es`;
+        
+        fetch(url, {
+            headers: {
+                'User-Agent': 'EcoSmartAdvisor/1.0'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la respuesta: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.address && data.address.country) {
+                // Obtener el país y traducirlo si es necesario
+                let detectedCountry = data.address.country;
+                let translatedCountry = countryTranslations[detectedCountry] || detectedCountry;
+                
+                // Actualizar el botón con el nombre del país
+                centrarEnArgentinaBtn.innerHTML = `<i class="fas fa-globe-americas me-1"></i>${translatedCountry}`;
+                
+                // Guardar el país actual
+                currentCountry = translatedCountry;
+                
+                // Actualizar el campo oculto del país (si existe)
+                const paisInput = document.getElementById('pais');
+                if (paisInput) {
+                    paisInput.value = translatedCountry;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error al detectar país:', error);
+            // En caso de error, mostrar "Argentina" por defecto
+            centrarEnArgentinaBtn.innerHTML = `<i class="fas fa-globe-americas me-1"></i>Argentina`;
+        });
+    }
+    
     // Botón para centrar mapa en Argentina
     if (centrarEnArgentinaBtn) {
         centrarEnArgentinaBtn.addEventListener('click', function() {
             if (map) {
                 map.setView([ARGENTINA_LAT, ARGENTINA_LNG], ARGENTINA_ZOOM);
+                // Al centrar en Argentina, actualizar el botón
+                centrarEnArgentinaBtn.innerHTML = `<i class="fas fa-globe-americas me-1"></i>Argentina`;
+                currentCountry = 'Argentina';
             }
         });
     }
