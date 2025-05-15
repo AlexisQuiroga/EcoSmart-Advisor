@@ -45,7 +45,9 @@
             <div class="card-body p-4">
                 <p class="lead mb-4">En esta sección puede simular distintos escenarios de instalación de sistemas de energía renovable para evaluar rendimiento, ahorro y beneficio ambiental.</p>
                 
-                <form id="simuladorForm" method="POST" action="{{ url_for('simulador.simulador') }}" novalidate>
+                <form id="formularioSimulador" method="post" action="{{ url_for('simulador') }}" novalidate>
+                    <!-- Token de depuración -->
+                    <input type="hidden" name="form_debug" value="simulacion_energetica">
                     <div class="mb-4">
                         <h3 class="h5 mb-3">Configuración de Simulación</h3>
                         
@@ -414,9 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Verificar selección de ubicación antes de enviar
-    const simuladorForm = document.getElementById('simuladorForm');
+    const simuladorForm = document.getElementById('formularioSimulador');
     
     simuladorForm.addEventListener('submit', function(event) {
+        console.log("Formulario enviado - iniciando validación");
+        // Solo para depuración sin prevenir comportamiento predeterminado
+        
         const latitudInput = document.getElementById('latitud');
         const longitudInput = document.getElementById('longitud');
         const capacidadInput = document.getElementById('capacidad');
@@ -480,6 +485,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Si todo está bien, permitir que se envíe el formulario
         console.log("Formulario validado correctamente, enviando datos...");
+        
+        // Mostrar al usuario que estamos procesando la solicitud
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        }
     });
 });
 </script>

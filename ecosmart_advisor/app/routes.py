@@ -157,10 +157,10 @@ def diagnostico_api():
     recomendacion = calcular_recomendacion(datos, clima)
     return jsonify(recomendacion)
 
-# Blueprint para el simulador
-simulador_bp = Blueprint('simulador', __name__, url_prefix='/simulador')
+# Rutas simples para el simulador sin Blueprint
+# para evitar problemas de redirección
 
-@simulador_bp.route('/', methods=['GET', 'POST'])
+@main_bp.route('/simulador', methods=['GET', 'POST'])
 def simulador():
     """
     Ruta para el simulador de energía renovable
@@ -176,6 +176,11 @@ def simulador():
             # Registrar información detallada
             logger.info("=== INICIO PROCESAMIENTO DE SIMULACIÓN ===")
             logger.info(f"Request method: {request.method}, Form data: {request.form}")
+            
+            # Añadir debug info
+            form_debug = request.form.get('form_debug', '')
+            if form_debug:
+                logger.info(f"Formulario verificado: {form_debug}")
             
             # Obtener los datos del formulario
             tipo_instalacion = request.form.get('tipo_instalacion')
@@ -216,8 +221,9 @@ def simulador():
             
             if campos_faltantes:
                 logger.warning(f"Faltan campos requeridos: {campos_faltantes}")
-                return render_template('formulario_simulador.html', 
-                                     error=f"Faltan campos requeridos: {', '.join(campos_faltantes)}")
+                logger.warning(f"Redirigiendo a formulario por campos faltantes: {campos_faltantes}")
+                error_msg = f"Faltan campos requeridos: {', '.join(campos_faltantes)}"
+                return render_template('formulario_simulador.html', error=error_msg)
             
             # Aplicar valores predeterminados si no se proporcionan
             if not datos_simulacion['consumo_mensual']:
@@ -268,7 +274,15 @@ def simulador():
             logger.info("=== FIN PROCESAMIENTO DE SIMULACIÓN ===")
             logger.info("Redirigiendo a la página de resultados de simulación")
             
+            # Guardar datos importantes en la sesión en caso de error
+            session['ultimo_resultado'] = {
+                'tipo': resultados.get('tipo', ''),
+                'capacidad_kw': resultados.get('capacidad_kw', 0),
+                'generacion_mensual': resultados.get('generacion_mensual', 0)
+            }
+            
             # Finalmente, renderizamos la página de resultados
+            logger.info(f"Enviando resultados a template, datos:{len(str(datos_simulacion))} bytes, resultados:{len(str(resultados))} bytes")
             return render_template('resultado_simulacion.html', 
                                   resultados=resultados,
                                   datos=datos_simulacion)
@@ -281,7 +295,7 @@ def simulador():
     # Si es GET, mostrar formulario del simulador
     return render_template('formulario_simulador.html')
 
-@simulador_bp.route('/api', methods=['POST'])
+@main_bp.route('/simulador/api', methods=['POST'])
 def simulador_api():
     """API para el simulador (para uso con AJAX)"""
     import logging
