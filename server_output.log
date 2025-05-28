@@ -1,0 +1,198 @@
+2025-05-15 20:29:32,375 - __main__ - INFO - Iniciando EcoSmart Advisor
+2025-05-15 20:29:32,384 - __main__ - INFO - UNSPLASH_API_KEY está configurada correctamente (longitud: 43)
+2025-05-15 20:29:32,576 - ecosmart_advisor.app.services.ai_recommender - INFO - Inicializando módulo de recomendaciones con IA
+2025-05-15 20:29:32,591 - ecosmart_advisor.app.services.carousel_content - INFO - ---- Generando datos para el carrusel con imágenes filtradas de energías renovables ----
+2025-05-15 20:29:32,607 - ecosmart_advisor.chatbot.ai_chatbot - INFO - Inicializando chatbot educativo con IA
+2025-05-15 20:29:32,615 - __main__ - INFO - Intentando iniciar en puerto 8080...
+ * Serving Flask app 'ecosmart_advisor.app'
+ * Debug mode: on
+2025-05-15 20:29:32,706 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.31.128.16:8080
+2025-05-15 20:29:32,707 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-15 20:29:32,712 - werkzeug - INFO -  * Restarting with stat
+2025-05-15 20:29:33,325 - __main__ - INFO - Iniciando EcoSmart Advisor
+2025-05-15 20:29:33,326 - __main__ - INFO - UNSPLASH_API_KEY está configurada correctamente (longitud: 43)
+2025-05-15 20:29:33,468 - ecosmart_advisor.app.services.ai_recommender - INFO - Inicializando módulo de recomendaciones con IA
+2025-05-15 20:29:33,477 - ecosmart_advisor.app.services.carousel_content - INFO - ---- Generando datos para el carrusel con imágenes filtradas de energías renovables ----
+2025-05-15 20:29:33,487 - ecosmart_advisor.chatbot.ai_chatbot - INFO - Inicializando chatbot educativo con IA
+2025-05-15 20:29:33,492 - __main__ - INFO - Intentando iniciar en puerto 8080...
+2025-05-15 20:29:33,569 - werkzeug - WARNING -  * Debugger is active!
+2025-05-15 20:29:33,580 - werkzeug - INFO -  * Debugger PIN: 677-169-464
+2025-05-15 20:29:33,946 - index - INFO - Generando datos del carrusel para la página principal
+2025-05-15 20:29:33,947 - index - INFO - UNSPLASH_API_KEY configurada (longitud: 43)
+2025-05-15 20:29:33,948 - index - INFO - Intentando generar datos con carousel_content...
+2025-05-15 20:29:33,961 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:34,173 - index - INFO - Generando datos del carrusel para la página principal
+2025-05-15 20:29:34,176 - index - INFO - UNSPLASH_API_KEY configurada (longitud: 43)
+2025-05-15 20:29:34,176 - index - INFO - Intentando generar datos con carousel_content...
+2025-05-15 20:29:34,182 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:34,788 - index - INFO - Generando datos del carrusel para la página principal
+2025-05-15 20:29:34,789 - index - INFO - UNSPLASH_API_KEY configurada (longitud: 43)
+2025-05-15 20:29:34,790 - index - INFO - Intentando generar datos con carousel_content...
+2025-05-15 20:29:34,792 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:34,845 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:34,848 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:34,848 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar panels energy sustainable energy
+2025-05-15 20:29:34,850 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:34,912 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+panels+energy+sustainable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1431
+2025-05-15 20:29:34,914 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1509391366360-2e959784a276?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMGVuZXJneSUyMHN1c3RhaW5hYmxlJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODg1MjR8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:34,917 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:35,121 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:35,122 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:35,123 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar panels energy green energy
+2025-05-15 20:29:35,129 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:35,187 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+panels+energy+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1607
+2025-05-15 20:29:35,188 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMGVuZXJneSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:35,190 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:35,481 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:35,483 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:35,483 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar panels energy clean energy
+2025-05-15 20:29:35,485 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:35,546 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+panels+energy+clean+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1604
+2025-05-15 20:29:35,547 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1474398777522-cabeb42e8132?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMGVuZXJneSUyMGNsZWFuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY1NTR8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:35,550 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:35,573 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:35,576 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:35,576 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: wind turbine energy green energy
+2025-05-15 20:29:35,579 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:35,642 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=wind+turbine+energy+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1397
+2025-05-15 20:29:35,646 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1466611653911-95081537e5b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHx3aW5kJTIwdHVyYmluZSUyMGVuZXJneSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY1NTV8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:35,648 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,099 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,103 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,103 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: wind turbine energy renewable energy
+2025-05-15 20:29:36,105 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:36,181 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=wind+turbine+energy+renewable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1395
+2025-05-15 20:29:36,182 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1466611653911-95081537e5b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHx3aW5kJTIwdHVyYmluZSUyMGVuZXJneSUyMHJlbmV3YWJsZSUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg4NTI0fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:36,184 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,269 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,270 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,270 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: wind turbine energy sustainable energy
+2025-05-15 20:29:36,272 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:36,292 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,293 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,293 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar water heater sustainable energy
+2025-05-15 20:29:36,295 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:36,333 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=wind+turbine+energy+sustainable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1403
+2025-05-15 20:29:36,334 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1466611653911-95081537e5b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHx3aW5kJTIwdHVyYmluZSUyMGVuZXJneSUyMHN1c3RhaW5hYmxlJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY3NTR8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:36,335 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,352 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+water+heater+sustainable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1471
+2025-05-15 20:29:36,353 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1483004406427-6acb078d1f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHdhdGVyJTIwaGVhdGVyJTIwc3VzdGFpbmFibGUlMjBlbmVyZ3l8ZW58MXwwfHx8MTc0NzI4NjU1Nnww&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:36,355 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,794 - index - INFO - Generando datos del carrusel para la página principal
+2025-05-15 20:29:36,795 - index - INFO - UNSPLASH_API_KEY configurada (longitud: 43)
+2025-05-15 20:29:36,796 - index - INFO - Intentando generar datos con carousel_content...
+2025-05-15 20:29:36,799 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,872 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,873 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,874 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar water heater clean energy
+2025-05-15 20:29:36,876 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:36,936 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+water+heater+clean+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1463
+2025-05-15 20:29:36,939 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1483004406427-6acb078d1f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHdhdGVyJTIwaGVhdGVyJTIwY2xlYW4lMjBlbmVyZ3l8ZW58MXwwfHx8MTc0NzI4ODUyNXww&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:36,942 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:36,970 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,971 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,971 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar water heater renewable energy
+2025-05-15 20:29:36,973 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:36,982 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:36,984 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:36,984 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: energy efficiency home green energy
+2025-05-15 20:29:36,986 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:37,034 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+water+heater+renewable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1469
+2025-05-15 20:29:37,035 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1483004406427-6acb078d1f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHdhdGVyJTIwaGVhdGVyJTIwcmVuZXdhYmxlJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY3NTV8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,038 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:37,047 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=energy+efficiency+home+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1243
+2025-05-15 20:29:37,048 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1555465910-31f7f20a184d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxlbmVyZ3klMjBlZmZpY2llbmN5JTIwaG9tZSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODg1MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,050 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:37,441 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:37,443 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:37,443 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar panels energy green energy
+2025-05-15 20:29:37,444 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:37,502 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+panels+energy+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1607
+2025-05-15 20:29:37,503 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMGVuZXJneSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY4MDd8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,507 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:37,592 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:37,593 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:37,594 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: energy efficiency home green energy
+2025-05-15 20:29:37,596 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:37,659 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=energy+efficiency+home+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1243
+2025-05-15 20:29:37,660 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1555465910-31f7f20a184d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxlbmVyZ3klMjBlZmZpY2llbmN5JTIwaG9tZSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODg1MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,662 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:37,686 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:37,688 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:37,688 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: energy efficiency home clean energy
+2025-05-15 20:29:37,689 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:37,725 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:37,726 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:37,726 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: renewable energy future sustainable energy
+2025-05-15 20:29:37,727 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:37,749 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=energy+efficiency+home+clean+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1696
+2025-05-15 20:29:37,750 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxlbmVyZ3klMjBlZmZpY2llbmN5JTIwaG9tZSUyMGNsZWFuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY4MTB8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,753 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:37,787 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=renewable+energy+future+sustainable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1319
+2025-05-15 20:29:37,788 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxyZW5ld2FibGUlMjBlbmVyZ3klMjBmdXR1cmUlMjBzdXN0YWluYWJsZSUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg4NTI3fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:37,790 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,154 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:38,156 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:38,161 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: wind turbine energy green energy
+2025-05-15 20:29:38,163 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:38,225 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=wind+turbine+energy+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1397
+2025-05-15 20:29:38,227 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1466611653911-95081537e5b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHx3aW5kJTIwdHVyYmluZSUyMGVuZXJneSUyMGdyZWVuJTIwZW5lcmd5fGVufDF8MHx8fDE3NDcyODY1NTV8MA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:38,230 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,378 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:38,385 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:38,385 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: renewable energy future green energy
+2025-05-15 20:29:38,387 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:38,410 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:38,411 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:38,412 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: renewable energy future sustainable energy
+2025-05-15 20:29:38,414 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:38,444 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:38,445 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:38,446 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar thermal energy system clean energy
+2025-05-15 20:29:38,447 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:38,449 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=renewable+energy+future+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1551
+2025-05-15 20:29:38,450 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1629380072722-725fa5fdcfec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxyZW5ld2FibGUlMjBlbmVyZ3klMjBmdXR1cmUlMjBncmVlbiUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg2NTU3fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:38,452 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,476 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=renewable+energy+future+sustainable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1319
+2025-05-15 20:29:38,477 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxyZW5ld2FibGUlMjBlbmVyZ3klMjBmdXR1cmUlMjBzdXN0YWluYWJsZSUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg4NTI3fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:38,480 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,510 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+thermal+energy+system+clean+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1315
+2025-05-15 20:29:38,512 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHRoZXJtYWwlMjBlbmVyZ3klMjBzeXN0ZW0lMjBjbGVhbiUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg5ODM4fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:38,512 - index - INFO - Carrusel data obtenida correctamente: ['energia_solar', 'energia_eolica', 'termotanque_solar', 'eficiencia_energetica', 'futuro_renovables', 'energia_termica']
+2025-05-15 20:29:38,513 - index - INFO - Usando imágenes filtradas de Unsplash sobre energías renovables
+2025-05-15 20:29:38,565 - werkzeug - INFO - 172.31.128.16 - - [15/May/2025 20:29:38] "GET / HTTP/1.1" 200 -
+2025-05-15 20:29:38,798 - index - INFO - Generando datos del carrusel para la página principal
+2025-05-15 20:29:38,801 - index - INFO - UNSPLASH_API_KEY configurada (longitud: 43)
+2025-05-15 20:29:38,801 - index - INFO - Intentando generar datos con carousel_content...
+2025-05-15 20:29:38,803 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,888 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:38,889 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:38,890 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar water heater green energy
+2025-05-15 20:29:38,891 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:38,952 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+water+heater+green+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1230
+2025-05-15 20:29:38,953 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1555465910-31f7f20a184d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHdhdGVyJTIwaGVhdGVyJTIwZ3JlZW4lMjBlbmVyZ3l8ZW58MXwwfHx8MTc0NzI4NjcxNnww&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:38,955 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.deepseek.com:443
+2025-05-15 20:29:38,983 - werkzeug - INFO - 172.31.128.16 - - [15/May/2025 20:29:38] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-05-15 20:29:39,115 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:39,116 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:39,116 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar thermal energy system clean energy
+2025-05-15 20:29:39,118 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:39,125 - werkzeug - INFO - 172.31.128.16 - - [15/May/2025 20:29:39] "[36mGET /static/css/carousel.css HTTP/1.1[0m" 304 -
+2025-05-15 20:29:39,164 - urllib3.connectionpool - DEBUG - https://api.deepseek.com:443 "POST /v1/chat/completions HTTP/1.1" 402 111
+2025-05-15 20:29:39,165 - ecosmart_advisor.app.services.carousel_content - INFO - API key encontrada: tr0od...**********
+2025-05-15 20:29:39,165 - ecosmart_advisor.app.services.carousel_content - INFO - Buscando imágenes de: solar thermal energy system renewable energy
+2025-05-15 20:29:39,167 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.unsplash.com:443
+2025-05-15 20:29:39,177 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+thermal+energy+system+clean+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1315
+2025-05-15 20:29:39,178 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHRoZXJtYWwlMjBlbmVyZ3klMjBzeXN0ZW0lMjBjbGVhbiUyMGVuZXJneXxlbnwxfDB8fHwxNzQ3Mjg5ODM4fDA&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:39,179 - index - INFO - Carrusel data obtenida correctamente: ['energia_solar', 'energia_eolica', 'termotanque_solar', 'eficiencia_energetica', 'futuro_renovables', 'energia_termica']
+2025-05-15 20:29:39,179 - index - INFO - Usando imágenes filtradas de Unsplash sobre energías renovables
+2025-05-15 20:29:39,181 - werkzeug - INFO - 127.0.0.1 - - [15/May/2025 20:29:39] "GET / HTTP/1.1" 200 -
+2025-05-15 20:29:39,208 - werkzeug - INFO - 172.31.128.16 - - [15/May/2025 20:29:39] "[36mGET /static/js/mapa-simple.js HTTP/1.1[0m" 304 -
+2025-05-15 20:29:39,241 - urllib3.connectionpool - DEBUG - https://api.unsplash.com:443 "GET /search/photos?query=solar+thermal+energy+system+renewable+energy&per_page=1&orientation=landscape&content_filter=high&client_id=tr0odLvtBNUhUAnr31BC__J33EqNNYdDyW0x5DoYnQU HTTP/1.1" 200 1316
+2025-05-15 20:29:39,242 - ecosmart_advisor.app.services.carousel_content - INFO - Imagen encontrada: https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NTA4NTl8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHRoZXJtYWwlMjBlbmVyZ3klMjBzeXN0ZW0lMjByZW5ld2FibGUlMjBlbmVyZ3l8ZW58MXwwfHx8MTc0NzI4ODUyOHww&ixlib=rb-4.1.0&q=80&w=1080
+2025-05-15 20:29:39,243 - index - INFO - Carrusel data obtenida correctamente: ['energia_solar', 'energia_eolica', 'termotanque_solar', 'eficiencia_energetica', 'futuro_renovables', 'energia_termica']
+2025-05-15 20:29:39,243 - index - INFO - Usando imágenes filtradas de Unsplash sobre energías renovables
+2025-05-15 20:29:39,245 - werkzeug - INFO - 127.0.0.1 - - [15/May/2025 20:29:39] "GET / HTTP/1.1" 200 -

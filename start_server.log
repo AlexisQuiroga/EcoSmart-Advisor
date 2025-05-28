@@ -1,0 +1,8 @@
+2025-05-15 20:29:29,703 - __main__ - INFO - Procesos gunicorn anteriores detenidos
+2025-05-15 20:29:29,741 - __main__ - INFO - Procesos python anteriores detenidos
+2025-05-15 20:29:31,742 - __main__ - INFO - Iniciando servidor EcoSmart Advisor...
+2025-05-15 20:29:31,753 - __main__ - INFO - Servidor iniciado con PID: 8852
+2025-05-15 20:29:31,766 - __main__ - INFO - Esperando a que el servidor esté disponible... (1/15)
+2025-05-15 20:29:33,784 - __main__ - INFO - Esperando a que el servidor esté disponible... (2/15)
+2025-05-15 20:29:35,788 - __main__ - INFO - Esperando a que el servidor esté disponible... (3/15)
+2025-05-15 20:29:37,792 - __main__ - INFO - Esperando a que el servidor esté disponible... (4/15)

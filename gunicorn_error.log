@@ -1,0 +1,12 @@
+[2025-05-15 19:38:33 +0000] [3005] [INFO] Starting gunicorn 23.0.0
+[2025-05-15 19:38:33 +0000] [3005] [ERROR] Connection in use: ('0.0.0.0', 8080)
+[2025-05-15 19:38:33 +0000] [3005] [ERROR] connection to ('0.0.0.0', 8080) failed: [Errno 98] Address already in use
+[2025-05-15 19:38:34 +0000] [3005] [ERROR] Connection in use: ('0.0.0.0', 8080)
+[2025-05-15 19:38:34 +0000] [3005] [ERROR] connection to ('0.0.0.0', 8080) failed: [Errno 98] Address already in use
+[2025-05-15 19:38:35 +0000] [3005] [ERROR] Connection in use: ('0.0.0.0', 8080)
+[2025-05-15 19:38:35 +0000] [3005] [ERROR] connection to ('0.0.0.0', 8080) failed: [Errno 98] Address already in use
+[2025-05-15 19:38:36 +0000] [3005] [ERROR] Connection in use: ('0.0.0.0', 8080)
+[2025-05-15 19:38:36 +0000] [3005] [ERROR] connection to ('0.0.0.0', 8080) failed: [Errno 98] Address already in use
+[2025-05-15 19:38:37 +0000] [3005] [ERROR] Connection in use: ('0.0.0.0', 8080)
+[2025-05-15 19:38:37 +0000] [3005] [ERROR] connection to ('0.0.0.0', 8080) failed: [Errno 98] Address already in use
+[2025-05-15 19:38:38 +0000] [3005] [ERROR] Can't connect to ('0.0.0.0', 8080)
